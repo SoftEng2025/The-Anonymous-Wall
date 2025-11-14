@@ -1,12 +1,43 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import './App.css';
+import { useEffect, useMemo, useRef, useState } from 'react'
+import './App.css'
 
-const HERO_BUTTONS = [
+type HeroButtonConfig = {
+  label: string
+  variant: 'outlined' | 'filled'
+  iconClass: string
+}
+
+type MessageCardConfig = {
+  to: string
+  tone: 'mint' | 'peach' | 'coral'
+  lines: string[]
+}
+
+type TypingConfig = {
+  baseTypeSpeed: number
+  minimumHold: number
+}
+
+type Lyric = {
+  text: string
+  durationMs: number
+  typeSpeed?: number
+  minimumHold?: number
+}
+
+type PreparedLyric = Lyric & {
+  typeDelay: number
+  holdDelay: number
+  typedDuration: number
+  fullDuration: number
+}
+
+const HERO_BUTTONS: HeroButtonConfig[] = [
   { label: 'Browse', variant: 'outlined', iconClass: 'fa-regular fa-comment-dots' },
   { label: 'Message', variant: 'filled', iconClass: 'fa-solid fa-paper-plane' },
-];
+]
 
-const CARD_MESSAGES = [
+const CARD_MESSAGES: MessageCardConfig[] = [
   { to: 'Everyone', tone: 'mint', lines: ['Speak freely.', 'Stay anonymous.'] },
   { to: 'You', tone: 'peach', lines: ['You are stronger', 'than you think.', "Don't give up!"] },
   {
@@ -14,15 +45,15 @@ const CARD_MESSAGES = [
     tone: 'coral',
     lines: ["I hope you're proud", 'of who you become.', 'Keep going!'],
   },
-];
+]
 
-const NAV_LINKS = ['Browse', 'Forum', 'Submit', 'About'];
+const NAV_LINKS = ['Browse', 'Forum', 'Submit', 'About']
 
-const TYPING_CONFIG = { baseTypeSpeed: 60, minimumHold: 300 };
+const TYPING_CONFIG: TypingConfig = { baseTypeSpeed: 60, minimumHold: 300 }
 
-const toMs = (seconds) => Math.round(seconds * 1000);
+const toMs = (seconds: number) => Math.round(seconds * 1000)
 
-const LYRICS_TIMELINE = [
+const LYRICS_TIMELINE: Lyric[] = [
   { text: "Maybe I'd change", durationMs: toMs(4.3) },
   { text: 'For you someday', durationMs: toMs(3.6) },
   { text: "But I can't help", durationMs: toMs(1.6) },
@@ -38,25 +69,25 @@ const LYRICS_TIMELINE = [
   { text: 'For long', durationMs: toMs(2.5) },
   { text: 'I swear', durationMs: toMs(3.5) },
   { text: "I'll only make you cry", durationMs: toMs(5) },
-];
+]
 
-const prepareTimeline = (timeline, config = {}) => {
-  const { baseTypeSpeed = 60, minimumHold = 300 } = config;
+const prepareTimeline = (timeline: Lyric[], config: TypingConfig): PreparedLyric[] => {
+  const { baseTypeSpeed, minimumHold } = config
 
   return timeline.map((lyric) => {
-    const charCount = Math.max(lyric.text.length, 1);
-    const totalDuration = lyric.durationMs ?? 3000;
-    const baseDelay = lyric.typeSpeed ?? baseTypeSpeed;
-    const minDisplay = lyric.minimumHold ?? minimumHold;
-    const availableForTyping = Math.max(0, totalDuration - minDisplay);
+    const charCount = Math.max(lyric.text.length, 1)
+    const totalDuration = lyric.durationMs ?? 3000
+    const baseDelay = lyric.typeSpeed ?? baseTypeSpeed
+    const minDisplay = lyric.minimumHold ?? minimumHold
+    const availableForTyping = Math.max(0, totalDuration - minDisplay)
 
-    let typeDelay = baseDelay;
+    let typeDelay = baseDelay
     if (availableForTyping > 0 && charCount * baseDelay > availableForTyping) {
-      typeDelay = Math.max(20, availableForTyping / charCount);
+      typeDelay = Math.max(20, availableForTyping / charCount)
     }
 
-    const typedDuration = charCount * typeDelay;
-    const holdDelay = Math.max(minDisplay, totalDuration - typedDuration);
+    const typedDuration = charCount * typeDelay
+    const holdDelay = Math.max(minDisplay, totalDuration - typedDuration)
 
     return {
       ...lyric,
@@ -64,78 +95,76 @@ const prepareTimeline = (timeline, config = {}) => {
       holdDelay,
       typedDuration,
       fullDuration: typedDuration + holdDelay,
-    };
-  });
-};
+    }
+  })
+}
 
-const useTypedLyrics = (timeline, config) => {
-  const preparedTimeline = useMemo(() => prepareTimeline(timeline, config), [timeline, config]);
-  const [text, setText] = useState('');
+const useTypedLyrics = (timeline: Lyric[], config: TypingConfig) => {
+  const preparedTimeline = useMemo(() => prepareTimeline(timeline, config), [timeline, config])
+  const [text, setText] = useState('')
 
   useEffect(() => {
     if (!preparedTimeline.length) {
-      setText('');
-      return undefined;
+      setText('')
+      return undefined
     }
 
-    setText('');
-    let lyricIndex = 0;
-    let charIndex = 0;
-    let deleting = false;
-    let timeoutId;
+    setText('')
+    let lyricIndex = 0
+    let charIndex = 0
+    let deleting = false
+    let timeoutId: number | undefined
 
-    const schedule = (delay) => {
-      timeoutId = window.setTimeout(step, Math.max(20, delay));
-    };
+    const schedule = (delay: number) => {
+      timeoutId = window.setTimeout(step, Math.max(20, delay))
+    }
 
     const step = () => {
-      const lyric = preparedTimeline[lyricIndex];
+      const lyric = preparedTimeline[lyricIndex]
       if (!lyric) {
-        return;
+        return
       }
 
       if (deleting) {
-        setText('');
-        charIndex = 0;
-        deleting = false;
-        lyricIndex = (lyricIndex + 1) % preparedTimeline.length;
-        schedule(320);
-        return;
+        setText('')
+        charIndex = 0
+        deleting = false
+        lyricIndex = (lyricIndex + 1) % preparedTimeline.length
+        schedule(320)
+        return
       }
 
-      charIndex = Math.min(lyric.text.length, charIndex + 1);
-      setText(lyric.text.slice(0, charIndex));
+      charIndex = Math.min(lyric.text.length, charIndex + 1)
+      setText(lyric.text.slice(0, charIndex))
 
       if (charIndex === lyric.text.length) {
-        deleting = true;
-        schedule(lyric.holdDelay);
-        return;
+        deleting = true
+        schedule(lyric.holdDelay)
+        return
       }
 
-      schedule(lyric.typeDelay);
-    };
+      schedule(lyric.typeDelay)
+    }
 
-    schedule(650);
+    schedule(650)
 
     return () => {
       if (timeoutId) {
-        window.clearTimeout(timeoutId);
+        window.clearTimeout(timeoutId)
       }
-    };
-  }, [preparedTimeline]);
+    }
+  }, [preparedTimeline])
 
-  return text;
-};
+  return text
+}
 
-const HeroButton = ({ label, variant, iconClass }) => {
-  const [isPressed, setIsPressed] = useState(false);
+const HeroButton = ({ label, variant, iconClass }: HeroButtonConfig) => {
+  const [isPressed, setIsPressed] = useState(false)
 
-  const className = ['hero-button', variant, isPressed ? 'pressed' : '']
-    .filter(Boolean)
-    .join(' ');
+  const className = ['hero-button', variant, isPressed ? 'pressed' : ''].filter(Boolean).join(' ')
 
-  const handlePressStart = () => setIsPressed(true);
-  const handlePressEnd = () => setIsPressed(false);
+  const handlePressStart = () => setIsPressed(true)
+  const handlePressEnd = () => setIsPressed(false)
 
   return (
     <button
@@ -154,22 +183,30 @@ const HeroButton = ({ label, variant, iconClass }) => {
       </span>
       {label}
     </button>
-  );
-};
+  )
+}
 
-const MessageCard = ({ to, tone, lines }) => {
-  const [isSent, setIsSent] = useState(false);
-  const timerRef = useRef();
+const MessageCard = ({ to, tone, lines }: MessageCardConfig) => {
+  const [isSent, setIsSent] = useState(false)
+  const timerRef = useRef<number | null>(null)
 
-  useEffect(() => () => window.clearTimeout(timerRef.current), []);
+  useEffect(() => {
+    return () => {
+      if (timerRef.current !== null) {
+        window.clearTimeout(timerRef.current)
+      }
+    }
+  }, [])
 
   const handleSend = () => {
-    window.clearTimeout(timerRef.current);
-    setIsSent(true);
-    timerRef.current = window.setTimeout(() => setIsSent(false), 400);
-  };
+    if (timerRef.current !== null) {
+      window.clearTimeout(timerRef.current)
+    }
+    setIsSent(true)
+    timerRef.current = window.setTimeout(() => setIsSent(false), 400)
+  }
 
-  const className = ['card-message', tone].filter(Boolean).join(' ');
+  const className = ['card-message', tone].filter(Boolean).join(' ')
 
   return (
     <article className="card">
@@ -196,15 +233,17 @@ const MessageCard = ({ to, tone, lines }) => {
           aria-label="Send message"
           onClick={handleSend}
         >
-          <ion-icon name="send" aria-hidden="true"></ion-icon>
+          <span className="send-icon" aria-hidden="true">
+            <i className="fa-solid fa-paper-plane"></i>
+          </span>
         </button>
       </footer>
     </article>
-  );
-};
+  )
+}
 
 function App() {
-  const typedText = useTypedLyrics(LYRICS_TIMELINE, TYPING_CONFIG);
+  const typedText = useTypedLyrics(LYRICS_TIMELINE, TYPING_CONFIG)
 
   return (
     <div className="page">
@@ -215,12 +254,12 @@ function App() {
         </div>
         <nav className="nav-links" aria-label="Primary navigation">
           {NAV_LINKS.map((label) => {
-            const slug = label.toLowerCase().replace(/\s+/g, '-');
+            const slug = label.toLowerCase().replace(/\s+/g, '-')
             return (
               <a key={label} className="nav-link" href={`#${slug}`}>
                 {label}
               </a>
-            );
+            )
           })}
         </nav>
         <a className="login-button" href="#login">
@@ -251,7 +290,7 @@ function App() {
         </section>
       </main>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App

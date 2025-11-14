@@ -360,9 +360,16 @@ body {
   animation: sendPulse 0.4s ease;
 }
 
-.send-button ion-icon {
+.send-button .send-icon {
   font-size: 24px;
   color: var(--accent-blue);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.send-button .send-icon i {
+  color: inherit;
 }
 
 @keyframes sendPulse {
