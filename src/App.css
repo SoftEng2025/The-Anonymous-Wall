@@ -112,6 +112,7 @@ body {
   opacity: 1;
 }
 
+
 .login-button {
   background: linear-gradient(135deg, var(--accent-blue) 0%, #39a4f4 100%);
   color: var(--text-light);
@@ -119,6 +120,8 @@ body {
   border-radius: 12px;
   text-decoration: none;
   font-weight: 700;
+  border: none;
+  cursor: pointer;
 }
 
 .login-button:hover {
