@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
+import { useAuth } from './contexts/AuthContext'
 
 type HeroButtonConfig = {
   label: string
@@ -243,6 +244,7 @@ const MessageCard = ({ to, tone, lines }: MessageCardConfig) => {
 }
 
 function App() {
+  const { currentUser, login, logout } = useAuth()
   const typedText = useTypedLyrics(LYRICS_TIMELINE, TYPING_CONFIG)
 
   return (
@@ -262,9 +264,26 @@ function App() {
             )
           })}
         </nav>
-        <a className="login-button" href="#login">
-          Login
-        </a>
+        <div className="auth-container">
+          {currentUser ? (
+            <div className="user-menu">
+              {currentUser.photoURL && (
+                <img
+                  src={currentUser.photoURL}
+                  alt={currentUser.displayName || 'User'}
+                  className="user-avatar"
+                />
+              )}
+              <button className="login-button" onClick={() => logout()}>
+                Logout
+              </button>
+            </div>
+          ) : (
+            <button className="login-button" onClick={() => login()}>
+              Login
+            </button>
+          )}
+        </div>
       </header>
 
       <main className="hero">
