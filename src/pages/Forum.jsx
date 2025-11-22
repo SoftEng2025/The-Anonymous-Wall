@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getAvatarUrl } from '../backend/api/avatar';
 import { postController } from '../backend/controllers/postController';
+import { userController } from '../backend/controllers/userController';
 import { MOCK_POSTS, TAG_COLORS, getTagColor } from '../data/mockForumData';
 import './Forum.css';
 
@@ -14,6 +15,7 @@ const Forum = () => {
     const [posts, setPosts] = useState([]);
     const [filteredPosts, setFilteredPosts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [username, setUsername] = useState('');
 
     // Search and Filter State
     const [searchQuery, setSearchQuery] = useState('');
@@ -54,6 +56,29 @@ const Forum = () => {
 
         fetchPosts();
     }, []);
+
+    // Fetch user profile to get username
+    useEffect(() => {
+        const fetchUsername = async () => {
+            if (currentUser) {
+                try {
+                    const profile = await userController.getUserProfile(currentUser.uid);
+                    if (profile && profile.username) {
+                        setUsername(profile.username);
+                    } else {
+                        // Create profile if it doesn't exist
+                        const newProfile = await userController.createUserProfile(currentUser.uid, {});
+                        setUsername(newProfile.username);
+                    }
+                } catch (error) {
+                    console.error("Error fetching username:", error);
+                    setUsername('Anonymous');
+                }
+            }
+        };
+
+        fetchUsername();
+    }, [currentUser]);
 
     // Filter Logic
     useEffect(() => {
@@ -137,7 +162,7 @@ const Forum = () => {
 
         try {
             const newPostData = {
-                author: currentUser.displayName || 'Anonymous',
+                author: username || 'Anonymous',
                 uid: currentUser.uid,
                 title: newPostTitle,
                 content: newPostContent,
