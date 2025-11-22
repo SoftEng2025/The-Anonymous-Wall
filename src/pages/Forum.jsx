@@ -4,7 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { getAvatarUrl } from '../backend/api/avatar';
 import { postController } from '../backend/controllers/postController';
 import { userController } from '../backend/controllers/userController';
-import { MOCK_POSTS, TAG_COLORS, getTagColor } from '../data/mockForumData';
+import { MOCK_POSTS } from '../data/mockForumData';
+import { BOARDS, getBoardById, getBoardColor, getBoardName } from '../data/boardConfig';
 import './Forum.css';
 
 const Forum = () => {
@@ -17,16 +18,15 @@ const Forum = () => {
     const [loading, setLoading] = useState(true);
     const [username, setUsername] = useState('');
 
-    // Search and Filter State
-    const [searchQuery, setSearchQuery] = useState('');
+    // Board and Filter State
+    const [selectedBoard, setSelectedBoard] = useState(null); // null = all boards
     const [filterType, setFilterType] = useState('latest'); // latest, likes, comments
     const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
 
     // Form State
     const [newPostTitle, setNewPostTitle] = useState('');
     const [newPostContent, setNewPostContent] = useState('');
-    const [newPostTags, setNewPostTags] = useState([]);
-    const [tagInput, setTagInput] = useState('');
+    const [newPostBoard, setNewPostBoard] = useState(''); // Selected board for new post
 
     // Fetch Posts
     useEffect(() => {
@@ -84,12 +84,9 @@ const Forum = () => {
     useEffect(() => {
         let result = [...posts];
 
-        // Filter by Search (Tags)
-        if (searchQuery.trim()) {
-            const query = searchQuery.toLowerCase();
-            result = result.filter(post =>
-                post.tags && post.tags.some(tag => tag.toLowerCase().includes(query))
-            );
+        // Filter by Board
+        if (selectedBoard) {
+            result = result.filter(post => post.board === selectedBoard);
         }
 
         // Sort by Filter Type
@@ -107,7 +104,7 @@ const Forum = () => {
         }
 
         setFilteredPosts(result);
-    }, [posts, searchQuery, filterType]);
+    }, [posts, selectedBoard, filterType]);
 
     const handleCreatePostClick = () => {
         if (currentUser) {
@@ -127,31 +124,16 @@ const Forum = () => {
         }
     };
 
-    const handleTagInputKeyDown = (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            const value = tagInput.trim();
-            if (!value) return;
-
-            let tag = value;
-            if (!tag.startsWith('#')) {
-                tag = '#' + tag;
-            }
-
-            if (!newPostTags.includes(tag)) {
-                setNewPostTags([...newPostTags, tag]);
-            }
-            setTagInput('');
-        }
-    };
-
-    const removeTag = (tagToRemove) => {
-        setNewPostTags(newPostTags.filter(tag => tag !== tagToRemove));
-    };
+    // Tag handlers removed - using boards now
 
     const handlePostSubmit = async () => {
         if (!newPostTitle.trim() || !newPostContent.trim()) {
             alert("Please fill in both title and content before posting.");
+            return;
+        }
+
+        if (!newPostBoard) {
+            alert("Please select a board for your post.");
             return;
         }
 
@@ -166,7 +148,7 @@ const Forum = () => {
                 uid: currentUser.uid,
                 title: newPostTitle,
                 content: newPostContent,
-                tags: newPostTags
+                board: newPostBoard
             };
 
             const newPostId = await postController.createPost(newPostData);
@@ -187,8 +169,7 @@ const Forum = () => {
             // Reset Form
             setNewPostTitle('');
             setNewPostContent('');
-            setNewPostTags([]);
-            setTagInput(' ');
+            setNewPostBoard('');
             setIsCreatePostOpen(false);
         } catch (error) {
             console.error("Failed to create post:", error);
@@ -198,21 +179,36 @@ const Forum = () => {
 
     return (
         <div className="forum-page">
+            {/* Board Navigation */}
+            <div className="board-navigation">
+                <button
+                    className={`board-tab ${selectedBoard === null ? 'active' : ''}`}
+                    onClick={() => setSelectedBoard(null)}
+                >
+                    <i className="fa-solid fa-border-all"></i>
+                    All Boards
+                </button>
+                {BOARDS.map(board => (
+                    <button
+                        key={board.id}
+                        className={`board-tab ${selectedBoard === board.id ? 'active' : ''}`}
+                        onClick={() => setSelectedBoard(board.id)}
+                        style={{ '--board-color': board.color }}
+                    >
+                        <i className={`fa-solid ${board.icon}`}></i>
+                        {board.name}
+                    </button>
+                ))}
+            </div>
+
             <div className="forum-controls">
-                <div className="search-container">
-                    <i className="fa-solid fa-magnifying-glass search-icon"></i>
-                    <input
-                        type="text"
-                        placeholder="Search by tags"
-                        className="search-input"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
+                <div className="filter-container">
                     <button
                         className={`filter-btn ${isFilterMenuOpen ? 'active' : ''}`}
                         onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
                     >
                         <i className="fa-solid fa-sliders"></i>
+                        Sort
                     </button>
 
                     {isFilterMenuOpen && (
@@ -262,13 +258,15 @@ const Forum = () => {
                                     <span>•</span>
                                     <span className="time">{post.timeAgo}</span>
                                 </div>
-                                {post.tags && post.tags.length > 0 && (
-                                    <div className="post-tags">
-                                        {post.tags.map(tag => (
-                                            <span key={tag} className={`tag-pill ${getTagColor(tag)}`}>
-                                                {tag}
-                                            </span>
-                                        ))}
+                                {post.board && (
+                                    <div className="post-board">
+                                        <span
+                                            className="board-badge"
+                                            style={{ backgroundColor: getBoardColor(post.board) }}
+                                        >
+                                            <i className={`fa-solid ${getBoardById(post.board)?.icon || 'fa-comments'}`}></i>
+                                            {getBoardName(post.board)}
+                                        </span>
                                     </div>
                                 )}
                             </div>
@@ -308,22 +306,22 @@ const Forum = () => {
                                 onChange={e => setNewPostTitle(e.target.value)}
                             />
 
-                            <div className="tags-input-container">
-                                {newPostTags.map(tag => (
-                                    <span key={tag} className="modal-tag-chip">
-                                        {tag}
-                                        <button className="remove-tag-btn" onClick={() => removeTag(tag)}>
-                                            <i className="fa-solid fa-times"></i>
+                            <div className="board-selector">
+                                <label className="board-label">Select Board *</label>
+                                <div className="board-options">
+                                    {BOARDS.map(board => (
+                                        <button
+                                            key={board.id}
+                                            type="button"
+                                            className={`board-option ${newPostBoard === board.id ? 'selected' : ''}`}
+                                            onClick={() => setNewPostBoard(board.id)}
+                                            style={{ '--board-color': board.color }}
+                                        >
+                                            <i className={`fa-solid ${board.icon}`}></i>
+                                            <span>{board.name}</span>
                                         </button>
-                                    </span>
-                                ))}
-                                <input
-                                    type="text"
-                                    placeholder="Tags (Press Enter to add)"
-                                    value={tagInput}
-                                    onChange={e => setTagInput(e.target.value)}
-                                    onKeyDown={handleTagInputKeyDown}
-                                />
+                                    ))}
+                                </div>
                             </div>
 
                             <textarea
