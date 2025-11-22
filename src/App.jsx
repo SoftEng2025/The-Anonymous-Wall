@@ -6,6 +6,7 @@ import { NAV_LINKS } from './utils/constants'
 import Home from './pages/Home'
 import About from './pages/About'
 import Submit from './pages/Submit'
+import Browse from './pages/Browse'
 
 function AppContent() {
     const { currentUser, login, logout } = useAuth()
@@ -47,6 +48,18 @@ function AppContent() {
                                 </Link>
                             )
                         }
+                        // Handle "Browse" specifically to route to the page
+                        if (label === 'Browse') {
+                            return (
+                                <Link
+                                    key={label}
+                                    to="/browse"
+                                    className={`nav-link ${location.pathname === '/browse' ? 'active' : ''}`}
+                                >
+                                    {label}
+                                </Link>
+                            )
+                        }
                         // For other links, keep them as anchors for now or update as needed
                         // Assuming "Browse", "Forum", "Submit" might be sections on Home or future pages
                         // For now, let's route them to home with hash if they are sections, or just placeholders
@@ -80,6 +93,7 @@ function AppContent() {
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/browse" element={<Browse />} />
                 <Route path="/submit" element={<Submit />} />
             </Routes>
         </div>

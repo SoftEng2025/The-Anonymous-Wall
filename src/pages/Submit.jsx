@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+import { useMessages } from '../contexts/MessageContext'
+import { useNavigate } from 'react-router-dom'
 import './Submit.css'
 
 const THEMES = [
@@ -24,14 +26,23 @@ export default function Submit() {
     const [selectedTheme, setSelectedTheme] = useState(THEMES[2]) // Default to mint
     const [selectedMood, setSelectedMood] = useState(null)
 
+    const { addMessage } = useMessages()
+    const navigate = useNavigate()
+
     const handleSubmit = () => {
-        console.log({
+        if (!recipient || !message || !selectedMood) {
+            alert('Please fill in all fields and select a mood')
+            return
+        }
+
+        addMessage({
             recipient,
             message,
             theme: selectedTheme.id,
             mood: selectedMood
         })
-        // Add submission logic here
+
+        navigate('/browse')
     }
 
     return (
