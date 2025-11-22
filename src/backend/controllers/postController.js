@@ -97,5 +97,28 @@ export const postController = {
             console.error("Error updating posts author:", error);
             throw error;
         }
+    },
+
+    /**
+     * Retrieves all posts created by a specific user, ordered by timestamp descending.
+     * @param {string} uid 
+     * @returns {Promise<Array>} List of user's posts.
+     */
+    getPostsByUserId: async (uid) => {
+        try {
+            const q = query(
+                collection(db, POSTS_COLLECTION),
+                where('uid', '==', uid),
+                orderBy('timestamp', 'desc')
+            );
+            const querySnapshot = await getDocs(q);
+            return querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+        } catch (error) {
+            console.error("Error fetching user posts:", error);
+            throw error;
+        }
     }
 };
