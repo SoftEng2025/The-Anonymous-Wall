@@ -1,0 +1,223 @@
+.submit-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.submit-card {
+    background: var(--card-body);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 500px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.submit-header {
+    background: var(--card-top);
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.submit-title {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-light);
+}
+
+.submit-body {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.submit-input {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 8px;
+    border: none;
+    background: #ffffff;
+    font-family: var(--font-primary);
+    font-size: 1rem;
+    color: #333;
+}
+
+.submit-input::placeholder {
+    color: #a0a0a0;
+    font-weight: 600;
+}
+
+.submit-textarea {
+    width: 100%;
+    height: 150px;
+    padding: 1rem;
+    border-radius: 8px;
+    border: none;
+    font-family: var(--font-primary);
+    font-size: 1rem;
+    color: #253353;
+    /* Dark text for readability on light backgrounds */
+    font-weight: 600;
+    resize: none;
+    transition: background-color 0.3s ease;
+}
+
+.submit-textarea::placeholder {
+    color: rgba(37, 51, 83, 0.6);
+}
+
+.selector-label {
+    display: block;
+    text-align: center;
+    font-weight: 700;
+    color: var(--text-light);
+    margin-bottom: 0.8rem;
+}
+
+.theme-options {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.theme-option {
+    width: 100%;
+    height: 40px;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.theme-option:hover {
+    opacity: 0.9;
+}
+
+.theme-option.selected {
+    position: relative;
+    z-index: 1;
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.mood-options {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 1rem;
+}
+
+.mood-option {
+    background: none;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: transform 0.2s, color 0.2s;
+}
+
+.mood-icon {
+    font-size: 2rem;
+    transition: color 0.2s;
+}
+
+.mood-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.mood-option:hover {
+    color: var(--text-light);
+    transform: translateY(-2px);
+}
+
+/* Specific mood colors */
+.mood-option.happy:hover .mood-icon,
+.mood-option.happy.selected .mood-icon {
+    color: #ffd700;
+    /* Yellow */
+}
+
+.mood-option.sad:hover .mood-icon,
+.mood-option.sad.selected .mood-icon {
+    color: #4fc3f7;
+    /* Light Blue */
+}
+
+.mood-option.in-love:hover .mood-icon,
+.mood-option.in-love.selected .mood-icon {
+    color: #ff4081;
+    /* Pink */
+}
+
+.mood-option.angry:hover .mood-icon,
+.mood-option.angry.selected .mood-icon {
+    color: #ff5252;
+    /* Red */
+}
+
+.mood-option.confused:hover .mood-icon,
+.mood-option.confused.selected .mood-icon {
+    color: #e040fb;
+    /* Purple */
+}
+
+.mood-option.selected {
+    color: var(--text-light);
+}
+
+.submit-send-button {
+    margin-top: 1rem;
+    background: linear-gradient(135deg, var(--accent-blue) 0%, #39a4f4 100%);
+    color: var(--text-light);
+    padding: 0.8rem;
+    border-radius: 8px;
+    border: none;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: transform 0.2s;
+    width: 150px;
+    align-self: center;
+}
+
+.submit-send-button:hover {
+    transform: translateY(-2px);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .submit-card {
+        max-width: 100%;
+    }
+
+    .mood-options {
+        gap: 0.5rem;
+    }
+
+    .mood-icon {
+        font-size: 1.5rem;
+    }
+}

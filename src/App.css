@@ -15,6 +15,9 @@
   --mint: #c8f0e0;
   --peach: #ffcfb3;
   --coral: #ff8975;
+  --sage: #9caf88;
+  --lime: #dce775;
+  --lavender: #9575cd;
   --font-primary: 'Nunito', 'Segoe UI', sans-serif;
 }
 
@@ -68,6 +71,14 @@ body {
   letter-spacing: 0.04em;
 }
 
+.logo-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
 .logo-primary {
   color: var(--text-light);
 }
@@ -103,11 +114,13 @@ body {
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
-.nav-link:hover {
+.nav-link:hover,
+.nav-link.active {
   color: var(--text-light);
 }
 
-.nav-link:hover::after {
+.nav-link:hover::after,
+.nav-link.active::after {
   transform: translateY(0);
   opacity: 1;
 }

@@ -1,33 +1,57 @@
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom'
 import './App.css'
 import { useAuth } from './contexts/AuthContext'
-import HeroButton from './components/HeroButton'
-import MessageCard from './components/MessageCard'
-import { useTypedLyrics } from './hooks/useTypedLyrics'
 import { getAvatarUrl } from './api/avatar'
-import {
-    HERO_BUTTONS,
-    CARD_MESSAGES,
-    NAV_LINKS,
-    TYPING_CONFIG,
-    LYRICS_TIMELINE
-} from './utils/constants'
+import { NAV_LINKS } from './utils/constants'
+import Home from './pages/Home'
+import About from './pages/About'
+import Submit from './pages/Submit'
 
-function App() {
+function AppContent() {
     const { currentUser, login, logout } = useAuth()
-    const typedText = useTypedLyrics(LYRICS_TIMELINE, TYPING_CONFIG)
+    const location = useLocation()
 
     return (
         <div className="page">
             <header className="site-header">
                 <div className="logo">
-                    <span className="logo-primary">Anony</span>
-                    <span className="logo-accent">Wall</span>
+                    <Link to="/" className="logo-link">
+                        <span className="logo-primary">Anony</span>
+                        <span className="logo-accent">Wall</span>
+                    </Link>
                 </div>
                 <nav className="nav-links" aria-label="Primary navigation">
                     {NAV_LINKS.map((label) => {
                         const slug = label.toLowerCase().replace(/\s+/g, '-')
+                        // Handle "About" specifically to route to the page
+                        if (label === 'About') {
+                            return (
+                                <Link
+                                    key={label}
+                                    to="/about"
+                                    className={`nav-link ${location.pathname === '/about' ? 'active' : ''}`}
+                                >
+                                    {label}
+                                </Link>
+                            )
+                        }
+                        // Handle "Submit" specifically to route to the page
+                        if (label === 'Submit') {
+                            return (
+                                <Link
+                                    key={label}
+                                    to="/submit"
+                                    className={`nav-link ${location.pathname === '/submit' ? 'active' : ''}`}
+                                >
+                                    {label}
+                                </Link>
+                            )
+                        }
+                        // For other links, keep them as anchors for now or update as needed
+                        // Assuming "Browse", "Forum", "Submit" might be sections on Home or future pages
+                        // For now, let's route them to home with hash if they are sections, or just placeholders
                         return (
-                            <a key={label} className="nav-link" href={`#${slug}`}>
+                            <a key={label} className="nav-link" href={`/#${slug}`}>
                                 {label}
                             </a>
                         )
@@ -53,29 +77,20 @@ function App() {
                 </div>
             </header>
 
-            <main className="hero">
-                <div className="hero-content">
-                    <h1 className="hero-title">
-                        <span className="typed-text" aria-live="polite" aria-atomic="true">
-                            {typedText}
-                        </span>
-                        <span className="hero-cursor" aria-hidden="true"></span>
-                    </h1>
-                    <p className="hero-subtitle">A safe space to express what you can't say out loud.</p>
-                    <div className="hero-actions">
-                        {HERO_BUTTONS.map((button) => (
-                            <HeroButton key={button.label} {...button} />
-                        ))}
-                    </div>
-                </div>
-
-                <section className="cards" aria-label="Anonymous notes">
-                    {CARD_MESSAGES.map((card) => (
-                        <MessageCard key={card.to} {...card} />
-                    ))}
-                </section>
-            </main>
+            <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/submit" element={<Submit />} />
+            </Routes>
         </div>
+    )
+}
+
+function App() {
+    return (
+        <Router>
+            <AppContent />
+        </Router>
     )
 }
 
