@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getAvatarUrl } from '../backend/api/avatar';
 import { postController } from '../backend/controllers/postController';
 import { replyController } from '../backend/controllers/replyController';
+import { userController } from '../backend/controllers/userController';
 import { useAuth } from '../contexts/AuthContext';
 import './ForumPost.css';
 
@@ -67,8 +68,18 @@ const ForumPost = () => {
             }
 
             try {
+                // Fetch user profile to get the correct username
+                let profile = await userController.getUserProfile(currentUser.uid);
+
+                // If profile doesn't exist (edge case), create one with random name
+                if (!profile) {
+                    profile = await userController.createUserProfile(currentUser.uid, {});
+                }
+
+                const authorName = profile.username;
+
                 const replyData = {
-                    author: currentUser.displayName || 'Anonymous',
+                    author: authorName,
                     uid: currentUser.uid,
                     content: replyContent
                 };
