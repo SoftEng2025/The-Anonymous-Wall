@@ -5,6 +5,7 @@ import { userController } from '../backend/controllers/userController';
 import { postController } from '../backend/controllers/postController';
 import { replyController } from '../backend/controllers/replyController';
 import { useNavigate } from 'react-router-dom';
+import { getTagColor } from '../data/mockForumData';
 import './Profile.css';
 
 function Profile() {
@@ -14,6 +15,9 @@ function Profile() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState(null);
+    const [showHistory, setShowHistory] = useState(false);
+    const [historyPosts, setHistoryPosts] = useState([]);
+    const [loadingHistory, setLoadingHistory] = useState(false);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -71,6 +75,23 @@ function Profile() {
         }
     };
 
+    const handleViewHistory = async () => {
+        if (!showHistory) {
+            // Fetch history when opening
+            setLoadingHistory(true);
+            try {
+                const posts = await postController.getPostsByUserId(currentUser.uid);
+                setHistoryPosts(posts);
+            } catch (error) {
+                console.error("Error fetching post history:", error);
+                setMessage({ type: 'error', text: 'Failed to load post history.' });
+            } finally {
+                setLoadingHistory(false);
+            }
+        }
+        setShowHistory(!showHistory);
+    };
+
     const handleLogout = async () => {
         try {
             await logout();
@@ -78,6 +99,20 @@ function Profile() {
         } catch (error) {
             console.error("Failed to log out", error);
         }
+    };
+
+    const formatTimeAgo = (timestamp) => {
+        if (!timestamp) return 'Unknown';
+        const now = Date.now();
+        const diff = now - timestamp;
+        const minutes = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+        const days = Math.floor(diff / 86400000);
+
+        if (minutes < 1) return 'Just now';
+        if (minutes < 60) return `${minutes}m ago`;
+        if (hours < 24) return `${hours}h ago`;
+        return `${days}d ago`;
     };
 
     if (loading) {
@@ -126,6 +161,54 @@ function Profile() {
                 >
                     {saving ? 'Saving...' : 'Save Changes'}
                 </button>
+            </div>
+
+            <div className="profile-section">
+                <h2 className="section-title">Post History</h2>
+                <button
+                    className="save-button"
+                    onClick={handleViewHistory}
+                    disabled={loadingHistory}
+                >
+                    {loadingHistory ? 'Loading...' : showHistory ? 'Hide History' : 'View History'}
+                </button>
+
+                {showHistory && (
+                    <div className="history-posts">
+                        {historyPosts.length === 0 ? (
+                            <p className="no-posts">You haven't created any posts yet.</p>
+                        ) : (
+                            historyPosts.map(post => (
+                                <div
+                                    key={post.id}
+                                    className="history-post-card"
+                                    onClick={() => navigate(`/forum/${post.id}`)}
+                                >
+                                    <div className="history-post-header">
+                                        <div className="history-post-info">
+                                            <span className="history-time">{formatTimeAgo(post.timestamp)}</span>
+                                        </div>
+                                        {post.tags && post.tags.length > 0 && (
+                                            <div className="history-post-tags">
+                                                {post.tags.map(tag => (
+                                                    <span key={tag} className={`tag-pill ${getTagColor(tag)}`}>
+                                                        {tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <h3 className="history-post-title">{post.title}</h3>
+                                    <p className="history-post-content">{post.content}</p>
+                                    <div className="history-post-stats">
+                                        <span><i className="fa-regular fa-heart"></i> {post.likes || 0}</span>
+                                        <span><i className="fa-regular fa-comment"></i> {post.comments || 0}</span>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                )}
             </div>
 
             <div className="logout-section">
