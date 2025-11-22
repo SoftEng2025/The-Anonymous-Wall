@@ -35,7 +35,7 @@ function AppContent() {
 
                         const path = `/${slug}`
                         // Check if it's one of the known pages
-                        if (['/about', '/submit', '/browse', '/forum'].includes(path)) {
+                        if (['/about', '/submit', '/browse', '/freedom-wall', '/forum'].includes(path)) {
                             return (
                                 <Link
                                     key={label}
@@ -83,6 +83,7 @@ function AppContent() {
                 <Route path="/" element={<Home />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/browse" element={<Browse />} />
+                <Route path="/freedom-wall" element={<Browse />} />
                 <Route path="/submit" element={<Submit />} />
                 <Route path="/forum" element={<Forum />} />
                 <Route path="/forum/:postId" element={<ForumPost />} />

@@ -1,7 +1,7 @@
 const toMs = (seconds) => Math.round(seconds * 1000)
 
 export const HERO_BUTTONS = [
-    { label: 'Browse', variant: 'outlined', iconClass: 'fa-regular fa-comment-dots' },
+    { label: 'Freedom Wall', variant: 'outlined', iconClass: 'fa-regular fa-comment-dots' },
     { label: 'Message', variant: 'filled', iconClass: 'fa-solid fa-paper-plane', path: '/submit' },
 ]
 
@@ -30,7 +30,7 @@ export const CARD_MESSAGES = [
     },
 ]
 
-export const NAV_LINKS = ['Browse', 'Forum', 'Submit']
+export const NAV_LINKS = ['Freedom Wall', 'Forum', 'Submit']
 
 export const TYPING_CONFIG = { baseTypeSpeed: 60, minimumHold: 300 }
 
