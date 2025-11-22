@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useMessages } from '../contexts/MessageContext'
 import { useNavigate } from 'react-router-dom'
+import { messageController } from '../backend/controllers/messageController'
 import './Submit.css'
 
 const THEMES = [
@@ -25,24 +26,41 @@ export default function Submit() {
     const [message, setMessage] = useState('')
     const [selectedTheme, setSelectedTheme] = useState(THEMES[2]) // Default to mint
     const [selectedMood, setSelectedMood] = useState(null)
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     const { addMessage } = useMessages()
     const navigate = useNavigate()
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!recipient || !message || !selectedMood) {
             alert('Please fill in all fields and select a mood')
             return
         }
 
-        addMessage({
-            recipient,
-            message,
-            theme: selectedTheme.id,
-            mood: selectedMood
-        })
+        setIsSubmitting(true)
 
-        navigate('/browse')
+        try {
+            const messageData = {
+                recipient,
+                message,
+                theme: selectedTheme.id,
+                mood: selectedMood
+            }
+
+            // Save to Firebase
+            await messageController.createMessage(messageData)
+
+            // Also add to local context for immediate UI update
+            addMessage(messageData)
+
+            // Navigate to browse page
+            navigate('/browse')
+        } catch (error) {
+            console.error("Failed to submit message:", error)
+            alert("Failed to send message. Please try again.")
+        } finally {
+            setIsSubmitting(false)
+        }
     }
 
     return (
@@ -100,8 +118,12 @@ export default function Submit() {
                         </div>
                     </div>
 
-                    <button className="submit-send-button" onClick={handleSubmit}>
-                        Send <i className="fa-solid fa-paper-plane"></i>
+                    <button
+                        className="submit-send-button"
+                        onClick={handleSubmit}
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? 'Sending...' : 'Send'} <i className="fa-solid fa-paper-plane"></i>
                     </button>
                 </div>
             </div>

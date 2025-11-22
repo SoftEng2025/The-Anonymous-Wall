@@ -1,13 +1,14 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom'
 import './App.css'
 import { useAuth } from './contexts/AuthContext'
-import { getAvatarUrl } from './api/avatar'
+import { getAvatarUrl } from './backend/api/avatar'
 import { NAV_LINKS } from './utils/constants'
 import Home from './pages/Home'
 import About from './pages/About'
 import Submit from './pages/Submit'
 import Browse from './pages/Browse'
 import Forum from './pages/Forum'
+import ForumPost from './pages/ForumPost';
 
 function AppContent() {
     const { currentUser, login, logout } = useAuth()
@@ -73,6 +74,7 @@ function AppContent() {
                 <Route path="/browse" element={<Browse />} />
                 <Route path="/submit" element={<Submit />} />
                 <Route path="/forum" element={<Forum />} />
+                <Route path="/forum/:postId" element={<ForumPost />} />
             </Routes>
         </div>
     )
