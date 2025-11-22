@@ -9,7 +9,7 @@ import { BOARDS, getBoardById, getBoardColor, getBoardName } from '../data/board
 import './Forum.css';
 
 const Forum = () => {
-    const { currentUser, login } = useAuth();
+    const { currentUser, login, loginAnonymous } = useAuth();
     const navigate = useNavigate();
     const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -121,6 +121,16 @@ const Forum = () => {
             setIsCreatePostOpen(true);
         } catch (error) {
             console.error("Failed to login", error);
+        }
+    };
+
+    const handleAnonymousLogin = async () => {
+        try {
+            await loginAnonymous();
+            setIsLoginModalOpen(false);
+            setIsCreatePostOpen(true);
+        } catch (error) {
+            console.error("Failed anonymous login", error);
         }
     };
 
@@ -351,6 +361,10 @@ const Forum = () => {
                         <button className="google-login-btn" onClick={handleLoginContinue}>
                             <i className="fa-brands fa-google google-icon"></i>
                             Continue with Google
+                        </button>
+                        <button className="anonymous-login-btn" onClick={handleAnonymousLogin}>
+                            <i className="fa-solid fa-user-secret"></i>
+                            Continue as Guest
                         </button>
                     </div>
                 </div>
