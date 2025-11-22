@@ -1,72 +1,100 @@
-# The-Anonymous-Wall
+# The Anonymous Wall (AnonyWall)
 
-# Getting Started with Create React App
+A modern web application built with React and Vite that allows users to share thoughts and ideas on a digital wall.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 🚀 Features
 
-## Available Scripts
+-   **Browse Posts**: Explore a collection of posts on the "Wall".
+-   **Submit Posts**: Share your own thoughts with the community.
+-   **User Authentication**: Secure login using Google Sign-In via Firebase.
+-   **Responsive Design**: Optimized for both desktop and mobile devices.
+-   **Modern UI**: Clean and intuitive interface with smooth navigation.
 
-In the project directory, you can run:
+## 🛠️ Tech Stack
 
-### `npm start`
+-   **Frontend Framework**: [React](https://react.dev/)
+-   **Build Tool**: [Vite](https://vitejs.dev/)
+-   **Routing**: [React Router v7](https://reactrouter.com/)
+-   **Backend & Auth**: [Firebase](https://firebase.google.com/)
+-   **Styling**: CSS3
+-   **Linting**: ESLint
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 📋 Prerequisites
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Before you begin, ensure you have the following installed:
+-   [Node.js](https://nodejs.org/) (v16 or higher)
+-   [npm](https://www.npmjs.com/) (usually comes with Node.js)
 
-### `npm test`
+## ⚙️ Installation
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1.  **Clone the repository**
+    ```bash
+    git clone https://github.com/yourusername/The-Anonymous-Wall.git
+    cd The-Anonymous-Wall
+    ```
 
-### `npm run build`
+2.  **Install dependencies**
+    ```bash
+    npm install
+    ```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 🔧 Configuration
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+This project uses Firebase for authentication and backend services. You need to set up a Firebase project and configure the environment variables.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1.  **Create a Firebase Project**: Follow the detailed instructions in [FIREBASE_SETUP.md](./FIREBASE_SETUP.md).
+2.  **Set up Environment Variables**:
+    -   Create a `.env` file in the root directory.
+    -   Add your Firebase configuration keys as described in the setup guide.
 
-### `npm run eject`
+## 🏃‍♂️ Running the App
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Start the development server:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+npm run dev
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Open [http://localhost:5173](http://localhost:5173) in your browser to view the application.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## 📦 Building for Production
 
-## Learn More
+To create a production-ready build:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```bash
+npm run build
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+The build artifacts will be stored in the `dist` directory. You can preview the production build locally using:
 
-### Code Splitting
+```bash
+npm run preview
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## 📂 Project Structure
 
-### Analyzing the Bundle Size
+```
+The-Anonymous-Wall/
+├── public/              # Static assets
+├── src/
+│   ├── api/             # API utility functions
+│   ├── components/      # Reusable UI components
+│   ├── contexts/        # React Contexts (e.g., AuthContext)
+│   ├── hooks/           # Custom React hooks
+│   ├── pages/           # Application pages (Home, About, Browse, Submit)
+│   ├── utils/           # Helper functions and constants
+│   ├── App.jsx          # Main application component with routing
+│   └── main.jsx         # Entry point
+├── .env                 # Environment variables (do not commit)
+├── FIREBASE_SETUP.md    # Detailed Firebase setup guide
+├── package.json         # Project dependencies and scripts
+└── vite.config.js       # Vite configuration
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 🤝 Contributing
 
-### Making a Progressive Web App
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## 📄 License
 
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
