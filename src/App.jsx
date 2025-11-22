@@ -10,10 +10,13 @@ import Browse from './pages/Browse'
 import Forum from './pages/Forum'
 import ForumPost from './pages/ForumPost';
 import Profile from './pages/Profile';
+import LoginModal from './components/LoginModal';
+import { useState } from 'react';
 
 function AppContent() {
-    const { currentUser, login, loginAnonymous, logout } = useAuth()
+    const { currentUser, logout } = useAuth()
     const location = useLocation()
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
 
     return (
         <div className="page">
@@ -62,17 +65,17 @@ function AppContent() {
                             </Link>
                         </div>
                     ) : (
-                        <div className="login-buttons">
-                            <button className="login-button guest-login" onClick={() => loginAnonymous()}>
-                                Guest Login
-                            </button>
-                            <button className="login-button" onClick={() => login()}>
-                                Login with Google
-                            </button>
-                        </div>
+                        <button className="login-button" onClick={() => setIsLoginModalOpen(true)}>
+                            Login
+                        </button>
                     )}
                 </div>
             </header>
+
+            <LoginModal
+                isOpen={isLoginModalOpen}
+                onClose={() => setIsLoginModalOpen(false)}
+            />
 
             <Routes>
                 <Route path="/" element={<Home />} />
