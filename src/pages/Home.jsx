@@ -1,5 +1,6 @@
 import HeroButton from '../components/HeroButton'
 import MessageCard from '../components/MessageCard'
+import './Home.css'
 import { useTypedLyrics } from '../hooks/useTypedLyrics'
 import {
     HERO_BUTTONS,

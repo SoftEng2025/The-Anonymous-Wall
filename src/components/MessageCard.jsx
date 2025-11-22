@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import './MessageCard.css'
 
 const MessageCard = ({ to, tone, lines }) => {
     const [isSent, setIsSent] = useState(false)
