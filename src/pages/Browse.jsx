@@ -22,13 +22,16 @@ export default function Browse() {
     return (
         <div className="browse-container">
             <div className="search-container">
-                <input
-                    type="text"
-                    className="search-input"
-                    placeholder="Enter recipient name..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
+                <div className="search-input-wrapper">
+                    <i className="fa-regular fa-user search-icon"></i>
+                    <input
+                        type="text"
+                        className="search-input"
+                        placeholder="Enter recipient name..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
                 <button className="search-button">
                     <i className="fa-solid fa-magnifying-glass"></i> Search
                 </button>

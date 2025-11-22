@@ -17,9 +17,25 @@
     margin: 0 auto;
 }
 
-.search-input {
+.search-input-wrapper {
+    position: relative;
     flex: 1;
-    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    pointer-events: none;
+    font-size: 1rem;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 20px 12px 40px;
+    /* Increased left padding for icon */
     border-radius: 8px;
     border: 2px solid rgba(255, 255, 255, 0.2);
     background: rgba(255, 255, 255, 0.1);

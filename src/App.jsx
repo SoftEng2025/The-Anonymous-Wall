@@ -7,6 +7,7 @@ import Home from './pages/Home'
 import About from './pages/About'
 import Submit from './pages/Submit'
 import Browse from './pages/Browse'
+import Forum from './pages/Forum'
 
 function AppContent() {
     const { currentUser, login, logout } = useAuth()
@@ -24,45 +25,21 @@ function AppContent() {
                 <nav className="nav-links" aria-label="Primary navigation">
                     {NAV_LINKS.map((label) => {
                         const slug = label.toLowerCase().replace(/\s+/g, '-')
-                        // Handle "About" specifically to route to the page
-                        if (label === 'About') {
+
+                        const path = `/${slug}`
+                        // Check if it's one of the known pages
+                        if (['/about', '/submit', '/browse', '/forum'].includes(path)) {
                             return (
                                 <Link
                                     key={label}
-                                    to="/about"
-                                    className={`nav-link ${location.pathname === '/about' ? 'active' : ''}`}
+                                    to={path}
+                                    className={`nav-link ${location.pathname === path ? 'active' : ''}`}
                                 >
                                     {label}
                                 </Link>
                             )
                         }
-                        // Handle "Submit" specifically to route to the page
-                        if (label === 'Submit') {
-                            return (
-                                <Link
-                                    key={label}
-                                    to="/submit"
-                                    className={`nav-link ${location.pathname === '/submit' ? 'active' : ''}`}
-                                >
-                                    {label}
-                                </Link>
-                            )
-                        }
-                        // Handle "Browse" specifically to route to the page
-                        if (label === 'Browse') {
-                            return (
-                                <Link
-                                    key={label}
-                                    to="/browse"
-                                    className={`nav-link ${location.pathname === '/browse' ? 'active' : ''}`}
-                                >
-                                    {label}
-                                </Link>
-                            )
-                        }
-                        // For other links, keep them as anchors for now or update as needed
-                        // Assuming "Browse", "Forum", "Submit" might be sections on Home or future pages
-                        // For now, let's route them to home with hash if they are sections, or just placeholders
+
                         return (
                             <a key={label} className="nav-link" href={`/#${slug}`}>
                                 {label}
@@ -95,6 +72,7 @@ function AppContent() {
                 <Route path="/about" element={<About />} />
                 <Route path="/browse" element={<Browse />} />
                 <Route path="/submit" element={<Submit />} />
+                <Route path="/forum" element={<Forum />} />
             </Routes>
         </div>
     )
