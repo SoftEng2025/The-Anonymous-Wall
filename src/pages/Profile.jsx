@@ -5,7 +5,7 @@ import { userController } from '../backend/controllers/userController';
 import { postController } from '../backend/controllers/postController';
 import { replyController } from '../backend/controllers/replyController';
 import { useNavigate } from 'react-router-dom';
-import { getTagColor } from '../data/mockForumData';
+import { getBoardById, getBoardColor, getBoardName } from '../data/boardConfig';
 import './Profile.css';
 
 function Profile() {
@@ -188,13 +188,15 @@ function Profile() {
                                         <div className="history-post-info">
                                             <span className="history-time">{formatTimeAgo(post.timestamp)}</span>
                                         </div>
-                                        {post.tags && post.tags.length > 0 && (
-                                            <div className="history-post-tags">
-                                                {post.tags.map(tag => (
-                                                    <span key={tag} className={`tag-pill ${getTagColor(tag)}`}>
-                                                        {tag}
-                                                    </span>
-                                                ))}
+                                        {post.board && (
+                                            <div className="history-post-board">
+                                                <span
+                                                    className="board-badge"
+                                                    style={{ backgroundColor: getBoardColor(post.board) }}
+                                                >
+                                                    <i className={`fa-solid ${getBoardById(post.board)?.icon || 'fa-comments'}`}></i>
+                                                    {getBoardName(post.board)}
+                                                </span>
                                             </div>
                                         )}
                                     </div>
@@ -216,7 +218,7 @@ function Profile() {
                     Logout
                 </button>
             </div>
-        </div>
+        </div >
     );
 }
 
