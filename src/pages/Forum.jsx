@@ -1,53 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { getAvatarUrl } from '../api/avatar';
+import { getAvatarUrl } from '../backend/api/avatar';
+import { postController } from '../backend/controllers/postController';
+import { MOCK_POSTS, TAG_COLORS, getTagColor } from '../data/mockForumData';
 import './Forum.css';
-
-// Mock Data for initial display
-const MOCK_POSTS = [
-    {
-        id: 1,
-        author: 'deeZnuxcz',
-        avatarSeed: 'deeZnuxcz',
-        timeAgo: '2 days ago',
-        title: 'I caught my boyfriend kissing another man',
-        content: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries ...',
-        likes: 110,
-        comments: 54,
-        tags: ['#cheating', '#gay']
-    },
-    {
-        id: 2,
-        author: 'femboienjoyer',
-        avatarSeed: 'femboienjoyer',
-        timeAgo: '3 days ago',
-        title: 'OA lang ba ako or assuming lang talaga',
-        content: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries ...',
-        likes: 101,
-        comments: 34,
-        tags: ['#relationship', '#advice']
-    },
-    {
-        id: 3,
-        author: 'w_speed',
-        avatarSeed: 'w_speed',
-        timeAgo: '4 days ago',
-        title: 'How do i have the courage to confess to her?',
-        content: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries ...',
-        likes: 45,
-        comments: 12,
-        tags: ['#crush', '#confession']
-    }
-];
-
-const TAG_COLORS = ['green', 'pink', 'blue', 'yellow'];
 
 const Forum = () => {
     const { currentUser, login } = useAuth();
+    const navigate = useNavigate();
     const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-    const [posts, setPosts] = useState(MOCK_POSTS);
-    const [filteredPosts, setFilteredPosts] = useState(MOCK_POSTS);
+    const [posts, setPosts] = useState([]);
+    const [filteredPosts, setFilteredPosts] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     // Search and Filter State
     const [searchQuery, setSearchQuery] = useState('');
@@ -60,6 +26,35 @@ const Forum = () => {
     const [newPostTags, setNewPostTags] = useState([]);
     const [tagInput, setTagInput] = useState('');
 
+    // Fetch Posts
+    useEffect(() => {
+        const fetchPosts = async () => {
+            try {
+                setLoading(true);
+                const fetchedPosts = await postController.getAllPosts();
+                // Use mock data if Firebase is empty
+                if (fetchedPosts.length === 0) {
+                    console.log("Using mock data - Firebase is empty");
+                    setPosts(MOCK_POSTS);
+                    setFilteredPosts(MOCK_POSTS);
+                } else {
+                    setPosts(fetchedPosts);
+                    setFilteredPosts(fetchedPosts);
+                }
+            } catch (error) {
+                console.error("Failed to fetch posts:", error);
+                // Use mock data on error
+                console.log("Using mock data due to error");
+                setPosts(MOCK_POSTS);
+                setFilteredPosts(MOCK_POSTS);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPosts();
+    }, []);
+
     // Filter Logic
     useEffect(() => {
         let result = [...posts];
@@ -68,7 +63,7 @@ const Forum = () => {
         if (searchQuery.trim()) {
             const query = searchQuery.toLowerCase();
             result = result.filter(post =>
-                post.tags.some(tag => tag.toLowerCase().includes(query))
+                post.tags && post.tags.some(tag => tag.toLowerCase().includes(query))
             );
         }
 
@@ -82,9 +77,7 @@ const Forum = () => {
                 break;
             case 'latest':
             default:
-                // Assuming MOCK_POSTS are already roughly sorted by date or we'd need real dates
-                // For now, we'll just keep them as is or reverse if needed. 
-                // Since new posts are added to top, default array order is usually 'latest'
+                result.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                 break;
         }
 
@@ -131,39 +124,51 @@ const Forum = () => {
         setNewPostTags(newPostTags.filter(tag => tag !== tagToRemove));
     };
 
-    const handlePostSubmit = () => {
-        if (!newPostTitle.trim() || !newPostContent.trim()) return;
-
-        const newPost = {
-            id: Date.now(),
-            author: currentUser.displayName || 'Anonymous',
-            avatarSeed: currentUser.uid,
-            timeAgo: 'Just now',
-            title: newPostTitle,
-            content: newPostContent,
-            likes: 0,
-            comments: 0,
-            tags: newPostTags
-        };
-
-        setPosts([newPost, ...posts]);
-
-        // Reset Form
-        setNewPostTitle('');
-        setNewPostContent('');
-        setNewPostTags([]);
-        setTagInput('');
-        setIsCreatePostOpen(false);
-    };
-
-    const getTagColor = (tag) => {
-        // Simple hash to pick a consistent color
-        let hash = 0;
-        for (let i = 0; i < tag.length; i++) {
-            hash = tag.charCodeAt(i) + ((hash << 5) - hash);
+    const handlePostSubmit = async () => {
+        if (!newPostTitle.trim() || !newPostContent.trim()) {
+            alert("Please fill in both title and content before posting.");
+            return;
         }
-        const index = Math.abs(hash) % TAG_COLORS.length;
-        return TAG_COLORS[index];
+
+        if (!currentUser) {
+            alert("You must be logged in to create a post.");
+            return;
+        }
+
+        try {
+            const newPostData = {
+                author: currentUser.displayName || 'Anonymous',
+                uid: currentUser.uid,
+                title: newPostTitle,
+                content: newPostContent,
+                tags: newPostTags
+            };
+
+            const newPostId = await postController.createPost(newPostData);
+
+            // Optimistic update or refetch
+            const createdPost = {
+                id: newPostId,
+                ...newPostData,
+                likes: 0,
+                comments: 0,
+                timeAgo: 'Just now',
+                avatarSeed: currentUser.uid,
+                timestamp: Date.now()
+            };
+
+            setPosts([createdPost, ...posts]);
+
+            // Reset Form
+            setNewPostTitle('');
+            setNewPostContent('');
+            setNewPostTags([]);
+            setTagInput(' ');
+            setIsCreatePostOpen(false);
+        } catch (error) {
+            console.error("Failed to create post:", error);
+            alert("Failed to create post. Please try again.");
+        }
     };
 
     return (
@@ -215,7 +220,11 @@ const Forum = () => {
 
             <div className="posts-feed">
                 {filteredPosts.map(post => (
-                    <div key={post.id} className="post-card">
+                    <div
+                        key={post.id}
+                        className="post-card clickable"
+                        onClick={() => navigate(`/forum/${post.id}`)}
+                    >
                         <div className="post-header">
                             <img
                                 src={getAvatarUrl(post.avatarSeed)}
@@ -242,10 +251,10 @@ const Forum = () => {
                         <h3 className="post-title">{post.title}</h3>
                         <p className="post-content">{post.content}</p>
                         <div className="post-actions">
-                            <button className="action-btn">
+                            <button className="action-btn" onClick={(e) => e.stopPropagation()}>
                                 <i className="fa-regular fa-heart"></i> {post.likes}
                             </button>
-                            <button className="action-btn">
+                            <button className="action-btn" onClick={(e) => e.stopPropagation()}>
                                 <i className="fa-regular fa-comment"></i> {post.comments}
                             </button>
                         </div>

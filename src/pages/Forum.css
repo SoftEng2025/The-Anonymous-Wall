@@ -153,6 +153,15 @@
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+.post-card.clickable {
+    cursor: pointer;
+}
+
+.post-card.clickable:hover {
+    transform: translateY(-2px);
+    background: rgba(40, 44, 84, 0.8);
+}
+
 .post-header {
     display: flex;
     align-items: flex-start;

@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useMessages } from '../contexts/MessageContext'
+import { messageController } from '../backend/controllers/messageController'
 import './Browse.css'
 
 const MOOD_ICONS = {
@@ -11,8 +12,34 @@ const MOOD_ICONS = {
 }
 
 export default function Browse() {
-    const { messages } = useMessages()
+    const { messages: contextMessages } = useMessages()
     const [searchTerm, setSearchTerm] = useState('')
+    const [messages, setMessages] = useState([])
+    const [loading, setLoading] = useState(true)
+
+    // Fetch messages from Firebase
+    useEffect(() => {
+        const fetchMessages = async () => {
+            try {
+                setLoading(true)
+                const fetchedMessages = await messageController.getAllMessages()
+                // Use Firebase messages if available, otherwise use context messages
+                if (fetchedMessages.length > 0) {
+                    setMessages(fetchedMessages)
+                } else {
+                    setMessages(contextMessages)
+                }
+            } catch (error) {
+                console.error("Failed to fetch messages:", error)
+                // Fallback to context messages on error
+                setMessages(contextMessages)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchMessages()
+    }, [contextMessages])
 
     const filteredMessages = messages.filter(msg =>
         msg.recipient.toLowerCase().includes(searchTerm.toLowerCase()) ||

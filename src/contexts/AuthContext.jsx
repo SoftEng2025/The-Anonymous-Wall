@@ -4,7 +4,7 @@ import {
     signInWithPopup,
     signOut
 } from 'firebase/auth';
-import { auth, googleProvider } from '../firebase';
+import { auth, googleProvider } from '../backend/config/firebase';
 
 const AuthContext = createContext(undefined);
 
