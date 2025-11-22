@@ -1,5 +1,5 @@
 import { db } from '../config/firebase';
-import { collection, addDoc, getDocs, doc, getDoc, updateDoc, query, orderBy, increment } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, getDoc, updateDoc, query, orderBy, increment, where, writeBatch } from 'firebase/firestore';
 import { createPostModel } from '../models/PostModel';
 
 const POSTS_COLLECTION = 'posts';
@@ -73,6 +73,28 @@ export const postController = {
             });
         } catch (error) {
             console.error("Error updating like:", error);
+            throw error;
+        }
+    },
+
+    /**
+     * Updates the author name for all posts by a specific user.
+     * @param {string} uid 
+     * @param {string} newName 
+     */
+    updatePostsAuthor: async (uid, newName) => {
+        try {
+            const q = query(collection(db, POSTS_COLLECTION), where('uid', '==', uid));
+            const querySnapshot = await getDocs(q);
+
+            const batch = writeBatch(db);
+            querySnapshot.forEach((doc) => {
+                batch.update(doc.ref, { author: newName });
+            });
+
+            await batch.commit();
+        } catch (error) {
+            console.error("Error updating posts author:", error);
             throw error;
         }
     }
