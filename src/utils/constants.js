@@ -13,6 +13,21 @@ export const CARD_MESSAGES = [
         tone: 'coral',
         lines: ["I hope you're proud", 'of who you become.', 'Keep going!'],
     },
+    {
+        to: 'My Ex',
+        tone: 'mint',
+        lines: ['I forgive you.', 'Not for you,', 'but for me.'],
+    },
+    {
+        to: 'Mom',
+        tone: 'peach',
+        lines: ['I miss your cooking.', 'And your hugs.', 'Love you.'],
+    },
+    {
+        to: 'Stranger',
+        tone: 'coral',
+        lines: ['Your smile made', 'my day better.', 'Thank you.'],
+    },
 ]
 
 export const NAV_LINKS = ['Browse', 'Forum', 'Submit', 'About']
