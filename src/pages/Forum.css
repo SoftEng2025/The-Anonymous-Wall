@@ -447,6 +447,26 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
+.anonymous-login-btn {
+    background: #f0f0f0;
+    color: #555;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    margin-left: 0.5rem;
+}
+
+.anonymous-login-btn i {
+    font-size: 1.2rem;
+}
+
 .google-icon {
     font-size: 1.5rem;
 }
