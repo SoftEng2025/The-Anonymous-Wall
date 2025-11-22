@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import {
     onAuthStateChanged,
     signInWithPopup,
+    signInAnonymously,
     signOut
 } from 'firebase/auth';
 import { auth, googleProvider } from '../backend/config/firebase';
@@ -33,6 +34,10 @@ export function AuthProvider({ children }) {
         return signInWithPopup(auth, googleProvider);
     };
 
+    const loginAnonymous = () => {
+        return signInAnonymously(auth);
+    };
+
     const logout = () => {
         return signOut(auth);
     };
@@ -40,6 +45,7 @@ export function AuthProvider({ children }) {
     const value = {
         currentUser,
         login,
+        loginAnonymous,
         logout,
         loading
     };
