@@ -9,9 +9,10 @@ import Submit from './pages/Submit'
 import Browse from './pages/Browse'
 import Forum from './pages/Forum'
 import ForumPost from './pages/ForumPost';
+import Profile from './pages/Profile';
 
 function AppContent() {
-    const { currentUser, login, logout } = useAuth()
+    const { currentUser, login, loginAnonymous, logout } = useAuth()
     const location = useLocation()
 
     return (
@@ -51,19 +52,24 @@ function AppContent() {
                 <div className="auth-container">
                     {currentUser ? (
                         <div className="user-menu">
-                            <img
-                                src={getAvatarUrl(currentUser.uid)}
-                                alt={currentUser.displayName || 'User'}
-                                className="user-avatar"
-                            />
-                            <button className="login-button" onClick={() => logout()}>
-                                Logout
-                            </button>
+                            <Link to="/profile">
+                                <img
+                                    src={getAvatarUrl(currentUser.uid)}
+                                    alt={currentUser.displayName || 'User'}
+                                    className="user-avatar"
+                                    title="Go to Profile"
+                                />
+                            </Link>
                         </div>
                     ) : (
-                        <button className="login-button" onClick={() => login()}>
-                            Login
-                        </button>
+                        <div className="login-buttons">
+                            <button className="login-button guest-login" onClick={() => loginAnonymous()}>
+                                Guest Login
+                            </button>
+                            <button className="login-button" onClick={() => login()}>
+                                Login with Google
+                            </button>
+                        </div>
                     )}
                 </div>
             </header>
@@ -75,6 +81,7 @@ function AppContent() {
                 <Route path="/submit" element={<Submit />} />
                 <Route path="/forum" element={<Forum />} />
                 <Route path="/forum/:postId" element={<ForumPost />} />
+                <Route path="/profile" element={<Profile />} />
             </Routes>
         </div>
     )
