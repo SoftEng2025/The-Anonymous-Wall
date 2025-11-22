@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom'
 import './App.css'
+import './components/Header.css'
 import { useAuth } from './contexts/AuthContext'
 import { getAvatarUrl } from './backend/api/avatar'
 import { NAV_LINKS } from './utils/constants'
@@ -11,6 +12,7 @@ import Forum from './pages/Forum'
 import ForumPost from './pages/ForumPost';
 import Profile from './pages/Profile';
 import LoginModal from './components/LoginModal';
+import Footer from './components/Footer';
 import { useState } from 'react';
 
 function AppContent() {
@@ -86,6 +88,8 @@ function AppContent() {
                 <Route path="/forum/:postId" element={<ForumPost />} />
                 <Route path="/profile" element={<Profile />} />
             </Routes>
+
+            <Footer />
         </div>
     )
 }

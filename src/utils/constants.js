@@ -30,7 +30,7 @@ export const CARD_MESSAGES = [
     },
 ]
 
-export const NAV_LINKS = ['Browse', 'Forum', 'Submit', 'About']
+export const NAV_LINKS = ['Browse', 'Forum', 'Submit']
 
 export const TYPING_CONFIG = { baseTypeSpeed: 60, minimumHold: 300 }
 
