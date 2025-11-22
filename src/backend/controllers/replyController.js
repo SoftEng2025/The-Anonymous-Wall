@@ -1,5 +1,5 @@
 import { db } from '../config/firebase';
-import { collection, addDoc, getDocs, query, orderBy, doc, updateDoc, increment } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, orderBy, doc, updateDoc, increment, collectionGroup, where, writeBatch } from 'firebase/firestore';
 import { createReplyModel } from '../models/ReplyModel';
 
 const POSTS_COLLECTION = 'posts';
@@ -47,6 +47,32 @@ export const replyController = {
             }));
         } catch (error) {
             console.error("Error fetching replies:", error);
+            throw error;
+        }
+    },
+
+    /**
+     * Updates the author name for all replies by a specific user.
+     * @param {string} uid 
+     * @param {string} newName 
+     */
+    updateRepliesAuthor: async (uid, newName) => {
+        try {
+            // Use collectionGroup to query all 'replies' subcollections
+            const q = query(collectionGroup(db, REPLIES_SUBCOLLECTION), where('uid', '==', uid));
+            const querySnapshot = await getDocs(q);
+
+            const batch = writeBatch(db);
+            querySnapshot.forEach((doc) => {
+                batch.update(doc.ref, { author: newName });
+            });
+
+            await batch.commit();
+        } catch (error) {
+            console.error("Error updating replies author:", error);
+            if (error.code === 'failed-precondition' && error.message.includes('index')) {
+                console.error("MISSING INDEX: Please create the required index using the link in the error message above.");
+            }
             throw error;
         }
     }
