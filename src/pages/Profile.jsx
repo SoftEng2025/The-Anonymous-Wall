@@ -13,6 +13,7 @@ function Profile() {
     const { currentUser, logout } = useAuth();
     const navigate = useNavigate();
     const [username, setUsername] = useState('');
+    const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState(null);
@@ -27,11 +28,13 @@ function Profile() {
                     const profile = await userController.getUserProfile(currentUser.uid);
                     if (profile) {
                         setUsername(profile.username || '');
+                        setIsAdmin(profile.role === 'admin');
                     } else {
                         // Initialize profile if it doesn't exist
                         // userController will generate a random name
                         const newProfile = await userController.createUserProfile(currentUser.uid, {});
                         setUsername(newProfile.username);
+                        setIsAdmin(newProfile.role === 'admin');
                     }
                 } catch (error) {
                     console.error("Error fetching profile:", error);
@@ -129,7 +132,10 @@ function Profile() {
                     className="profile-avatar"
                 />
                 <h1 className="profile-title">Profile Settings</h1>
-                <p className="user-email">{currentUser?.email}</p>
+                <div className="user-identity">
+                    <p className="user-email">{currentUser?.email}</p>
+                    {isAdmin && <span className="admin-badge">Admin</span>}
+                </div>
             </div>
 
             {message && (
