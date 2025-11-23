@@ -6,10 +6,11 @@ import { postController } from '../backend/controllers/postController';
 import { userController } from '../backend/controllers/userController';
 import { MOCK_POSTS } from '../data/mockForumData';
 import { BOARDS, getBoardById, getBoardColor, getBoardName } from '../data/boardConfig';
+import LoginModal from '../components/LoginModal';
 import './Forum.css';
 
 const Forum = () => {
-    const { currentUser, login, loginAnonymous } = useAuth();
+    const { currentUser } = useAuth();
     const navigate = useNavigate();
     const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -111,26 +112,6 @@ const Forum = () => {
             setIsCreatePostOpen(true);
         } else {
             setIsLoginModalOpen(true);
-        }
-    };
-
-    const handleLoginContinue = async () => {
-        try {
-            await login();
-            setIsLoginModalOpen(false);
-            setIsCreatePostOpen(true);
-        } catch (error) {
-            console.error("Failed to login", error);
-        }
-    };
-
-    const handleAnonymousLogin = async () => {
-        try {
-            await loginAnonymous();
-            setIsLoginModalOpen(false);
-            setIsCreatePostOpen(true);
-        } catch (error) {
-            console.error("Failed anonymous login", error);
         }
     };
 
@@ -354,21 +335,11 @@ const Forum = () => {
             )}
 
             {/* Login Modal */}
-            {isLoginModalOpen && (
-                <div className="modal-overlay" onClick={() => setIsLoginModalOpen(false)}>
-                    <div className="modal-content login-modal-content" onClick={e => e.stopPropagation()}>
-                        <h2 className="login-modal-title">Log In to Continue</h2>
-                        <button className="google-login-btn" onClick={handleLoginContinue}>
-                            <i className="fa-brands fa-google google-icon"></i>
-                            Continue with Google
-                        </button>
-                        <button className="anonymous-login-btn" onClick={handleAnonymousLogin}>
-                            <i className="fa-solid fa-user-secret"></i>
-                            Continue as Guest
-                        </button>
-                    </div>
-                </div>
-            )}
+            <LoginModal
+                isOpen={isLoginModalOpen}
+                onClose={() => setIsLoginModalOpen(false)}
+                onLoginSuccess={() => setIsCreatePostOpen(true)}
+            />
         </div>
     );
 };
