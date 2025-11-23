@@ -3,7 +3,10 @@ import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
 const USERS_COLLECTION = 'users';
 
-const ADMIN_EMAILS = ['johnlemargonzales@gmail.com'];
+// Get admin emails from environment variable
+const ADMIN_EMAILS = import.meta.env.VITE_ADMIN_EMAILS
+    ? import.meta.env.VITE_ADMIN_EMAILS.split(',').map(email => email.trim())
+    : [];
 
 export const userController = {
     /**
