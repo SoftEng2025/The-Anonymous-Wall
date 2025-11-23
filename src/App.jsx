@@ -36,7 +36,6 @@ function AppContent() {
                         const slug = label.toLowerCase().replace(/\s+/g, '-')
 
                         const path = `/${slug}`
-                        // Check if it's one of the known pages
                         if (['/about', '/submit', '/browse', '/freedom-wall', '/forum'].includes(path)) {
                             return (
                                 <Link
@@ -55,12 +54,7 @@ function AppContent() {
                             </a>
                         )
                     })}
-                    <Link
-                        to="/contact"
-                        className={`nav-link ${location.pathname === '/contact' ? 'active' : ''}`}
-                    >
-                        Contact
-                    </Link>
+
                 </nav>
                 <div className="auth-container">
                     {currentUser ? (
