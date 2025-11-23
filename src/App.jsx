@@ -15,6 +15,7 @@ import TermsOfService from './pages/TermsOfService';
 import LoginModal from './components/LoginModal';
 import Contact from './pages/Contact.jsx';
 import Footer from './components/Footer';
+import BackToTop from './components/BackToTop';
 import { useState } from 'react';
 
 function AppContent() {
@@ -94,6 +95,7 @@ function AppContent() {
                 <Route path="/contact" element={<Contact />} />
             </Routes>
 
+            <BackToTop />
             <Footer />
         </div>
     )
