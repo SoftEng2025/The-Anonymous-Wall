@@ -2,7 +2,7 @@ import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import './LoginModal.css';
 
-const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
+const LoginModal = ({ isOpen, onClose, onLoginSuccess, isAdminLogin = false }) => {
     const { login, loginAnonymous } = useAuth();
 
     if (!isOpen) return null;
@@ -35,8 +35,12 @@ const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
                 </button>
 
                 <div className="modal-header">
-                    <h2 className="modal-title">Welcome to <span className="text-accent">AnonyWall</span></h2>
-                    <p className="modal-subtitle">Join the conversation freely and securely.</p>
+                    <h2 className="modal-title">
+                        {isAdminLogin ? 'Admin Login' : <>Welcome to <span className="text-accent">AnonyWall</span></>}
+                    </h2>
+                    <p className="modal-subtitle">
+                        {isAdminLogin ? 'Please sign in with your authorized account.' : 'Join the conversation freely and securely.'}
+                    </p>
                 </div>
 
                 <div className="modal-actions">
@@ -45,19 +49,25 @@ const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
                         Continue with Google
                     </button>
 
-                    <div className="divider">
-                        <span>or</span>
-                    </div>
+                    {!isAdminLogin && (
+                        <>
+                            <div className="divider">
+                                <span>or</span>
+                            </div>
 
-                    <button className="modal-btn guest-btn" onClick={handleGuestLogin}>
-                        <i className="fa-solid fa-user-secret"></i>
-                        Continue as Guest
-                    </button>
+                            <button className="modal-btn guest-btn" onClick={handleGuestLogin}>
+                                <i className="fa-solid fa-user-secret"></i>
+                                Continue as Guest
+                            </button>
+                        </>
+                    )}
                 </div>
 
-                <p className="modal-footer-text">
-                    Guest accounts are temporary and tied to this device.
-                </p>
+                {!isAdminLogin && (
+                    <p className="modal-footer-text">
+                        Guest accounts are temporary and tied to this device.
+                    </p>
+                )}
             </div>
         </div>
     );

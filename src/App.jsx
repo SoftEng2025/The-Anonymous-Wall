@@ -13,12 +13,32 @@ import ForumPost from './pages/ForumPost';
 import Profile from './pages/Profile';
 import LoginModal from './components/LoginModal';
 import Footer from './components/Footer';
-import { useState } from 'react';
+
+import AdminDashboard from './pages/AdminDashboard';
+import { userController } from './backend/controllers/userController';
+import { useState, useEffect } from 'react';
 
 function AppContent() {
     const { currentUser, logout } = useAuth()
     const location = useLocation()
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+    const [isAdmin, setIsAdmin] = useState(false)
+
+    useEffect(() => {
+        const checkAdmin = async () => {
+            if (currentUser) {
+                const adminStatus = await userController.isAdmin(currentUser.uid);
+                setIsAdmin(adminStatus);
+            } else {
+                setIsAdmin(false);
+            }
+        };
+        checkAdmin();
+    }, [currentUser]);
+
+    const handleCloseLoginModal = () => {
+        setIsLoginModalOpen(false);
+    };
 
     return (
         <div className="page">
@@ -53,6 +73,14 @@ function AppContent() {
                             </a>
                         )
                     })}
+                    {isAdmin && (
+                        <Link
+                            to="/admin"
+                            className={`nav-link ${location.pathname === '/admin' ? 'active' : ''}`}
+                        >
+                            Admin
+                        </Link>
+                    )}
                 </nav>
                 <div className="auth-container">
                     {currentUser ? (
@@ -76,7 +104,7 @@ function AppContent() {
 
             <LoginModal
                 isOpen={isLoginModalOpen}
-                onClose={() => setIsLoginModalOpen(false)}
+                onClose={handleCloseLoginModal}
             />
 
             <Routes>
@@ -88,6 +116,7 @@ function AppContent() {
                 <Route path="/forum" element={<Forum />} />
                 <Route path="/forum/:postId" element={<ForumPost />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/admin" element={<AdminDashboard />} />
             </Routes>
 
             <Footer />
