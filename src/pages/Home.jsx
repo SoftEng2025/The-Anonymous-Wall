@@ -1,5 +1,6 @@
 import HeroButton from '../components/HeroButton'
 import MessageCard from '../components/MessageCard'
+import Stats from '../components/Stats'
 import './Home.css'
 import { useTypedLyrics } from '../hooks/useTypedLyrics'
 import {
@@ -22,6 +23,9 @@ export default function Home() {
                     <span className="hero-cursor" aria-hidden="true"></span>
                 </h1>
                 <p className="hero-subtitle">A safe space to express what you can't say out loud.</p>
+                <div className="hero-stats-wrapper">
+                    <Stats />
+                </div>
                 <div className="hero-actions">
                     {HERO_BUTTONS.map((button) => (
                         <HeroButton key={button.label} {...button} />

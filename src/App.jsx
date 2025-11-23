@@ -11,7 +11,9 @@ import Browse from './pages/Browse'
 import Forum from './pages/Forum'
 import ForumPost from './pages/ForumPost';
 import Profile from './pages/Profile';
+import TermsOfService from './pages/TermsOfService';
 import LoginModal from './components/LoginModal';
+import Contact from './pages/Contact.jsx';
 import Footer from './components/Footer';
 
 import AdminDashboard from './pages/AdminDashboard';
@@ -54,7 +56,6 @@ function AppContent() {
                         const slug = label.toLowerCase().replace(/\s+/g, '-')
 
                         const path = `/${slug}`
-                        // Check if it's one of the known pages
                         if (['/about', '/submit', '/browse', '/freedom-wall', '/forum'].includes(path)) {
                             return (
                                 <Link
@@ -81,6 +82,7 @@ function AppContent() {
                             Admin
                         </Link>
                     )}
+
                 </nav>
                 <div className="auth-container">
                     {currentUser ? (
@@ -117,6 +119,8 @@ function AppContent() {
                 <Route path="/forum/:postId" element={<ForumPost />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/contact" element={<Contact />} />
             </Routes>
 
             <Footer />
