@@ -120,5 +120,28 @@ export const postController = {
             console.error("Error fetching user posts:", error);
             throw error;
         }
+    },
+
+    /**
+     * Retrieves all posts for a specific board, ordered by timestamp descending.
+     * @param {string} boardId - The board ID to filter by
+     * @returns {Promise<Array>} List of posts for the board.
+     */
+    getPostsByBoard: async (boardId) => {
+        try {
+            const q = query(
+                collection(db, POSTS_COLLECTION),
+                where('board', '==', boardId),
+                orderBy('timestamp', 'desc')
+            );
+            const querySnapshot = await getDocs(q);
+            return querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+        } catch (error) {
+            console.error("Error fetching posts by board:", error);
+            throw error;
+        }
     }
 };

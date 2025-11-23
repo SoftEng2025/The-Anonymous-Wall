@@ -8,7 +8,8 @@ export const MOCK_POSTS = [
         content: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries ...',
         likes: 110,
         comments: 54,
-        tags: ['#cheating', '#gay'],
+        board: 'general',
+        tags: ['#cheating', '#gay'], // Keep for backward compatibility
         replies: [
             {
                 id: 101,
@@ -37,6 +38,7 @@ export const MOCK_POSTS = [
         content: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries ...',
         likes: 101,
         comments: 34,
+        board: 'general',
         tags: ['#relationship', '#advice'],
         replies: []
     },
@@ -49,18 +51,9 @@ export const MOCK_POSTS = [
         content: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries ...',
         likes: 45,
         comments: 12,
+        board: 'general',
         tags: ['#crush', '#confession'],
         replies: []
     }
 ];
 
-export const TAG_COLORS = ['green', 'pink', 'blue', 'yellow'];
-
-export const getTagColor = (tag) => {
-    let hash = 0;
-    for (let i = 0; i < tag.length; i++) {
-        hash = tag.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const index = Math.abs(hash) % TAG_COLORS.length;
-    return TAG_COLORS[index];
-};
