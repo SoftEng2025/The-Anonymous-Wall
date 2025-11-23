@@ -1,5 +1,5 @@
 import { db } from '../config/firebase';
-import { collection, addDoc, getDocs, doc, getDoc, updateDoc, query, orderBy, increment, where, writeBatch } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy, increment, where, writeBatch } from 'firebase/firestore';
 import { createPostModel } from '../models/PostModel';
 
 const POSTS_COLLECTION = 'posts';
@@ -141,6 +141,19 @@ export const postController = {
             }));
         } catch (error) {
             console.error("Error fetching posts by board:", error);
+            throw error;
+        }
+    },
+    /**
+     * Deletes a post by ID.
+     * @param {string} postId 
+     */
+    deletePost: async (postId) => {
+        try {
+            const docRef = doc(db, POSTS_COLLECTION, postId);
+            await deleteDoc(docRef);
+        } catch (error) {
+            console.error("Error deleting post:", error);
             throw error;
         }
     }
