@@ -3,6 +3,8 @@ import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
 const USERS_COLLECTION = 'users';
 
+const ADMIN_EMAILS = ['johnlemargonzales@gmail.com'];
+
 export const userController = {
     /**
      * Retrieves a user's profile.
@@ -41,10 +43,14 @@ export const userController = {
                 username = generateRandomName();
             }
 
+            // Check if user should be admin
+            const role = ADMIN_EMAILS.includes(data.email) ? 'admin' : 'user';
+
             await setDoc(docRef, {
                 username: username,
                 // isAnonymous is no longer needed as everyone has a pseudonym
                 createdAt: new Date().toISOString(),
+                role: role,
                 ...data
             }, { merge: true });
 
@@ -52,6 +58,25 @@ export const userController = {
         } catch (error) {
             console.error("Error creating user profile:", error);
             throw error;
+        }
+    },
+
+    /**
+     * Checks if a user has admin privileges.
+     * @param {string} uid 
+     * @returns {Promise<boolean>}
+     */
+    isAdmin: async (uid) => {
+        try {
+            const docRef = doc(db, USERS_COLLECTION, uid);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                return docSnap.data().role === 'admin';
+            }
+            return false;
+        } catch (error) {
+            console.error("Error checking admin status:", error);
+            return false;
         }
     },
 
