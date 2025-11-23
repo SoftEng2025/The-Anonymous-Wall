@@ -6,6 +6,7 @@ import {
     signOut
 } from 'firebase/auth';
 import { auth, googleProvider } from '../backend/config/firebase';
+import { userController } from '../backend/controllers/userController';
 
 const AuthContext = createContext(undefined);
 
@@ -30,8 +31,25 @@ export function AuthProvider({ children }) {
         return unsubscribe;
     }, []);
 
-    const login = () => {
-        return signInWithPopup(auth, googleProvider);
+
+
+    const login = async () => {
+        try {
+            const result = await signInWithPopup(auth, googleProvider);
+            const user = result.user;
+
+            // Sync user profile (this will update role if email matches admin list)
+            await userController.createUserProfile(user.uid, {
+                email: user.email,
+                displayName: user.displayName,
+                photoURL: user.photoURL
+            });
+
+            return result;
+        } catch (error) {
+            console.error("Login failed:", error);
+            throw error;
+        }
     };
 
     const loginAnonymous = () => {
