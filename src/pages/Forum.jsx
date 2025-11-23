@@ -11,6 +11,7 @@ import Stats from '../components/Stats';
 import BoardBadge from '../components/BoardBadge';
 import ReportModal from '../components/ReportModal';
 import { reportController } from '../backend/controllers/reportController';
+import { formatTimeAgo } from '../utils/timeUtils';
 import './Forum.css';
 
 const Forum = () => {
@@ -50,8 +51,13 @@ const Forum = () => {
                     setPosts(MOCK_POSTS);
                     setFilteredPosts(MOCK_POSTS);
                 } else {
-                    setPosts(fetchedPosts);
-                    setFilteredPosts(fetchedPosts);
+                    const processedPosts = fetchedPosts.map(post => ({
+                        ...post,
+                        timeAgo: formatTimeAgo(post.timestamp),
+                        isLikedByCurrentUser: currentUser ? (post.likedBy || []).includes(currentUser.uid) : false
+                    }));
+                    setPosts(processedPosts);
+                    setFilteredPosts(processedPosts);
                 }
             } catch (error) {
                 console.error("Failed to fetch posts:", error);
@@ -147,7 +153,47 @@ const Forum = () => {
         }
     };
 
-    // Tag handlers removed - using boards now
+    const handleLikePost = async (e, post) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!currentUser) {
+            setIsLoginModalOpen(true);
+            return;
+        }
+
+        const isCurrentlyLiked = post.isLikedByCurrentUser;
+        const shouldLike = !isCurrentlyLiked;
+
+        // Optimistic update
+        const updatedPosts = posts.map(p => {
+            if (p.id === post.id) {
+                return {
+                    ...p,
+                    likes: shouldLike ? p.likes + 1 : p.likes - 1,
+                    isLikedByCurrentUser: shouldLike,
+                    likedBy: shouldLike
+                        ? [...(p.likedBy || []), currentUser.uid]
+                        : (p.likedBy || []).filter(id => id !== currentUser.uid)
+                };
+            }
+            return p;
+        });
+
+        setPosts(updatedPosts);
+        setFilteredPosts(updatedPosts);
+
+        try {
+            await postController.toggleLikePost(post.id, currentUser.uid, shouldLike);
+        } catch (error) {
+            console.error("Error liking post:", error);
+        }
+    };
+
+    const handleCommentClick = (e, postId) => {
+        e.preventDefault();
+        e.stopPropagation();
+        navigate(`/forum/${postId}`);
+    };
 
     const handlePostSubmit = async () => {
         setError('');
@@ -183,7 +229,7 @@ const Forum = () => {
                 ...newPostData,
                 likes: 0,
                 comments: 0,
-                timeAgo: 'Just now',
+                timeAgo: formatTimeAgo(Date.now()),
                 avatarSeed: currentUser.uid,
                 timestamp: Date.now()
             };
@@ -293,10 +339,13 @@ const Forum = () => {
                         <h3 className="post-title">{post.title}</h3>
                         <p className="post-content">{post.content}</p>
                         <div className="post-actions">
-                            <button className="action-btn" onClick={(e) => e.stopPropagation()}>
-                                <i className="fa-regular fa-heart"></i> {post.likes}
+                            <button
+                                className={`action-btn ${post.isLikedByCurrentUser ? 'liked' : ''}`}
+                                onClick={(e) => handleLikePost(e, post)}
+                            >
+                                <i className={`fa-${post.isLikedByCurrentUser ? 'solid' : 'regular'} fa-heart`}></i> {post.likes}
                             </button>
-                            <button className="action-btn" onClick={(e) => e.stopPropagation()}>
+                            <button className="action-btn" onClick={(e) => handleCommentClick(e, post.id)}>
                                 <i className="fa-regular fa-comment"></i> {post.comments}
                             </button>
                             <button className="action-btn report-btn" onClick={(e) => { e.stopPropagation(); handleReportClick(post); }}>
