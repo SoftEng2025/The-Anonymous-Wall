@@ -1,0 +1,14 @@
+.board-badge {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 12px;
+    font-weight: 700;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.board-badge i {
+    font-size: 0.85rem;
+}

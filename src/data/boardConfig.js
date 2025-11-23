@@ -27,13 +27,18 @@ export const BOARDS = [
     }
 ];
 
+const BOARD_MAP = BOARDS.reduce((acc, board) => {
+    acc[board.id] = board;
+    return acc;
+}, {});
+
 /**
  * Get board by ID
  * @param {string} boardId 
  * @returns {Object|null} Board object or null if not found
  */
 export const getBoardById = (boardId) => {
-    return BOARDS.find(board => board.id === boardId) || null;
+    return BOARD_MAP[boardId] || null;
 };
 
 /**

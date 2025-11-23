@@ -6,6 +6,7 @@ import { postController } from '../backend/controllers/postController';
 import { replyController } from '../backend/controllers/replyController';
 import { useNavigate } from 'react-router-dom';
 import { getBoardById, getBoardColor, getBoardName } from '../data/boardConfig';
+import BoardBadge from '../components/BoardBadge';
 import './Profile.css';
 
 function Profile() {
@@ -190,13 +191,7 @@ function Profile() {
                                         </div>
                                         {post.board && (
                                             <div className="history-post-board">
-                                                <span
-                                                    className="board-badge"
-                                                    style={{ backgroundColor: getBoardColor(post.board) }}
-                                                >
-                                                    <i className={`fa-solid ${getBoardById(post.board)?.icon || 'fa-comments'}`}></i>
-                                                    {getBoardName(post.board)}
-                                                </span>
+                                                <BoardBadge board={getBoardById(post.board)} />
                                             </div>
                                         )}
                                     </div>
