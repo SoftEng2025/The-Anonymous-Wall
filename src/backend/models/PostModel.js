@@ -15,7 +15,8 @@ export const createPostModel = (data) => {
         avatarSeed: data.uid, // Using UID as seed for avatar
         title: data.title,
         content: data.content,
-        tags: data.tags || [],
+        board: data.board || 'general', // Default to 'general' board
+        tags: data.tags || [], // Keep for backward compatibility
         likes: 0,
         comments: 0,
         createdAt: new Date().toISOString(),
