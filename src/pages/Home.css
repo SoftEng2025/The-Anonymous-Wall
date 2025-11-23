@@ -39,6 +39,17 @@
     vertical-align: bottom;
 }
 
+/* Stats Wrapper */
+.hero-stats-wrapper {
+    margin-bottom: 2rem;
+}
+
+.hero-stats-wrapper .stats-container {
+    margin-top: 2rem;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
 @keyframes blink {
 
     0%,
