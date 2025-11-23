@@ -11,6 +11,7 @@ import Browse from './pages/Browse'
 import Forum from './pages/Forum'
 import ForumPost from './pages/ForumPost';
 import Profile from './pages/Profile';
+import TermsOfService from './pages/TermsOfService';
 import LoginModal from './components/LoginModal';
 import Footer from './components/Footer';
 import { useState } from 'react';
@@ -88,6 +89,7 @@ function AppContent() {
                 <Route path="/forum" element={<Forum />} />
                 <Route path="/forum/:postId" element={<ForumPost />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/terms" element={<TermsOfService />} />
             </Routes>
 
             <Footer />
