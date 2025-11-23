@@ -8,6 +8,7 @@ import { MOCK_POSTS } from '../data/mockForumData';
 import { BOARDS, getBoardById, getBoardColor, getBoardName } from '../data/boardConfig';
 import LoginModal from '../components/LoginModal';
 import Stats from '../components/Stats';
+import BoardBadge from '../components/BoardBadge';
 import './Forum.css';
 
 const Forum = () => {
@@ -29,6 +30,7 @@ const Forum = () => {
     const [newPostTitle, setNewPostTitle] = useState('');
     const [newPostContent, setNewPostContent] = useState('');
     const [newPostBoard, setNewPostBoard] = useState(''); // Selected board for new post
+    const [error, setError] = useState('');
 
     // Fetch Posts
     useEffect(() => {
@@ -119,18 +121,19 @@ const Forum = () => {
     // Tag handlers removed - using boards now
 
     const handlePostSubmit = async () => {
+        setError('');
         if (!newPostTitle.trim() || !newPostContent.trim()) {
-            alert("Please fill in both title and content before posting.");
+            setError("Please fill in both title and content before posting.");
             return;
         }
 
         if (!newPostBoard) {
-            alert("Please select a board for your post.");
+            setError("Please select a board for your post.");
             return;
         }
 
         if (!currentUser) {
-            alert("You must be logged in to create a post.");
+            setError("You must be logged in to create a post.");
             return;
         }
 
@@ -162,10 +165,11 @@ const Forum = () => {
             setNewPostTitle('');
             setNewPostContent('');
             setNewPostBoard('');
+            setError('');
             setIsCreatePostOpen(false);
         } catch (error) {
             console.error("Failed to create post:", error);
-            alert("Failed to create post. Please try again.");
+            setError("Failed to create post. Please try again.");
         }
     };
 
@@ -225,11 +229,11 @@ const Forum = () => {
                             </button>
                         </div>
                     )}
-                </div>
+                </div >
                 <button className="create-post-btn" onClick={handleCreatePostClick}>
                     <i className="fa-solid fa-plus"></i> Create Post
                 </button>
-            </div>
+            </div >
 
             <div className="posts-feed">
                 {filteredPosts.map(post => (
@@ -252,13 +256,7 @@ const Forum = () => {
                                 </div>
                                 {post.board && (
                                     <div className="post-board">
-                                        <span
-                                            className="board-badge"
-                                            style={{ backgroundColor: getBoardColor(post.board) }}
-                                        >
-                                            <i className={`fa-solid ${getBoardById(post.board)?.icon || 'fa-comments'}`}></i>
-                                            {getBoardName(post.board)}
-                                        </span>
+                                        <BoardBadge board={getBoardById(post.board)} />
                                     </div>
                                 )}
                             </div>
@@ -283,57 +281,60 @@ const Forum = () => {
             </div>
 
             {/* Create Post Modal */}
-            {isCreatePostOpen && (
-                <div className="modal-overlay" onClick={() => setIsCreatePostOpen(false)}>
-                    <div className="modal-content" onClick={e => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2 className="modal-title">Create post</h2>
-                        </div>
-                        <div className="modal-body">
-                            <input
-                                type="text"
-                                placeholder="Title"
-                                className="modal-input"
-                                value={newPostTitle}
-                                onChange={e => setNewPostTitle(e.target.value)}
-                            />
-
-                            <div className="board-selector">
-                                <label className="board-label">Select Board *</label>
-                                <div className="board-options">
-                                    {BOARDS.map(board => (
-                                        <button
-                                            key={board.id}
-                                            type="button"
-                                            className={`board-option ${newPostBoard === board.id ? 'selected' : ''}`}
-                                            onClick={() => setNewPostBoard(board.id)}
-                                            style={{ '--board-color': board.color }}
-                                        >
-                                            <i className={`fa-solid ${board.icon}`}></i>
-                                            <span>{board.name}</span>
-                                        </button>
-                                    ))}
-                                </div>
+            {
+                isCreatePostOpen && (
+                    <div className="modal-overlay" onClick={() => setIsCreatePostOpen(false)}>
+                        <div className="modal-content" onClick={e => e.stopPropagation()}>
+                            <div className="modal-header">
+                                <h2 className="modal-title">Create post</h2>
                             </div>
+                            <div className="modal-body">
+                                {error && <div className="error-message">{error}</div>}
+                                <input
+                                    type="text"
+                                    placeholder="Title"
+                                    className="modal-input"
+                                    value={newPostTitle}
+                                    onChange={e => setNewPostTitle(e.target.value)}
+                                />
 
-                            <textarea
-                                placeholder="Share your message here"
-                                className="modal-textarea"
-                                value={newPostContent}
-                                onChange={e => setNewPostContent(e.target.value)}
-                            ></textarea>
-                        </div>
-                        <div className="modal-footer">
-                            <button className="btn-cancel" onClick={() => setIsCreatePostOpen(false)}>
-                                Cancel <i className="fa-solid fa-circle-xmark"></i>
-                            </button>
-                            <button className="btn-post" onClick={handlePostSubmit}>
-                                Post <i className="fa-solid fa-paper-plane"></i>
-                            </button>
+                                <div className="board-selector">
+                                    <label className="board-label">Select Board *</label>
+                                    <div className="board-options">
+                                        {BOARDS.map(board => (
+                                            <button
+                                                key={board.id}
+                                                type="button"
+                                                className={`board-option ${newPostBoard === board.id ? 'selected' : ''}`}
+                                                onClick={() => setNewPostBoard(board.id)}
+                                                style={{ '--board-color': board.color }}
+                                            >
+                                                <i className={`fa-solid ${board.icon}`}></i>
+                                                <span>{board.name}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <textarea
+                                    placeholder="Share your message here"
+                                    className="modal-textarea"
+                                    value={newPostContent}
+                                    onChange={e => setNewPostContent(e.target.value)}
+                                ></textarea>
+                            </div>
+                            <div className="modal-footer">
+                                <button className="btn-cancel" onClick={() => setIsCreatePostOpen(false)}>
+                                    Cancel <i className="fa-solid fa-circle-xmark"></i>
+                                </button>
+                                <button className="btn-post" onClick={handlePostSubmit}>
+                                    Post <i className="fa-solid fa-paper-plane"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Login Modal */}
             <LoginModal
@@ -341,7 +342,7 @@ const Forum = () => {
                 onClose={() => setIsLoginModalOpen(false)}
                 onLoginSuccess={() => setIsCreatePostOpen(true)}
             />
-        </div>
+        </div >
     );
 };
 
