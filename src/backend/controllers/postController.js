@@ -1,5 +1,5 @@
 import { db } from '../config/firebase';
-import { collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy, increment, where, writeBatch } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy, increment, where, writeBatch, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { createPostModel } from '../models/PostModel';
 
 const POSTS_COLLECTION = 'posts';
@@ -61,15 +61,16 @@ export const postController = {
 
     /**
      * Toggles a like on a post.
-     * Note: This is a simplified implementation. In a real app, you'd track *who* liked it to prevent duplicates.
      * @param {string} postId 
-     * @param {boolean} isLiked - If true, we are un-liking (decrement). If false, we are liking (increment).
+     * @param {string} uid - The user ID of the person liking/unliking.
+     * @param {boolean} shouldLike - If true, we are liking (increment). If false, we are un-liking (decrement).
      */
-    toggleLikePost: async (postId, isLiked) => {
+    toggleLikePost: async (postId, uid, shouldLike) => {
         try {
             const docRef = doc(db, POSTS_COLLECTION, postId);
             await updateDoc(docRef, {
-                likes: increment(isLiked ? -1 : 1)
+                likes: increment(shouldLike ? 1 : -1),
+                likedBy: shouldLike ? arrayUnion(uid) : arrayRemove(uid)
             });
         } catch (error) {
             console.error("Error updating like:", error);

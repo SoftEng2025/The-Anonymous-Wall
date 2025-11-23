@@ -18,6 +18,7 @@ export const createPostModel = (data) => {
         board: data.board || 'general', // Default to 'general' board
         tags: data.tags || [], // Keep for backward compatibility
         likes: 0,
+        likedBy: [], // Array of user IDs who liked the post
         comments: 0,
         createdAt: new Date().toISOString(),
         // We'll store a timestamp for sorting
