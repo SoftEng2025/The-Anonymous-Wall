@@ -2,7 +2,7 @@ import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import './LoginModal.css';
 
-const LoginModal = ({ isOpen, onClose }) => {
+const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
     const { login, loginAnonymous } = useAuth();
 
     if (!isOpen) return null;
@@ -11,6 +11,7 @@ const LoginModal = ({ isOpen, onClose }) => {
         try {
             await login();
             onClose();
+            if (onLoginSuccess) onLoginSuccess();
         } catch (error) {
             console.error("Google login failed", error);
         }
@@ -20,6 +21,7 @@ const LoginModal = ({ isOpen, onClose }) => {
         try {
             await loginAnonymous();
             onClose();
+            if (onLoginSuccess) onLoginSuccess();
         } catch (error) {
             console.error("Guest login failed", error);
         }
