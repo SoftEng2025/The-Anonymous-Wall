@@ -8,6 +8,8 @@ import { MOCK_POSTS } from '../data/mockForumData';
 import { BOARDS, getBoardById, getBoardColor, getBoardName } from '../data/boardConfig';
 import LoginModal from '../components/LoginModal';
 import BoardBadge from '../components/BoardBadge';
+import ReportModal from '../components/ReportModal';
+import { reportController } from '../backend/controllers/reportController';
 import './Forum.css';
 
 const Forum = () => {
@@ -30,6 +32,10 @@ const Forum = () => {
     const [newPostContent, setNewPostContent] = useState('');
     const [newPostBoard, setNewPostBoard] = useState(''); // Selected board for new post
     const [error, setError] = useState('');
+
+    // Report State
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const [postToReport, setPostToReport] = useState(null);
 
     // Fetch Posts
     useEffect(() => {
@@ -114,6 +120,29 @@ const Forum = () => {
             setIsCreatePostOpen(true);
         } else {
             setIsLoginModalOpen(true);
+        }
+    };
+
+    const handleReportClick = (post) => {
+        if (!currentUser) {
+            setIsLoginModalOpen(true);
+            return;
+        }
+        setPostToReport(post);
+        setIsReportModalOpen(true);
+    };
+
+    const handleReportSubmit = async (reason) => {
+        if (postToReport && currentUser) {
+            try {
+                await reportController.createReport(postToReport.id, reason, currentUser.uid);
+                alert("Report submitted. Thank you for helping keep our community safe.");
+            } catch (error) {
+                console.error("Failed to submit report:", error);
+                alert("Failed to submit report. Please try again.");
+            }
+            setIsReportModalOpen(false);
+            setPostToReport(null);
         }
     };
 
@@ -269,6 +298,9 @@ const Forum = () => {
                             <button className="action-btn" onClick={(e) => e.stopPropagation()}>
                                 <i className="fa-regular fa-comment"></i> {post.comments}
                             </button>
+                            <button className="action-btn report-btn" onClick={(e) => { e.stopPropagation(); handleReportClick(post); }}>
+                                <i className="fa-regular fa-flag"></i> Report
+                            </button>
                         </div>
                     </div>
                 ))}
@@ -340,6 +372,13 @@ const Forum = () => {
                 isOpen={isLoginModalOpen}
                 onClose={() => setIsLoginModalOpen(false)}
                 onLoginSuccess={() => setIsCreatePostOpen(true)}
+            />
+
+            {/* Report Modal */}
+            <ReportModal
+                isOpen={isReportModalOpen}
+                onClose={() => setIsReportModalOpen(false)}
+                onSubmit={handleReportSubmit}
             />
         </div >
     );
