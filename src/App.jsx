@@ -11,7 +11,9 @@ import Browse from './pages/Browse'
 import Forum from './pages/Forum'
 import ForumPost from './pages/ForumPost';
 import Profile from './pages/Profile';
+import TermsOfService from './pages/TermsOfService';
 import LoginModal from './components/LoginModal';
+import Contact from './pages/Contact.jsx';
 import Footer from './components/Footer';
 import { useState } from 'react';
 
@@ -53,6 +55,12 @@ function AppContent() {
                             </a>
                         )
                     })}
+                    <Link
+                        to="/contact"
+                        className={`nav-link ${location.pathname === '/contact' ? 'active' : ''}`}
+                    >
+                        Contact
+                    </Link>
                 </nav>
                 <div className="auth-container">
                     {currentUser ? (
@@ -88,6 +96,8 @@ function AppContent() {
                 <Route path="/forum" element={<Forum />} />
                 <Route path="/forum/:postId" element={<ForumPost />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/contact" element={<Contact />} />
             </Routes>
 
             <Footer />
