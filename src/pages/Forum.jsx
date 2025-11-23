@@ -7,6 +7,7 @@ import { userController } from '../backend/controllers/userController';
 import { MOCK_POSTS } from '../data/mockForumData';
 import { BOARDS, getBoardById, getBoardColor, getBoardName } from '../data/boardConfig';
 import LoginModal from '../components/LoginModal';
+import Stats from '../components/Stats';
 import BoardBadge from '../components/BoardBadge';
 import ReportModal from '../components/ReportModal';
 import { reportController } from '../backend/controllers/reportController';
