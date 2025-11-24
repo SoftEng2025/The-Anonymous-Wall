@@ -1,60 +1,60 @@
 :root {
-  --bg-gradient-start: #2d3b86;
-  --bg-gradient-end: #574f9c;
-  --header-bg: #394283;
-  --card-header: #6568a9;
-  --card-body: #2b2f6c;
-  --card-footer: #434583;
-  --card-top: #5963a1;
-  --text-light: #ffffff;
-  --text-muted: #b7c0ff;
-  --accent-gold: #e8c89a;
-  --accent-blue: #1d8adb;
-  --accent-blue-dark: #1060aa;
-  --accent-outline: rgba(56, 129, 224, 0.6);
-  --mint: #c8f0e0;
-  --peach: #ffcfb3;
-  --coral: #ff8975;
-  --sage: #9caf88;
-  --lime: #dce775;
-  --lavender: #9575cd;
-  --font-primary: 'Nunito', 'Segoe UI', sans-serif;
+    --bg-gradient-start: #2d3b86;
+    --bg-gradient-end: #574f9c;
+    --header-bg: #394283;
+    --card-header: #6568a9;
+    --card-body: #2b2f6c;
+    --card-footer: #434583;
+    --card-top: #5963a1;
+    --text-light: #ffffff;
+    --text-muted: #b7c0ff;
+    --accent-gold: #e8c89a;
+    --accent-blue: #1d8adb;
+    --accent-blue-dark: #1060aa;
+    --accent-outline: rgba(56, 129, 224, 0.6);
+    --mint: #c8f0e0;
+    --peach: #ffcfb3;
+    --coral: #ff8975;
+    --sage: #9caf88;
+    --lime: #dce775;
+    --lavender: #9575cd;
+    --font-primary: 'Nunito', 'Segoe UI', sans-serif;
 }
 
 *,
 *::before,
 *::after {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 body {
-  margin: 0;
-  min-height: 100vh;
-  font-family: var(--font-primary);
-  background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
-  color: var(--text-light);
-  display: flex;
-  justify-content: center;
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--font-primary);
+    background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+    color: var(--text-light);
+    display: flex;
+    justify-content: center;
 }
 
 #root {
-  width: 100%;
-  display: flex;
-  justify-content: center;
+    width: 100%;
+    display: flex;
+    justify-content: center;
 }
 
 .page {
-  width: 100%;
-  min-height: 100vh;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 48px;
-  align-items: center;
+    width: 100%;
+    min-height: 100vh;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+    align-items: center;
 }
 
 @media (max-width: 960px) {
-  .page {
-    padding: 0 0 56px;
-  }
+    .page {
+        padding: 0 0 56px;
+    }
 }
