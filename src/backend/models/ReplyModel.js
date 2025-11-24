@@ -13,6 +13,7 @@ export const createReplyModel = (data) => {
         avatarSeed: data.uid,
         content: data.content,
         likes: 0,
+        replyTo: data.replyTo || null,
         createdAt: new Date().toISOString(),
         timestamp: Date.now()
     };

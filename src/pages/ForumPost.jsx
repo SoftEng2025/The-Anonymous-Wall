@@ -5,6 +5,7 @@ import { postController } from '../backend/controllers/postController';
 import { replyController } from '../backend/controllers/replyController';
 import { userController } from '../backend/controllers/userController';
 import { useAuth } from '../contexts/AuthContext';
+import { formatTimeAgo } from '../utils/timeUtils';
 import './ForumPost.css';
 
 const ForumPost = () => {
@@ -17,6 +18,7 @@ const ForumPost = () => {
     const [isLiked, setIsLiked] = useState(false);
     const [replies, setReplies] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [replyingTo, setReplyingTo] = useState(null);
 
     useEffect(() => {
         const fetchPostAndReplies = async () => {
@@ -24,11 +26,21 @@ const ForumPost = () => {
                 setLoading(true);
                 const fetchedPost = await postController.getPostById(postId);
                 if (fetchedPost) {
+                    fetchedPost.timeAgo = formatTimeAgo(fetchedPost.timestamp);
                     setPost(fetchedPost);
                     setLikes(fetchedPost.likes || 0);
+                    if (currentUser && fetchedPost.likedBy) {
+                        setIsLiked(fetchedPost.likedBy.includes(currentUser.uid));
+                    } else {
+                        setIsLiked(false);
+                    }
 
                     const fetchedReplies = await replyController.getReplies(postId);
-                    setReplies(fetchedReplies);
+                    const processedReplies = fetchedReplies.map(reply => ({
+                        ...reply,
+                        timeAgo: formatTimeAgo(reply.timestamp)
+                    }));
+                    setReplies(processedReplies);
                 }
             } catch (error) {
                 console.error("Error fetching post details:", error);
@@ -40,9 +52,14 @@ const ForumPost = () => {
         if (postId) {
             fetchPostAndReplies();
         }
-    }, [postId]);
+    }, [postId, currentUser]);
 
     const handleLike = async () => {
+        if (!currentUser) {
+            alert("Please login to like posts.");
+            return;
+        }
+
         // Optimistic update
         const newIsLiked = !isLiked;
         const newLikes = newIsLiked ? likes + 1 : likes - 1;
@@ -51,7 +68,7 @@ const ForumPost = () => {
         setLikes(newLikes);
 
         try {
-            await postController.toggleLikePost(postId, !newIsLiked);
+            await postController.toggleLikePost(postId, currentUser.uid, newIsLiked);
         } catch (error) {
             console.error("Error toggling like:", error);
             // Revert on error
@@ -81,7 +98,8 @@ const ForumPost = () => {
                 const replyData = {
                     author: authorName,
                     uid: currentUser.uid,
-                    content: replyContent
+                    content: replyContent,
+                    replyTo: replyingTo ? replyingTo.author : null
                 };
 
                 const newReply = await replyController.addReply(postId, replyData);
@@ -95,6 +113,7 @@ const ForumPost = () => {
 
                 setReplies([...replies, displayReply]);
                 setReplyContent('');
+                setReplyingTo(null);
             } catch (error) {
                 console.error("Error adding reply:", error);
                 alert("Failed to add reply.");
@@ -102,7 +121,8 @@ const ForumPost = () => {
         }
     };
 
-    const handleReplyClick = () => {
+    const handleReplyClick = (reply) => {
+        setReplyingTo(reply);
         document.querySelector('.reply-main-input').focus();
     };
 
@@ -154,10 +174,18 @@ const ForumPost = () => {
                         </div>
 
                         <div className="reply-input-section">
+                            {replyingTo && (
+                                <div className="replying-to-indicator">
+                                    <span>Replying to <span className="username">{replyingTo.author}</span></span>
+                                    <button className="cancel-reply-btn" onClick={() => setReplyingTo(null)}>
+                                        <i className="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
+                            )}
                             <input
                                 type="text"
                                 className="reply-main-input"
-                                placeholder={currentUser ? "Add a reply" : "Login to reply"}
+                                placeholder={currentUser ? (replyingTo ? `Reply to ${replyingTo.author}...` : "Add a reply") : "Login to reply"}
                                 value={replyContent}
                                 onChange={(e) => setReplyContent(e.target.value)}
                                 onKeyDown={handleReplySubmit}
@@ -177,6 +205,12 @@ const ForumPost = () => {
                                     />
                                     <div className="reply-info">
                                         <span className="reply-username">{reply.author}</span>
+                                        {reply.replyTo && (
+                                            <>
+                                                <span className="reply-arrow">▸</span>
+                                                <span className="reply-target">{reply.replyTo}</span>
+                                            </>
+                                        )}
                                         <span>•</span>
                                         <span className="reply-time">{reply.timeAgo || 'Recently'}</span>
                                     </div>
@@ -186,7 +220,7 @@ const ForumPost = () => {
                                     <button className="reply-action-btn">
                                         <i className="fa-regular fa-heart"></i> {reply.likes || 0}
                                     </button>
-                                    <button className="reply-action-btn" onClick={handleReplyClick}>
+                                    <button className="reply-action-btn" onClick={() => handleReplyClick(reply)}>
                                         <i className="fa-solid fa-reply"></i> Reply
                                     </button>
                                 </div>
