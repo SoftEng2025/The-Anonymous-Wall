@@ -56,6 +56,12 @@
     color: var(--accent-gold);
 }
 
+.footer-link.active {
+    color: var(--text-light);
+    text-decoration: underline;
+    text-decoration-color: var(--accent-gold);
+}
+
 @media (max-width: 600px) {
     .footer-content {
         flex-direction: column;
