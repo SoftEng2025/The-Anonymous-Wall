@@ -25,6 +25,8 @@ const Forum = () => {
     const [loading, setLoading] = useState(true);
     const [username, setUsername] = useState('');
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     // Board and Filter State
     const [selectedBoard, setSelectedBoard] = useState(null); // null = all boards
     const [filterType, setFilterType] = useState('latest'); // latest, likes, comments
@@ -223,7 +225,10 @@ const Forum = () => {
             return;
         }
 
+        if (isSubmitting) return;
+
         try {
+            setIsSubmitting(true);
             const newPostData = {
                 author: username || 'Anonymous',
                 uid: currentUser.uid,
@@ -256,6 +261,8 @@ const Forum = () => {
         } catch (error) {
             console.error("Failed to create post:", error);
             setError("Failed to create post. Please try again.");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -322,53 +329,62 @@ const Forum = () => {
             </div >
 
             <div className="posts-feed">
-                {filteredPosts.map(post => (
-                    <div
-                        key={post.id}
-                        className="post-card clickable"
-                        onClick={() => setSelectedPostId(post.id)}
-                    >
-                        <div className="post-header">
-                            <img
-                                src={getAvatarUrl(post.avatarSeed)}
-                                alt={post.author}
-                                className="user-avatar"
-                            />
-                            <div className="header-content">
-                                <div className="post-info">
-                                    <span className="username">{post.author}</span>
-                                    <span>•</span>
-                                    <span className="time">{post.timeAgo}</span>
-                                </div>
-                                {post.board && (
-                                    <div className="post-board">
-                                        <BoardBadge board={getBoardById(post.board)} />
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                        <h3 className="post-title">{post.title}</h3>
-                        <p className="post-content">{post.content}</p>
-                        <div className="post-actions">
-                            <button
-                                className={`action-btn ${post.isLikedByCurrentUser ? 'liked' : ''}`}
-                                onClick={(e) => handleLikePost(e, post)}
+                {loading ? (
+                    <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.7)', padding: '2rem' }}>
+                        <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '10px' }}></i>
+                        Loading posts...
+                    </div>
+                ) : (
+                    <>
+                        {filteredPosts.map(post => (
+                            <div
+                                key={post.id}
+                                className="post-card clickable"
+                                onClick={() => setSelectedPostId(post.id)}
                             >
-                                <i className={`fa-${post.isLikedByCurrentUser ? 'solid' : 'regular'} fa-heart`}></i> {post.likes}
-                            </button>
-                            <button className="action-btn" onClick={(e) => handleCommentClick(e, post.id)}>
-                                <i className="fa-regular fa-comment"></i> {post.comments}
-                            </button>
-                            <button className="action-btn report-btn" onClick={(e) => { e.stopPropagation(); handleReportClick(post); }}>
-                                <i className="fa-regular fa-flag"></i> Report
-                            </button>
-                        </div>
-                    </div>
-                ))}
-                {filteredPosts.length === 0 && (
-                    <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)', padding: '2rem' }}>
-                        No posts found matching your criteria.
-                    </div>
+                                <div className="post-header">
+                                    <img
+                                        src={getAvatarUrl(post.avatarSeed)}
+                                        alt={post.author}
+                                        className="user-avatar"
+                                    />
+                                    <div className="header-content">
+                                        <div className="post-info">
+                                            <span className="username">{post.author}</span>
+                                            <span>•</span>
+                                            <span className="time">{post.timeAgo}</span>
+                                        </div>
+                                        {post.board && (
+                                            <div className="post-board">
+                                                <BoardBadge board={getBoardById(post.board)} />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <h3 className="post-title">{post.title}</h3>
+                                <p className="post-content">{post.content}</p>
+                                <div className="post-actions">
+                                    <button
+                                        className={`action-btn ${post.isLikedByCurrentUser ? 'liked' : ''}`}
+                                        onClick={(e) => handleLikePost(e, post)}
+                                    >
+                                        <i className={`fa-${post.isLikedByCurrentUser ? 'solid' : 'regular'} fa-heart`}></i> {post.likes}
+                                    </button>
+                                    <button className="action-btn" onClick={(e) => handleCommentClick(e, post.id)}>
+                                        <i className="fa-regular fa-comment"></i> {post.comments}
+                                    </button>
+                                    <button className="action-btn report-btn" onClick={(e) => { e.stopPropagation(); handleReportClick(post); }}>
+                                        <i className="fa-regular fa-flag"></i> Report
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                        {filteredPosts.length === 0 && (
+                            <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)', padding: '2rem' }}>
+                                No posts found matching your criteria.
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
 
@@ -419,8 +435,12 @@ const Forum = () => {
                                 <button className="btn-cancel" onClick={() => setIsCreatePostOpen(false)}>
                                     Cancel <i className="fa-solid fa-circle-xmark"></i>
                                 </button>
-                                <button className="btn-post" onClick={handlePostSubmit}>
-                                    Post <i className="fa-solid fa-paper-plane"></i>
+                                <button
+                                    className="btn-post"
+                                    onClick={handlePostSubmit}
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? 'Posting...' : 'Post'} <i className="fa-solid fa-paper-plane"></i>
                                 </button>
                             </div>
                         </div>
