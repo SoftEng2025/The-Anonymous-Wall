@@ -1,5 +1,5 @@
 import { db } from '../config/firebase';
-import { collection, addDoc, getDocs, query, orderBy, doc, updateDoc, increment, collectionGroup, where, writeBatch } from 'firebase/firestore';
+import { collection, addDoc, getDocs, getDoc, query, orderBy, doc, updateDoc, increment, collectionGroup, where, writeBatch } from 'firebase/firestore';
 import { createReplyModel } from '../models/ReplyModel';
 
 const POSTS_COLLECTION = 'posts';
@@ -73,6 +73,39 @@ export const replyController = {
             if (error.code === 'failed-precondition' && error.message.includes('index')) {
                 console.error("MISSING INDEX: Please create the required index using the link in the error message above.");
             }
+            throw error;
+        }
+    },
+
+    /**
+     * Toggles like on a reply.
+     * @param {string} postId 
+     * @param {string} replyId 
+     * @param {string} userId 
+     * @param {boolean} shouldLike 
+     */
+    toggleLikeReply: async (postId, replyId, userId, shouldLike) => {
+        try {
+            const replyRef = doc(db, POSTS_COLLECTION, postId, REPLIES_SUBCOLLECTION, replyId);
+            const replySnap = await getDoc(replyRef);
+
+            if (replySnap.exists()) {
+                const currentLikedBy = replySnap.data().likedBy || [];
+
+                if (shouldLike) {
+                    await updateDoc(replyRef, {
+                        likes: increment(1),
+                        likedBy: [...currentLikedBy, userId]
+                    });
+                } else {
+                    await updateDoc(replyRef, {
+                        likes: increment(-1),
+                        likedBy: currentLikedBy.filter(id => id !== userId)
+                    });
+                }
+            }
+        } catch (error) {
+            console.error("Error toggling reply like:", error);
             throw error;
         }
     }

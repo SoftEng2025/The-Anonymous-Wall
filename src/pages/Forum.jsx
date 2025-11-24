@@ -10,6 +10,7 @@ import LoginModal from '../components/LoginModal';
 import Stats from '../components/Stats';
 import BoardBadge from '../components/BoardBadge';
 import ReportModal from '../components/ReportModal';
+import ForumPostModal from '../components/ForumPostModal';
 import { reportController } from '../backend/controllers/reportController';
 import { formatTimeAgo } from '../utils/timeUtils';
 import './Forum.css';
@@ -39,6 +40,15 @@ const Forum = () => {
     // Report State
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
     const [postToReport, setPostToReport] = useState(null);
+
+    // Forum Post Modal State
+    const [selectedPostId, setSelectedPostId] = useState(null);
+    const [focusCommentInput, setFocusCommentInput] = useState(false);
+
+    const handlePostUpdate = (updatedData) => {
+        setPosts(prevPosts => prevPosts.map(p => p.id === updatedData.id ? { ...p, ...updatedData } : p));
+        setFilteredPosts(prevPosts => prevPosts.map(p => p.id === updatedData.id ? { ...p, ...updatedData } : p));
+    };
 
     // Fetch Posts
     useEffect(() => {
@@ -193,7 +203,8 @@ const Forum = () => {
     const handleCommentClick = (e, postId) => {
         e.preventDefault();
         e.stopPropagation();
-        navigate(`/forum/${postId}`);
+        setSelectedPostId(postId);
+        setFocusCommentInput(true);
     };
 
     const handlePostSubmit = async () => {
@@ -353,6 +364,27 @@ const Forum = () => {
                                                 <BoardBadge board={getBoardById(post.board)} />
                                             </div>
                                         )}
+                {filteredPosts.map(post => (
+                    <div
+                        key={post.id}
+                        className="post-card clickable"
+                        onClick={() => setSelectedPostId(post.id)}
+                    >
+                        <div className="post-header">
+                            <img
+                                src={getAvatarUrl(post.avatarSeed)}
+                                alt={post.author}
+                                className="user-avatar"
+                            />
+                            <div className="header-content">
+                                <div className="post-info">
+                                    <span className="username">{post.author}</span>
+                                    <span>•</span>
+                                    <span className="time">{post.timeAgo}</span>
+                                </div>
+                                {post.board && (
+                                    <div className="post-board">
+                                        <BoardBadge board={getBoardById(post.board)} />
                                     </div>
                                 </div>
                                 <h3 className="post-title">{post.title}</h3>
@@ -451,6 +483,19 @@ const Forum = () => {
                 onClose={() => setIsReportModalOpen(false)}
                 onSubmit={handleReportSubmit}
             />
+
+            {/* Forum Post Modal */}
+            {selectedPostId && (
+                <ForumPostModal
+                    postId={selectedPostId}
+                    onClose={() => {
+                        setSelectedPostId(null);
+                        setFocusCommentInput(false);
+                    }}
+                    onPostUpdate={handlePostUpdate}
+                    focusCommentInput={focusCommentInput}
+                />
+            )}
         </div >
     );
 };
