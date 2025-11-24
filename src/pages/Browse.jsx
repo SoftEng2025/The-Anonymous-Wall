@@ -66,29 +66,30 @@ export default function Browse() {
 
             <div className="messages-grid">
                 {filteredMessages.map((msg) => (
-                    <div key={msg.id} className="message-card">
-                        <div className="message-header">
-                            <span className="message-to">to: {msg.recipient}</span>
+                    <article key={msg.id} className="card">
+                        <header className="card-header">
+                            <span className="card-to">to: {msg.recipient}</span>
                             <i className={`message-mood ${MOOD_ICONS[msg.mood] || 'fa-regular fa-face-smile'}`}></i>
-                        </div>
-                        <div className="message-content-wrapper">
-                            <div
-                                className="message-bubble"
+                        </header>
+                        <div className="card-body">
+                            <p
+                                className="card-message"
                                 style={{ backgroundColor: `var(--${msg.theme})` }}
                             >
                                 {msg.message}
-                            </div>
+                            </p>
                         </div>
-                        <div className="message-footer">
-                            <div className="reply-input-container">
-                                <input type="text" placeholder="Aa" className="reply-input" />
-                                <i className="fa-regular fa-face-smile reply-emoji"></i>
+                        <footer className="card-footer">
+                            <div className="input-shell">
+                                <input type="text" placeholder="Aa" className="reply-input-transparent" />
                             </div>
-                            <button className="reply-send-button">
-                                <i className="fa-solid fa-paper-plane"></i>
+                            <button className="send-button">
+                                <span className="send-icon">
+                                    <i className="fa-solid fa-paper-plane"></i>
+                                </span>
                             </button>
-                        </div>
-                    </div>
+                        </footer>
+                    </article>
                 ))}
             </div>
         </div>
