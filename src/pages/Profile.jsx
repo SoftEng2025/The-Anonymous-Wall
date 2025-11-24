@@ -13,6 +13,8 @@ function Profile() {
     const { currentUser, logout } = useAuth();
     const navigate = useNavigate();
     const [username, setUsername] = useState('');
+    const [tempUsername, setTempUsername] = useState('');
+    const [isEditing, setIsEditing] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -54,15 +56,17 @@ function Profile() {
         try {
             // 1. Update User Profile
             await userController.updateUserProfile(currentUser.uid, {
-                username: username
+                username: tempUsername
             });
 
             // 2. Retroactive Update: Update all past posts and replies
             await Promise.all([
-                postController.updatePostsAuthor(currentUser.uid, username),
-                replyController.updateRepliesAuthor(currentUser.uid, username)
+                postController.updatePostsAuthor(currentUser.uid, tempUsername),
+                replyController.updateRepliesAuthor(currentUser.uid, tempUsername)
             ]);
 
+            setUsername(tempUsername);
+            setIsEditing(false);
             setMessage({ type: 'success', text: 'Profile updated successfully!' });
         } catch (error) {
             console.error("Error saving profile:", error);
@@ -77,6 +81,16 @@ function Profile() {
         } finally {
             setSaving(false);
         }
+    };
+
+    const handleEditClick = () => {
+        setTempUsername(username);
+        setIsEditing(true);
+    };
+
+    const handleCancelEdit = () => {
+        setTempUsername('');
+        setIsEditing(false);
     };
 
     const handleViewHistory = async () => {
@@ -145,40 +159,48 @@ function Profile() {
             )}
 
             <div className="profile-section">
-                <h2 className="section-title">Identity Settings</h2>
-
-                <div className="form-group">
-                    <label>Username</label>
-                    <p className="help-text" style={{ fontSize: '0.9rem', color: '#888', marginBottom: '0.5rem' }}>
-                        This is your public identity on the forum. You can change it at any time.
-                    </p>
-                    <input
-                        type="text"
-                        className="form-input"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        placeholder="Enter your username"
-                    />
+                <h2 className="section-title">Username</h2>
+                <div className="section-content">
+                    {isEditing ? (
+                        <>
+                            <input
+                                type="text"
+                                className="username-input"
+                                value={tempUsername}
+                                onChange={(e) => setTempUsername(e.target.value)}
+                                placeholder="Enter new username"
+                            />
+                            <div className="edit-buttons">
+                                <button className="cancel-button" onClick={handleCancelEdit}>
+                                    cancel
+                                </button>
+                                <button className="save-button-filled" onClick={handleSave} disabled={saving}>
+                                    {saving ? 'saving...' : 'save'}
+                                </button>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="username-display">{username}</div>
+                            <button className="save-button" onClick={handleEditClick}>
+                                Update username
+                            </button>
+                        </>
+                    )}
                 </div>
-
-                <button
-                    className="save-button"
-                    onClick={handleSave}
-                    disabled={saving}
-                >
-                    {saving ? 'Saving...' : 'Save Changes'}
-                </button>
             </div>
 
             <div className="profile-section">
                 <h2 className="section-title">Post History</h2>
-                <button
-                    className="save-button"
-                    onClick={handleViewHistory}
-                    disabled={loadingHistory}
-                >
-                    {loadingHistory ? 'Loading...' : showHistory ? 'Hide History' : 'View History'}
-                </button>
+                <div className="section-content-center">
+                    <button
+                        className="view-history-button"
+                        onClick={handleViewHistory}
+                        disabled={loadingHistory}
+                    >
+                        {loadingHistory ? 'Loading...' : showHistory ? 'Hide History' : 'View History'}
+                    </button>
+                </div>
 
                 {showHistory && (
                     <div className="history-posts">
