@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import './Footer.css';
 
-const Footer = () => {
+const Footer = ({ location }) => {
     const currentYear = new Date().getFullYear();
 
     return (
@@ -14,9 +14,9 @@ const Footer = () => {
                     <span className="footer-copyright">© {currentYear}</span>
                 </div>
                 <nav className="footer-links">
-                    <Link to="/about" className="footer-link">About</Link>
-                    <Link to="/contact" className="footer-link">Contact</Link>
-                    <Link to="/terms" className="footer-link">Terms & Privacy</Link>
+                    <Link to="/about" className={`footer-link ${location.pathname === '/about' ? 'active' : ''}`}>About</Link>
+                    <Link to="/contact" className={`footer-link ${location.pathname === '/contact' ? 'active' : ''}`}>Contact</Link>
+                    <Link to="/terms" className={`footer-link ${location.pathname === '/terms' ? 'active' : ''}`}>Terms & Privacy</Link>
                 </nav>
             </div>
         </footer>

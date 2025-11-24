@@ -26,6 +26,11 @@ function AppContent() {
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
     const [isAdmin, setIsAdmin] = useState(false)
 
+    // Scroll to top on route change
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [location.pathname]);
+
     useEffect(() => {
         const checkAdmin = async () => {
             if (currentUser) {
@@ -52,28 +57,15 @@ function AppContent() {
                     </Link>
                 </div>
                 <nav className="nav-links" aria-label="Primary navigation">
-                    {NAV_LINKS.map((label) => {
-                        const slug = label.toLowerCase().replace(/\s+/g, '-')
-
-                        const path = `/${slug}`
-                        if (['/about', '/submit', '/browse', '/freedom-wall', '/forum'].includes(path)) {
-                            return (
-                                <Link
-                                    key={label}
-                                    to={path}
-                                    className={`nav-link ${location.pathname === path ? 'active' : ''}`}
-                                >
-                                    {label}
-                                </Link>
-                            )
-                        }
-
-                        return (
-                            <a key={label} className="nav-link" href={`/#${slug}`}>
-                                {label}
-                            </a>
-                        )
-                    })}
+                    <Link to="/freedom-wall" className={`nav-link ${location.pathname === '/freedom-wall' || location.pathname === '/browse' ? 'active' : ''}`}>
+                        Freedom Wall
+                    </Link>
+                    <Link to="/submit" className={`nav-link ${location.pathname === '/submit' ? 'active' : ''}`}>
+                        Submit
+                    </Link>
+                    <Link to="/forum" className={`nav-link ${location.pathname === '/forum' ? 'active' : ''}`}>
+                        Forum
+                    </Link>
                     {isAdmin && (
                         <Link
                             to="/admin"
@@ -124,7 +116,7 @@ function AppContent() {
             </Routes>
 
             <BackToTop />
-            <Footer />
+            <Footer location={location} />
         </div>
     )
 }
