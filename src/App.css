@@ -21,7 +21,6 @@
   --font-primary: 'Nunito', 'Segoe UI', sans-serif;
 }
 
-/* Global reset */
 *,
 *::before,
 *::after {
@@ -54,7 +53,6 @@ body {
   align-items: center;
 }
 
-/* Responsive */
 @media (max-width: 960px) {
   .page {
     padding: 0 0 56px;

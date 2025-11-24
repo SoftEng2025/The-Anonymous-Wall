@@ -14,3 +14,12 @@
 body {
   margin: 0;
 }
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+html {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

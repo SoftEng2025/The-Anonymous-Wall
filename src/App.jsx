@@ -15,7 +15,7 @@ import TermsOfService from './pages/TermsOfService';
 import LoginModal from './components/LoginModal';
 import Contact from './pages/Contact.jsx';
 import Footer from './components/Footer';
-
+import BackToTop from './components/BackToTop';
 import AdminDashboard from './pages/AdminDashboard';
 import { userController } from './backend/controllers/userController';
 import { useState, useEffect } from 'react';
@@ -115,6 +115,7 @@ function AppContent() {
                 <Route path="/contact" element={<Contact />} />
             </Routes>
 
+            <BackToTop />
             <Footer location={location} />
         </div>
     )
