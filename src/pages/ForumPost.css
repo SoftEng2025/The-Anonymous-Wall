@@ -76,6 +76,13 @@
     font-weight: 600;
     cursor: pointer;
     padding: 0;
+    opacity: 0.8;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.stat-item:hover {
+    opacity: 1;
+    transform: translateY(-1px);
 }
 
 .stat-item.liked i {

@@ -26,7 +26,6 @@ function AppContent() {
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
     const [isAdmin, setIsAdmin] = useState(false)
 
-    // Scroll to top on route change
     useEffect(() => {
         window.scrollTo(0, 0);
     }, [location.pathname]);
