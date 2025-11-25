@@ -50,16 +50,21 @@
     font-weight: 600;
 }
 
+.message-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
 .submit-textarea {
     width: 100%;
     height: 150px;
     padding: 1rem;
+    padding-bottom: 2.5rem;
     border-radius: 8px;
     border: none;
     font-family: var(--font-primary);
     font-size: 1rem;
     color: #253353;
-    /* Dark text for readability on light backgrounds */
     font-weight: 600;
     resize: none;
     transition: background-color 0.3s ease;
@@ -67,6 +72,24 @@
 
 .submit-textarea::placeholder {
     color: rgba(37, 51, 83, 0.6);
+}
+
+.char-counter {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgba(37, 51, 83, 0.5);
+    pointer-events: none;
+}
+
+.char-counter.warning {
+    color: #ff9800;
+}
+
+.char-counter.error {
+    color: #f44336;
 }
 
 .selector-label {
@@ -140,31 +163,26 @@
 .mood-option.happy:hover .mood-icon,
 .mood-option.happy.selected .mood-icon {
     color: #ffd700;
-    /* Yellow */
 }
 
 .mood-option.sad:hover .mood-icon,
 .mood-option.sad.selected .mood-icon {
     color: #4fc3f7;
-    /* Light Blue */
 }
 
 .mood-option.in-love:hover .mood-icon,
 .mood-option.in-love.selected .mood-icon {
     color: #ff4081;
-    /* Pink */
 }
 
 .mood-option.angry:hover .mood-icon,
 .mood-option.angry.selected .mood-icon {
     color: #ff5252;
-    /* Red */
 }
 
 .mood-option.confused:hover .mood-icon,
 .mood-option.confused.selected .mood-icon {
     color: #e040fb;
-    /* Purple */
 }
 
 .mood-option.selected {
@@ -190,8 +208,13 @@
     align-self: center;
 }
 
-.submit-send-button:hover {
+.submit-send-button:hover:not(:disabled) {
     transform: translateY(-2px);
+}
+
+.submit-send-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 @keyframes fadeIn {
