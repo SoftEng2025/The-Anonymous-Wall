@@ -34,10 +34,7 @@ export default function Submit() {
     const navigate = useNavigate()
 
     const handleMessageChange = (e) => {
-        const newMessage = e.target.value
-        if (newMessage.length <= MAX_MESSAGE_LENGTH) {
-            setMessage(newMessage)
-        }
+        setMessage(e.target.value)
     }
 
     const remainingChars = MAX_MESSAGE_LENGTH - message.length
