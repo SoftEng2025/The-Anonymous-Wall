@@ -16,13 +16,12 @@
 
 /* Modal Container */
 .forum-post-modal {
-    background: linear-gradient(135deg, rgba(59, 66, 117, 0.95) 0%, rgba(40, 44, 84, 0.95) 100%);
+    background: #3b4275;
     border-radius: 16px;
     max-width: 700px;
     width: 100%;
     max-height: 90vh;
     overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     flex-direction: column;
@@ -215,7 +214,6 @@
     left: 0;
     top: 0;
     border: 3px solid #282c54;
-    /* Match modal bg approx */
     z-index: 2;
 }
 
@@ -390,7 +388,7 @@
 }
 
 .modal-send-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #667eea;
     border: none;
     color: white;
     width: 40px;
