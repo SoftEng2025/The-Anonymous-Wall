@@ -78,36 +78,55 @@
 
 .filter-btn i {
     font-size: 1.1rem;
+    transition: transform 0.2s ease;
 }
 
 .filter-btn:hover,
 .filter-btn.active {
     background: rgba(255, 255, 255, 0.15);
     border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
 }
 
 .filter-menu {
     position: absolute;
     top: 100%;
-    right: 0;
-    margin-top: 0.5rem;
-    background: #2c3e50;
-    border-radius: 8px;
-    padding: 0.5rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 0.75rem;
+    background: linear-gradient(135deg, rgba(59, 66, 117, 0.98) 0%, rgba(40, 44, 84, 0.98) 100%);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 0.75rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     z-index: 10;
-    min-width: 150px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    min-width: 200px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    animation: filterMenuSlideIn 0.2s ease-out;
+}
+
+@keyframes filterMenuSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
 }
 
 .filter-option {
-    display: block;
+    display: flex;
     width: 100%;
+    align-items: center;
+    gap: 0.9rem;
     text-align: left;
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 1rem;
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.85);
     cursor: pointer;
     border-radius: 4px;
     font-size: 0.9rem;
@@ -117,6 +136,29 @@
 .filter-option.active {
     background: rgba(255, 255, 255, 0.1);
     color: white;
+    transform: translateX(3px);
+}
+
+.filter-option:hover i {
+    transform: scale(1.1);
+}
+
+.filter-option.active {
+    background: rgba(96, 165, 250, 0.25);
+    color: #60a5fa;
+    font-weight: 600;
+}
+
+.filter-option.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 70%;
+    background: #60a5fa;
+    border-radius: 0 2px 2px 0;
 }
 
 .create-post-btn {
@@ -153,12 +195,6 @@
     background: #e8c89a;
 }
 
-.posts-feed {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
 /* Post Card Styles */
 .post-card {
     background: rgba(40, 44, 84, 0.6);
@@ -166,6 +202,12 @@
     padding: 1.5rem;
     transition: transform 0.2s;
     border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.posts-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
 .post-card.clickable {
@@ -184,6 +226,14 @@
     margin-bottom: 1rem;
 }
 
+.post-info {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+}
+
 .header-content {
     display: flex;
     flex-direction: column;
@@ -196,14 +246,6 @@
     border-radius: 50%;
     background: #ccc;
     object-fit: cover;
-}
-
-.post-info {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 0.9rem;
 }
 
 .username {
