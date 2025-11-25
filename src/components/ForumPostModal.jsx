@@ -337,7 +337,7 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
                 {/* Reply Input - Sticky at Bottom */}
                 <div className="modal-reply-input-section">
                     <img
-                        src={currentUser ? getAvatarUrl(currentUser.uid) : '/default-avatar.png'}
+                        src={currentUser ? getAvatarUrl(currentUser.uid) : getAvatarUrl(null)}
                         alt="Your avatar"
                         className="modal-input-avatar"
                     />

@@ -172,10 +172,10 @@ function Profile() {
                             />
                             <div className="edit-buttons">
                                 <button className="cancel-button" onClick={handleCancelEdit}>
-                                    cancel
+                                    Cancel
                                 </button>
                                 <button className="save-button-filled" onClick={handleSave} disabled={saving}>
-                                    {saving ? 'saving...' : 'save'}
+                                    {saving ? 'Saving...' : 'Save'}
                                 </button>
                             </div>
                         </>
