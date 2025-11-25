@@ -21,6 +21,8 @@ const MOODS = [
     { id: 'confused', label: 'Confused', icon: 'fa-regular fa-face-flushed' },
 ]
 
+const MAX_MESSAGE_LENGTH = 95
+
 export default function Submit() {
     const [recipient, setRecipient] = useState('')
     const [message, setMessage] = useState('')
@@ -31,9 +33,21 @@ export default function Submit() {
     const { addMessage } = useMessages()
     const navigate = useNavigate()
 
+    const handleMessageChange = (e) => {
+        setMessage(e.target.value)
+    }
+
+    const remainingChars = MAX_MESSAGE_LENGTH - message.length
+    const isOverLimit = message.length > MAX_MESSAGE_LENGTH
+
     const handleSubmit = async () => {
         if (!recipient || !message || !selectedMood) {
             alert('Please fill in all fields and select a mood')
+            return
+        }
+
+        if (message.length > MAX_MESSAGE_LENGTH) {
+            alert(`Message is too long. Please keep it under ${MAX_MESSAGE_LENGTH} characters.`)
             return
         }
 
@@ -79,13 +93,18 @@ export default function Submit() {
                         onChange={(e) => setRecipient(e.target.value)}
                     />
 
-                    <textarea
-                        className="submit-textarea"
-                        placeholder="Write your message here"
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        style={{ backgroundColor: selectedTheme.color }}
-                    />
+                    <div className="message-input-wrapper">
+                        <textarea
+                            className="submit-textarea"
+                            placeholder="Write your message here"
+                            value={message}
+                            onChange={handleMessageChange}
+                            style={{ backgroundColor: selectedTheme.color }}
+                        />
+                        <div className={`char-counter ${remainingChars < 20 ? 'warning' : ''} ${isOverLimit ? 'error' : ''}`}>
+                            {remainingChars} / {MAX_MESSAGE_LENGTH}
+                        </div>
+                    </div>
 
                     <div className="theme-selector">
                         <label className="selector-label">Theme</label>
@@ -121,7 +140,7 @@ export default function Submit() {
                     <button
                         className="submit-send-button"
                         onClick={handleSubmit}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || isOverLimit}
                     >
                         {isSubmitting ? 'Sending...' : 'Send'} <i className="fa-solid fa-paper-plane"></i>
                     </button>
