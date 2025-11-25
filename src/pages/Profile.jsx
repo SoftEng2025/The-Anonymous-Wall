@@ -7,6 +7,7 @@ import { replyController } from '../backend/controllers/replyController';
 import { useNavigate } from 'react-router-dom';
 import { getBoardById, getBoardColor, getBoardName } from '../data/boardConfig';
 import BoardBadge from '../components/BoardBadge';
+import ForumPostModal from '../components/ForumPostModal';
 import './Profile.css';
 
 function Profile() {
@@ -22,6 +23,7 @@ function Profile() {
     const [showHistory, setShowHistory] = useState(false);
     const [historyPosts, setHistoryPosts] = useState([]);
     const [loadingHistory, setLoadingHistory] = useState(false);
+    const [selectedPostId, setSelectedPostId] = useState(null);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -148,7 +150,7 @@ function Profile() {
                 <h1 className="profile-title">Profile Settings</h1>
                 <div className="user-identity">
                     <p className="user-email">{currentUser?.email}</p>
-                    {isAdmin && <span className="admin-badge">Admin</span>}
+                    {isAdmin && <span className="admin-badge">ADMIN</span>}
                 </div>
             </div>
 
@@ -211,7 +213,7 @@ function Profile() {
                                 <div
                                     key={post.id}
                                     className="history-post-card"
-                                    onClick={() => navigate(`/forum/${post.id}`)}
+                                    onClick={() => setSelectedPostId(post.id)}
                                 >
                                     <div className="history-post-header">
                                         <div className="history-post-info">
@@ -241,7 +243,15 @@ function Profile() {
                     Logout
                 </button>
             </div>
-        </div >
+
+            {/* ForumPostModal */}
+            {selectedPostId && (
+                <ForumPostModal
+                    postId={selectedPostId}
+                    onClose={() => setSelectedPostId(null)}
+                />
+            )}
+        </div>
     );
 }
 
