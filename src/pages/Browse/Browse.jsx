@@ -99,7 +99,19 @@ export default function Browse() {
                 {filteredMessages.map((msg) => (
                     <article key={msg.id} className="card">
                         <header className="card-header">
-                            <span className="card-to">to: {msg.recipient}</span>
+                            <div className="header-content">
+                                <span className="card-to">to: {msg.recipient}</span>
+                                <span className="card-date">
+                                    {msg.timestamp ? new Date(msg.timestamp).toLocaleString('en-US', {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric',
+                                        hour: 'numeric',
+                                        minute: 'numeric',
+                                        hour12: true
+                                    }).replace(',', ' –') : ''}
+                                </span>
+                            </div>
                             <div className="header-actions">
                                 <i className={`message-mood ${MOOD_ICONS[msg.mood] || 'fa-regular fa-face-smile'}`}></i>
                                 <button
