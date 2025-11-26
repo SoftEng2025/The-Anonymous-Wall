@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { userController } from '../backend/controllers/userController';
-import { reportController } from '../backend/controllers/reportController';
-import { moderationController } from '../backend/controllers/moderationController';
-import { postController } from '../backend/controllers/postController';
-import { messageController } from '../backend/controllers/messageController';
-import { getBoardById } from '../data/boardConfig';
-import BoardBadge from '../components/BoardBadge';
+import { useAuth } from '../../contexts/AuthContext';
+import { userController } from '../../backend/controllers/userController';
+import { reportController } from '../../backend/controllers/reportController';
+import { moderationController } from '../../backend/controllers/moderationController';
+import { postController } from '../../backend/controllers/postController';
+import { messageController } from '../../backend/controllers/messageController';
+import { getBoardById } from '../../data/boardConfig';
+import BoardBadge from '../../components/BoardBadge';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
