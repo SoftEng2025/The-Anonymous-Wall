@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import { useMessages } from '../contexts/MessageContext'
+import { useMessages } from '../../contexts/MessageContext'
 import { useNavigate } from 'react-router-dom'
-import { messageController } from '../backend/controllers/messageController'
+import { messageController } from '../../backend/controllers/messageController'
 import './Submit.css'
 
 const THEMES = [
