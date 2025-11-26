@@ -154,7 +154,7 @@ const Forum = () => {
     const handleReportSubmit = async (reason) => {
         if (postToReport && currentUser) {
             try {
-                await reportController.createReport(postToReport.id, reason, currentUser.uid);
+                await reportController.createReport(postToReport.id, reason, currentUser.uid, 'post');
                 alert("Report submitted. Thank you for helping keep our community safe.");
             } catch (error) {
                 console.error("Failed to submit report:", error);
