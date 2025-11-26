@@ -13,7 +13,7 @@ import ForumPost from './pages/ForumPost';
 import Profile from './pages/Profile';
 import TermsOfService from './pages/TermsOfService';
 import LoginModal from './components/LoginModal';
-import Contact from './pages/Contact.jsx';
+import Contact from './pages/Contact';
 import Footer from './components/Footer';
 import BackToTop from './components/BackToTop';
 import AdminDashboard from './pages/AdminDashboard';
