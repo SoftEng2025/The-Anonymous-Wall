@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { useMessages } from '../contexts/MessageContext'
-import { useAuth } from '../contexts/AuthContext'
-import { messageController } from '../backend/controllers/messageController'
-import { reportController } from '../backend/controllers/reportController'
-import ReportModal from '../components/ReportModal'
-import LoginModal from '../components/LoginModal'
+import { useMessages } from '../../contexts/MessageContext'
+import { useAuth } from '../../contexts/AuthContext'
+import { messageController } from '../../backend/controllers/messageController'
+import { reportController } from '../../backend/controllers/reportController'
+import ReportModal from '../../components/ReportModal'
+import LoginModal from '../../components/LoginModal'
 import './Browse.css'
 
 const MOOD_ICONS = {
