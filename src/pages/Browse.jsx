@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useMessages } from '../contexts/MessageContext'
 import { messageController } from '../backend/controllers/messageController'
 import './Browse.css'
@@ -16,6 +17,7 @@ export default function Browse() {
     const [searchTerm, setSearchTerm] = useState('')
     const [messages, setMessages] = useState([])
     const [loading, setLoading] = useState(true)
+    const navigate = useNavigate()
 
     // Fetch messages from Firebase
     useEffect(() => {
@@ -59,8 +61,8 @@ export default function Browse() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <button className="search-button">
-                    <i className="fa-solid fa-magnifying-glass"></i> Search
+                <button className="search-button" onClick={() => navigate('/submit')}>
+                    <i className="fa-solid fa-pen-to-square"></i> Submit
                 </button>
             </div>
 

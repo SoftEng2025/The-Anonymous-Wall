@@ -1,7 +1,3 @@
-.back-to-top.back-to-top-on-freedom-wall {
-  bottom: 100px !important; 
-}
-
 :root {
   --bg-gradient-start: #2d3b86;
   --bg-gradient-end: #574f9c;
@@ -14,7 +10,6 @@
   --text-muted: #b7c0ff;
   --accent-gold: #e8c89a;
   --accent-blue: #1d8adb;
-  --accent-blue-dark: #1060aa;
   --accent-outline: rgba(56, 129, 224, 0.6);
   --mint: #c8f0e0;
   --peach: #ffcfb3;
