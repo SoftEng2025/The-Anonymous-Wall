@@ -11,12 +11,13 @@ export const reportController = {
      * @param {string} reporterId - ID of the user reporting
      * @returns {Promise<string>} - The ID of the created report
      */
-    createReport: async (postId, reason, reporterId) => {
+    createReport: async (postId, reason, reporterId, type = 'post') => {
         try {
             const docRef = await addDoc(collection(db, REPORTS_COLLECTION), {
                 postId,
                 reason,
                 reporterId,
+                type, // 'post' or 'message'
                 status: 'pending', // pending, resolved, dismissed
                 timestamp: serverTimestamp(),
                 createdAt: new Date().toISOString()
