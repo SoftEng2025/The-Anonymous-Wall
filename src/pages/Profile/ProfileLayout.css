@@ -1,0 +1,111 @@
+.profile-container {
+    width: 600px;
+    max-width: 95vw;
+    margin: 1.5rem auto;
+    padding: 3rem 2rem;
+    background: rgba(50, 55, 100, 0.5);
+    border-radius: 16px;
+    color: var(--text-primary);
+}
+
+.profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 0;
+    background: transparent;
+    border: none;
+}
+
+.profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-bottom: 1.5rem;
+    border: none;
+    background: #ddd;
+}
+
+.profile-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 0 0 0.75rem 0;
+}
+
+.user-identity {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0;
+}
+
+.user-email {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.admin-badge {
+    background-color: #ef4444;
+    color: white;
+    padding: 0.25rem 0.65rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.profile-section {
+    margin-bottom: 1.25rem;
+    padding: 1.25rem 1.5rem;
+    background: rgba(70, 80, 140, 0.4);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.section-title {
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin: 0 0 0.75rem 0;
+    padding-bottom: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.section-content {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+}
+
+.section-content-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.logout-section {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.logout-button-large {
+    padding: 0.8rem 2rem;
+    background-color: transparent;
+    border: 2px solid rgba(239, 68, 68, 0.8);
+    color: #ef4444;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.logout-button-large:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+}
