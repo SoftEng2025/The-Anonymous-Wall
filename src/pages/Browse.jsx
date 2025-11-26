@@ -61,7 +61,7 @@ export default function Browse() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <button className="search-button" onClick={() => navigate('/submit')}>
+                <button className="submit-button" onClick={() => navigate('/submit')}>
                     <i className="fa-solid fa-pen-to-square"></i> Submit
                 </button>
             </div>
