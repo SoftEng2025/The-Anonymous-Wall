@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { getAvatarUrl } from '../backend/api/avatar';
-import { postController } from '../backend/controllers/postController';
-import { userController } from '../backend/controllers/userController';
-import { MOCK_POSTS } from '../data/mockForumData';
-import { BOARDS, getBoardById, getBoardColor, getBoardName } from '../data/boardConfig';
-import LoginModal from '../components/LoginModal';
-import Stats from '../components/Stats';
-import BoardBadge from '../components/BoardBadge';
-import ReportModal from '../components/ReportModal';
-import ForumPostModal from '../components/ForumPostModal';
-import { reportController } from '../backend/controllers/reportController';
-import { formatTimeAgo } from '../utils/timeUtils';
+import { useAuth } from '../../contexts/AuthContext';
+import { getAvatarUrl } from '../../backend/api/avatar';
+import { postController } from '../../backend/controllers/postController';
+import { userController } from '../../backend/controllers/userController';
+import { MOCK_POSTS } from '../../data/mockForumData';
+import { BOARDS, getBoardById, getBoardColor, getBoardName } from '../../data/boardConfig';
+import LoginModal from '../../components/LoginModal';
+import Stats from '../../components/Stats';
+import BoardBadge from '../../components/BoardBadge';
+import ReportModal from '../../components/ReportModal';
+import ForumPostModal from '../../components/ForumPostModal';
+import { reportController } from '../../backend/controllers/reportController';
+import { formatTimeAgo } from '../../utils/timeUtils';
 import './Forum.css';
 
 const Forum = () => {
