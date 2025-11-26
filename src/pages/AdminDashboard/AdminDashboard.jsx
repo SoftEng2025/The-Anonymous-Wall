@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { userController } from '../backend/controllers/userController';
-import { reportController } from '../backend/controllers/reportController';
-import { moderationController } from '../backend/controllers/moderationController';
-import { postController } from '../backend/controllers/postController';
-import { getBoardById } from '../data/boardConfig';
-import BoardBadge from '../components/BoardBadge';
+import { useAuth } from '../../contexts/AuthContext';
+import { userController } from '../../backend/controllers/userController';
+import { reportController } from '../../backend/controllers/reportController';
+import { moderationController } from '../../backend/controllers/moderationController';
+import { postController } from '../../backend/controllers/postController';
+import { messageController } from '../../backend/controllers/messageController';
+import { getBoardById } from '../../data/boardConfig';
+import BoardBadge from '../../components/BoardBadge';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -46,8 +47,14 @@ const AdminDashboard = () => {
             const pendingReports = await reportController.getPendingReports();
             // Fetch post details for each report
             const reportsWithPosts = await Promise.all(pendingReports.map(async (report) => {
-                const post = await postController.getPostById(report.postId);
-                return { ...report, post };
+                let content = null;
+                if (report.type === 'message') {
+                    content = await messageController.getMessageById(report.postId);
+                } else {
+                    // Default to post
+                    content = await postController.getPostById(report.postId);
+                }
+                return { ...report, content };
             }));
             setReports(reportsWithPosts);
         } catch (error) {
@@ -67,14 +74,18 @@ const AdminDashboard = () => {
     const handleAction = async (report, action) => {
         try {
             if (action === 'DELETE') {
-                if (window.confirm("Are you sure you want to delete this post?")) {
-                    await postController.deletePost(report.postId); // Assuming deletePost exists or needs to be added
+                if (window.confirm("Are you sure you want to delete this content?")) {
+                    if (report.type === 'message') {
+                        await messageController.deleteMessage(report.postId);
+                    } else {
+                        await postController.deletePost(report.postId);
+                    }
                     await reportController.resolveReport(report.id, 'resolved', currentUser.uid);
-                    await moderationController.logAction(currentUser.uid, 'DELETE_POST', report.postId, `Reason: ${report.reason}`);
+                    await moderationController.logAction(currentUser.uid, 'DELETE_CONTENT', report.postId, `Reason: ${report.reason} (Type: ${report.type || 'post'})`);
                 }
             } else if (action === 'KEEP') {
                 await reportController.resolveReport(report.id, 'dismissed', currentUser.uid);
-                await moderationController.logAction(currentUser.uid, 'KEEP_POST', report.postId, `Dismissed report: ${report.reason}`);
+                await moderationController.logAction(currentUser.uid, 'KEEP_CONTENT', report.postId, `Dismissed report: ${report.reason}`);
             }
 
             // Refresh data
@@ -124,17 +135,31 @@ const AdminDashboard = () => {
                                         </div>
                                         <span className="report-time">{new Date(report.timestamp?.toDate()).toLocaleString()}</span>
                                     </div>
-                                    {report.post ? (
+                                    {report.content ? (
                                         <div className="reported-post">
-                                            <div className="post-preview-header">
-                                                <span className="post-author">{report.post.author}</span>
-                                                {report.post.board && <BoardBadge board={getBoardById(report.post.board)} />}
-                                            </div>
-                                            <h3>{report.post.title}</h3>
-                                            <p>{report.post.content}</p>
+                                            {report.type === 'message' ? (
+                                                <>
+                                                    <div className="post-preview-header">
+                                                        <span className="post-author">To: {report.content.recipient}</span>
+                                                        <span className="post-mood">Mood: {report.content.mood}</span>
+                                                    </div>
+                                                    <p className="message-content" style={{ backgroundColor: `var(--${report.content.theme})`, padding: '10px', borderRadius: '5px' }}>
+                                                        {report.content.message}
+                                                    </p>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <div className="post-preview-header">
+                                                        <span className="post-author">{report.content.author}</span>
+                                                        {report.content.board && <BoardBadge board={getBoardById(report.content.board)} />}
+                                                    </div>
+                                                    <h3>{report.content.title}</h3>
+                                                    <p>{report.content.content}</p>
+                                                </>
+                                            )}
                                         </div>
                                     ) : (
-                                        <div className="post-deleted">Post already deleted</div>
+                                        <div className="post-deleted">Content already deleted</div>
                                     )}
                                     <div className="report-actions">
                                         <button className="btn-keep" onClick={() => handleAction(report, 'KEEP')}>

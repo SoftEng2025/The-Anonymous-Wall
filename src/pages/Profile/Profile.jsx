@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { getAvatarUrl } from '../backend/api/avatar';
-import { userController } from '../backend/controllers/userController';
-import { postController } from '../backend/controllers/postController';
-import { replyController } from '../backend/controllers/replyController';
+import { useAuth } from '../../contexts/AuthContext';
+import { getAvatarUrl } from '../../backend/api/avatar';
+import { userController } from '../../backend/controllers/userController';
+import { postController } from '../../backend/controllers/postController';
+import { replyController } from '../../backend/controllers/replyController';
 import { useNavigate } from 'react-router-dom';
-import { getBoardById, getBoardColor, getBoardName } from '../data/boardConfig';
-import BoardBadge from '../components/BoardBadge';
-import ForumPostModal from '../components/ForumPostModal';
+import { getBoardById, getBoardColor, getBoardName } from '../../data/boardConfig';
+import BoardBadge from '../../components/BoardBadge';
+import ForumPostModal from '../../components/ForumPostModal';
 import './Profile.css';
 
 function Profile() {

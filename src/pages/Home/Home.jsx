@@ -1,14 +1,14 @@
-import HeroButton from '../components/HeroButton'
-import MessageCard from '../components/MessageCard'
-import Stats from '../components/Stats'
+import HeroButton from '../../components/HeroButton'
+import MessageCard from '../../components/MessageCard'
+import Stats from '../../components/Stats'
 import './Home.css'
-import { useTypedLyrics } from '../hooks/useTypedLyrics'
+import { useTypedLyrics } from '../../hooks/useTypedLyrics'
 import {
     HERO_BUTTONS,
     CARD_MESSAGES,
     TYPING_CONFIG,
     LYRICS_TIMELINE
-} from '../utils/constants'
+} from '../../utils/constants'
 
 export default function Home() {
     const typedText = useTypedLyrics(LYRICS_TIMELINE, TYPING_CONFIG)

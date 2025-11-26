@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { useMessages } from '../contexts/MessageContext'
-import { messageController } from '../backend/controllers/messageController'
+import { useMessages } from '../../contexts/MessageContext'
+import { useAuth } from '../../contexts/AuthContext'
+import { messageController } from '../../backend/controllers/messageController'
+import { reportController } from '../../backend/controllers/reportController'
+import ReportModal from '../../components/ReportModal'
+import LoginModal from '../../components/LoginModal'
 import './Browse.css'
 
 const MOOD_ICONS = {
@@ -13,9 +17,13 @@ const MOOD_ICONS = {
 
 export default function Browse() {
     const { messages: contextMessages } = useMessages()
+    const { currentUser } = useAuth()
     const [searchTerm, setSearchTerm] = useState('')
     const [messages, setMessages] = useState([])
     const [loading, setLoading] = useState(true)
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false)
+    const [postToReport, setPostToReport] = useState(null)
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
 
     // Fetch messages from Firebase
     useEffect(() => {
@@ -46,6 +54,29 @@ export default function Browse() {
         msg.message.toLowerCase().includes(searchTerm.toLowerCase())
     )
 
+    const handleReportClick = (msg) => {
+        if (!currentUser) {
+            setIsLoginModalOpen(true)
+            return
+        }
+        setPostToReport(msg)
+        setIsReportModalOpen(true)
+    }
+
+    const handleReportSubmit = async (reason) => {
+        if (postToReport && currentUser) {
+            try {
+                await reportController.createReport(postToReport.id, reason, currentUser.uid, 'message')
+                alert("Report submitted. Thank you for helping keep our community safe.")
+            } catch (error) {
+                console.error("Failed to submit report:", error)
+                alert("Failed to submit report. Please try again.")
+            }
+            setIsReportModalOpen(false)
+            setPostToReport(null)
+        }
+    }
+
     return (
         <div className="browse-container">
             <div className="search-container">
@@ -69,7 +100,16 @@ export default function Browse() {
                     <article key={msg.id} className="card">
                         <header className="card-header">
                             <span className="card-to">to: {msg.recipient}</span>
-                            <i className={`message-mood ${MOOD_ICONS[msg.mood] || 'fa-regular fa-face-smile'}`}></i>
+                            <div className="header-actions">
+                                <i className={`message-mood ${MOOD_ICONS[msg.mood] || 'fa-regular fa-face-smile'}`}></i>
+                                <button
+                                    className="report-icon-btn"
+                                    onClick={(e) => { e.stopPropagation(); handleReportClick(msg); }}
+                                    title="Report"
+                                >
+                                    <i className="fa-regular fa-flag"></i>
+                                </button>
+                            </div>
                         </header>
                         <div className="card-body">
                             <p
@@ -92,6 +132,17 @@ export default function Browse() {
                     </article>
                 ))}
             </div>
-        </div>
+
+            <ReportModal
+                isOpen={isReportModalOpen}
+                onClose={() => setIsReportModalOpen(false)}
+                onSubmit={handleReportSubmit}
+            />
+
+            <LoginModal
+                isOpen={isLoginModalOpen}
+                onClose={() => setIsLoginModalOpen(false)}
+            />
+        </div >
     )
 }

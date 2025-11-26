@@ -150,6 +150,12 @@
     margin: 0;
 }
 
+.message-content {
+    color: #253353 !important;
+    /* Dark blue for readability on bright backgrounds */
+    font-weight: 600;
+}
+
 .report-actions {
     display: flex;
     gap: 1rem;
