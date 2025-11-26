@@ -1,5 +1,5 @@
 import React from 'react';
-import { useStats } from '../hooks/useStats';
+import { useStats } from '../../hooks/useStats';
 import './Stats.css';
 
 export default function Stats() {

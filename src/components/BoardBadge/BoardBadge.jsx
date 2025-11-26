@@ -1,5 +1,5 @@
 import React from 'react';
-import { getBoardColor } from '../data/boardConfig';
+import { getBoardColor } from '../../data/boardConfig';
 import './BoardBadge.css';
 
 const BoardBadge = ({ board, className = '' }) => {

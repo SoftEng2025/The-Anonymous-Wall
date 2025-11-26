@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getAvatarUrl } from '../backend/api/avatar';
-import { postController } from '../backend/controllers/postController';
-import { replyController } from '../backend/controllers/replyController';
-import { userController } from '../backend/controllers/userController';
-import { useAuth } from '../contexts/AuthContext';
-import { formatTimeAgo } from '../utils/timeUtils';
+import { getAvatarUrl } from '../../backend/api/avatar';
+import { postController } from '../../backend/controllers/postController';
+import { replyController } from '../../backend/controllers/replyController';
+import { userController } from '../../backend/controllers/userController';
+import { useAuth } from '../../contexts/AuthContext';
+import { formatTimeAgo } from '../../utils/timeUtils';
 import './ForumPostModal.css';
 
 const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) => {
