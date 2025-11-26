@@ -1,0 +1,56 @@
+.forum-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    color: white;
+    min-height: 100vh;
+}
+
+/* Board Navigation */
+.board-navigation {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.board-tab {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.board-tab i {
+    font-size: 1.1rem;
+}
+
+.board-tab:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.board-tab.active {
+    background: var(--board-color, #60a5fa);
+    border-color: var(--board-color, #60a5fa);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.forum-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto 2rem auto;
+}

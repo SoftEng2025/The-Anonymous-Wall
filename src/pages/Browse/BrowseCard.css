@@ -1,0 +1,149 @@
+/* Card Styles copied and adapted from MessageCard.css */
+.card {
+    background: var(--card-body);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    min-height: 360px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 18px 22px;
+    background: var(--card-top);
+}
+
+.header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.card-to {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.card-date {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.report-icon-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.report-icon-btn:hover {
+    color: #ff6b6b;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.card-body {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    padding: 24px 22px 26px;
+    background: var(--card-body);
+}
+
+.card-message {
+    background: var(--mint);
+    color: #253353;
+    padding: 16px 18px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 1.5;
+    text-align: left;
+    width: 100%;
+    margin: 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+.card-footer {
+    background: var(--card-top);
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.input-shell {
+    background: #eef1ff;
+    color: #6c6f9a;
+    border-radius: 999px;
+    padding: 0 18px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    height: 44px;
+}
+
+.reply-input-transparent {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    color: #6c6f9a;
+    font-weight: 600;
+    font-family: inherit;
+    padding: 0;
+}
+
+.reply-input-transparent::placeholder {
+    color: #6c6f9a;
+}
+
+.send-button {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: none;
+    background: rgba(41, 82, 170, 0.28);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.send-button:hover {
+    transform: translateY(-2px);
+}

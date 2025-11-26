@@ -1,0 +1,226 @@
+.create-post-btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    background: #d4b898;
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.2s;
+    white-space: nowrap;
+    height: auto;
+}
+
+.create-post-btn i {
+    background: white;
+    color: #d4b898;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+}
+
+.create-post-btn:hover {
+    transform: translateY(-2px);
+    background: #e8c89a;
+}
+
+/* Create Post Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background: linear-gradient(135deg, rgba(59, 66, 117, 0.95) 0%, rgba(40, 44, 84, 0.95) 100%);
+    border-radius: 16px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    margin-bottom: 1.5rem;
+}
+
+.modal-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+}
+
+.modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.modal-input {
+    width: 100%;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.modal-input:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.modal-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.board-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.board-label {
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+}
+
+.board-options {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.board-option {
+    flex: 1;
+    min-width: 120px;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.board-option i {
+    font-size: 1.5rem;
+}
+
+.board-option:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.board-option.selected {
+    background: var(--board-color, #60a5fa);
+    border-color: var(--board-color, #60a5fa);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Ensure textarea matches input style */
+.modal-textarea {
+    width: 100%;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.2s;
+    min-height: 150px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.modal-textarea:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.modal-textarea::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.btn-cancel {
+    padding: 0.8rem 1.5rem;
+    background: #d9534f;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-post {
+    padding: 0.8rem 1.5rem;
+    background: #0275d8;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.75rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 12px;
+    font-weight: 700;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.error-message {
+    background-color: rgba(220, 38, 38, 0.1);
+    color: #ef4444;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}

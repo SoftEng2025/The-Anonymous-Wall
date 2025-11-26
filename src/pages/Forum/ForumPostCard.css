@@ -1,0 +1,125 @@
+/* Post Card Styles */
+.post-card {
+    background: rgba(40, 44, 84, 0.6);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: transform 0.2s;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.posts-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.post-card.clickable {
+    cursor: pointer;
+}
+
+.post-card.clickable:hover {
+    transform: translateY(-2px);
+    background: rgba(40, 44, 84, 0.8);
+}
+
+.post-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.post-info {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+}
+
+.header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.user-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: #ccc;
+    object-fit: cover;
+}
+
+.username {
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Board Badge Styles */
+.post-board {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.board-badge {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 12px;
+    font-weight: 700;
+    color: white;
+    font-size: 0.95rem;
+}
+
+.board-badge i {
+    font-size: 0.85rem;
+}
+
+.post-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: white;
+}
+
+.post-content {
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+.post-actions {
+    display: flex;
+    gap: 1.5rem;
+    color: white;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.action-btn.liked {
+    color: white;
+    /* Keep text white/grey */
+}
+
+.action-btn.liked i {
+    color: #ff4d4d;
+    /* Only icon red */
+}
+
+.action-btn:hover {
+    opacity: 1;
+}
