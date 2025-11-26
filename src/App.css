@@ -19,6 +19,7 @@
   --lime: #dce775;
   --lavender: #9575cd;
   --font-primary: 'Nunito', 'Segoe UI', sans-serif;
+  --primary-accent: var(--accent-blue); 
 }
 
 *,
@@ -57,4 +58,76 @@ body {
   .page {
     padding: 0 0 56px;
   }
+}
+
+.floating-buttons-container {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 15px; 
+}
+
+.floating-action-button {    
+    width: 60px;
+    height: 60px;
+    background-color: var(--primary-accent);
+    color: #fff;
+    border-radius: 30px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transition: width 0.3s ease, border-radius 0.3s ease, background-color 0.2s;
+    border: none;
+    cursor: pointer;
+    order: 2;
+    overflow: hidden;
+    white-space: nowrap; 
+    text-decoration: none;
+}
+
+.fab-icon {
+    font-size: 24px;
+    transition: opacity 0.2s ease;
+}
+
+.fab-text {
+    font-size: 1rem;
+    font-weight: 600;
+    opacity: 0;
+    width: 0;
+    transition: opacity 0.2s ease, width 0.2s ease;
+}
+
+.floating-action-button:hover {
+    width: 140px; 
+    background-color: var(--accent-blue-dark);
+    justify-content: center;
+}
+
+.floating-action-button:hover {
+    transform: scale(1.1);
+    background-color: var(--accent-blue-dark);
+    color: #fff;
+}
+
+.floating-action-button:hover .fab-icon {
+    opacity: 0;
+    width: 0; 
+}
+
+.floating-action-button:hover .fab-text {
+    opacity: 1;
+    width: auto; 
+    margin-left: 8px;
+}
+
+
+.back-to-top {
+    order: 1;
+    position: static !important; 
 }

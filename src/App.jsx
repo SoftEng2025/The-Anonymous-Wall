@@ -26,7 +26,6 @@ function AppContent() {
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
     const [isAdmin, setIsAdmin] = useState(false)
 
-    // Scroll to top on route change
     useEffect(() => {
         window.scrollTo(0, 0);
     }, [location.pathname]);
@@ -48,76 +47,84 @@ function AppContent() {
     };
 
     return (
-        <div className="page">
-            <header className="site-header">
-                <div className="logo">
-                    <Link to="/" className="logo-link">
-                        <span className="logo-primary">Anony</span>
-                        <span className="logo-accent">Wall</span>
-                    </Link>
-                </div>
-                <nav className="nav-links" aria-label="Primary navigation">
-                    <Link to="/freedom-wall" className={`nav-link ${location.pathname === '/freedom-wall' || location.pathname === '/browse' ? 'active' : ''}`}>
-                        Freedom Wall
-                    </Link>
-                    <Link to="/submit" className={`nav-link ${location.pathname === '/submit' ? 'active' : ''}`}>
-                        Submit
-                    </Link>
-                    <Link to="/forum" className={`nav-link ${location.pathname === '/forum' ? 'active' : ''}`}>
-                        Forum
-                    </Link>
-                    {isAdmin && (
-                        <Link
-                            to="/admin"
-                            className={`nav-link ${location.pathname === '/admin' ? 'active' : ''}`}
-                        >
-                            Admin
+        <>
+            <div className="page">
+                <header className="site-header">
+                    <div className="logo">
+                        <Link to="/" className="logo-link">
+                            <span className="logo-primary">Anony</span>
+                            <span className="logo-accent">Wall</span>
                         </Link>
-                    )}
-
-                </nav>
-                <div className="auth-container">
-                    {currentUser ? (
-                        <div className="user-menu">
-                            <Link to="/profile">
-                                <img
-                                    src={getAvatarUrl(currentUser.uid)}
-                                    alt={currentUser.displayName || 'User'}
-                                    className="user-avatar"
-                                    title="Go to Profile"
-                                />
+                    </div>
+                    <nav className="nav-links" aria-label="Primary navigation">
+                        <Link to="/freedom-wall" className={`nav-link ${location.pathname === '/freedom-wall' || location.pathname === '/browse' ? 'active' : ''}`}>
+                            Freedom Wall
+                        </Link>
+                        <Link to="/forum" className={`nav-link ${location.pathname === '/forum' ? 'active' : ''}`}>
+                            Forum
+                        </Link>
+                        {isAdmin && (
+                            <Link
+                                to="/admin"
+                                className={`nav-link ${location.pathname === '/admin' ? 'active' : ''}`}
+                            >
+                                Admin
                             </Link>
-                        </div>
-                    ) : (
-                        <button className="login-button" onClick={() => setIsLoginModalOpen(true)}>
-                            Login
-                        </button>
-                    )}
+                        )}
+    
+                    </nav>
+                    <div className="auth-container">
+                        {currentUser ? (
+                            <div className="user-menu">
+                                <Link to="/profile">
+                                    <img
+                                        src={getAvatarUrl(currentUser.uid)}
+                                        alt={currentUser.displayName || 'User'}
+                                        className="user-avatar"
+                                        title="Go to Profile"
+                                    />
+                                </Link>
+                            </div>
+                        ) : (
+                            <button className="login-button" onClick={() => setIsLoginModalOpen(true)}>
+                                Login
+                            </button>
+                        )}
+                    </div>
+                </header>
+    
+                <LoginModal
+                    isOpen={isLoginModalOpen}
+                    onClose={handleCloseLoginModal}
+                />
+    
+                <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/browse" element={<Browse />} />
+                    <Route path="/freedom-wall" element={<Browse />} />
+                    <Route path="/submit" element={<Submit />} />
+                    <Route path="/forum" element={<Forum />} />
+                    <Route path="/forum/:postId" element={<ForumPost />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/terms" element={<TermsOfService />} />
+                    <Route path="/contact" element={<Contact />} />
+                </Routes>
+    
+                <Footer location={location} />
+            </div>
+
+            {(location.pathname === '/freedom-wall' || location.pathname === '/browse') && (
+                <div className="floating-buttons-container">
+                    <BackToTop />
+                    <Link to="/submit" className="floating-action-button" aria-label="Submit a new message">
+                        <i className="fa-solid fa-plus fab-icon"></i>
+                        <span className="fab-text">Submit</span>
+                    </Link>
                 </div>
-            </header>
-
-            <LoginModal
-                isOpen={isLoginModalOpen}
-                onClose={handleCloseLoginModal}
-            />
-
-            <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/browse" element={<Browse />} />
-                <Route path="/freedom-wall" element={<Browse />} />
-                <Route path="/submit" element={<Submit />} />
-                <Route path="/forum" element={<Forum />} />
-                <Route path="/forum/:postId" element={<ForumPost />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/terms" element={<TermsOfService />} />
-                <Route path="/contact" element={<Contact />} />
-            </Routes>
-
-            <BackToTop />
-            <Footer location={location} />
-        </div>
+            )}
+        </>
     )
 }
 
