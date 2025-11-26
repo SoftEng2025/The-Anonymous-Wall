@@ -1,0 +1,83 @@
+/* Post History Styles */
+.history-posts {
+    margin-top: 1.5rem;
+}
+
+.no-posts {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    padding: 2rem;
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+.history-post-card {
+    background: rgba(50, 60, 110, 0.4);
+    border-radius: 10px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.history-post-card:hover {
+    background: rgba(60, 70, 120, 0.5);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.history-post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.history-post-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.history-time {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+}
+
+.history-post-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+    color: var(--text-light);
+}
+
+.history-post-content {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin: 0 0 1rem 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.history-post-stats {
+    display: flex;
+    gap: 1.5rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+}
+
+.history-post-stats span {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.history-post-stats i {
+    font-size: 0.9rem;
+}
