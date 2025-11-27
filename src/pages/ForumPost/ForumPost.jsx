@@ -4,6 +4,10 @@ import { getAvatarUrl } from '../../backend/api/avatar';
 import { postController } from '../../backend/controllers/postController';
 import { replyController } from '../../backend/controllers/replyController';
 import { userController } from '../../backend/controllers/userController';
+import { reportController } from '../../backend/controllers/reportController';
+import ReportModal from '../../components/ReportModal';
+import ReportSuccessModal from '../../components/ReportSuccessModal/ReportSuccessModal';
+import LoginModal from '../../components/LoginModal';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatTimeAgo } from '../../utils/timeUtils';
 import './ForumPost.css';
@@ -19,6 +23,11 @@ const ForumPost = () => {
     const [replies, setReplies] = useState([]);
     const [loading, setLoading] = useState(true);
     const [replyingTo, setReplyingTo] = useState(null);
+
+    // Report State
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const [isReportSuccessModalOpen, setIsReportSuccessModalOpen] = useState(false);
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchPostAndReplies = async () => {
@@ -126,6 +135,27 @@ const ForumPost = () => {
         document.querySelector('.reply-main-input').focus();
     };
 
+    const handleReportClick = () => {
+        if (!currentUser) {
+            setIsLoginModalOpen(true);
+            return;
+        }
+        setIsReportModalOpen(true);
+    };
+
+    const handleReportSubmit = async (reason) => {
+        if (post && currentUser) {
+            try {
+                await reportController.createReport(post.id, reason, currentUser.uid, 'post');
+                setIsReportSuccessModalOpen(true);
+            } catch (error) {
+                console.error("Failed to submit report:", error);
+                alert("Failed to submit report. Please try again.");
+            }
+            setIsReportModalOpen(false);
+        }
+    };
+
     if (loading) {
         return <div className="forum-post-page loading">Loading...</div>;
     }
@@ -171,6 +201,9 @@ const ForumPost = () => {
                             <div className="stat-item">
                                 <i className="fa-regular fa-comment"></i> {replies.length}
                             </div>
+                            <button className="stat-item action-btn report-btn" onClick={handleReportClick}>
+                                <i className="fa-regular fa-flag"></i> Report
+                            </button>
                         </div>
 
                         <div className="reply-input-section">
@@ -229,6 +262,22 @@ const ForumPost = () => {
                     </div>
                 </div>
             </div>
+
+            <ReportModal
+                isOpen={isReportModalOpen}
+                onClose={() => setIsReportModalOpen(false)}
+                onSubmit={handleReportSubmit}
+            />
+
+            <ReportSuccessModal
+                isOpen={isReportSuccessModalOpen}
+                onClose={() => setIsReportSuccessModalOpen(false)}
+            />
+
+            <LoginModal
+                isOpen={isLoginModalOpen}
+                onClose={() => setIsLoginModalOpen(false)}
+            />
         </div>
     );
 };
