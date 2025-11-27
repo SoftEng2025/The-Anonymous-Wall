@@ -10,6 +10,7 @@ import LoginModal from '../../components/LoginModal';
 import Stats from '../../components/Stats';
 import BoardBadge from '../../components/BoardBadge';
 import ReportModal from '../../components/ReportModal';
+import ReportSuccessModal from '../../components/ReportSuccessModal/ReportSuccessModal';
 import ForumPostModal from '../../components/ForumPostModal';
 import { reportController } from '../../backend/controllers/reportController';
 import { formatTimeAgo } from '../../utils/timeUtils';
@@ -41,6 +42,7 @@ const Forum = () => {
 
     // Report State
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const [isReportSuccessModalOpen, setIsReportSuccessModalOpen] = useState(false);
     const [postToReport, setPostToReport] = useState(null);
 
     // Forum Post Modal State
@@ -160,7 +162,7 @@ const Forum = () => {
         if (postToReport && currentUser) {
             try {
                 await reportController.createReport(postToReport.id, reason, currentUser.uid, 'post');
-                alert("Report submitted. Thank you for helping keep our community safe.");
+                setIsReportSuccessModalOpen(true);
             } catch (error) {
                 console.error("Failed to submit report:", error);
                 alert("Failed to submit report. Please try again.");
@@ -612,6 +614,11 @@ const Forum = () => {
                 isOpen={isReportModalOpen}
                 onClose={() => setIsReportModalOpen(false)}
                 onSubmit={handleReportSubmit}
+            />
+
+            <ReportSuccessModal
+                isOpen={isReportSuccessModalOpen}
+                onClose={() => setIsReportSuccessModalOpen(false)}
             />
 
             {/* Forum Post Modal */}
