@@ -1,21 +1,60 @@
-.submit-container {
-    width: 100%;
+/* Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(8px);
     display: flex;
+    align-items: center;
     justify-content: center;
-    animation: fadeIn 0.5s ease-in-out;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
 }
 
-.submit-card {
-    background: var(--card-body);
+/* Submit Card - Adapted from User's .submit-card */
+.submit-modal-card {
+    background: var(--card-body, #1e293b);
     border-radius: 12px;
     width: 100%;
     max-width: 500px;
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    position: relative;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Close Button */
+.close-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: transparent;
+    border: none;
+    color: var(--text-light, #fff);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.2s;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.close-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* User's Styles Integrated */
+
 .submit-header {
-    background: var(--card-top);
+    background: var(--card-top, #2d3748);
     padding: 1.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -24,7 +63,7 @@
     margin: 0;
     font-size: 1.2rem;
     font-weight: 700;
-    color: var(--text-light);
+    color: var(--text-light, #fff);
 }
 
 .submit-body {
@@ -40,7 +79,7 @@
     border-radius: 8px;
     border: none;
     background: #ffffff;
-    font-family: var(--font-primary);
+    font-family: var(--font-primary, sans-serif);
     font-size: 1rem;
     color: #333;
 }
@@ -62,7 +101,7 @@
     padding-bottom: 2.5rem;
     border-radius: 8px;
     border: none;
-    font-family: var(--font-primary);
+    font-family: var(--font-primary, sans-serif);
     font-size: 1rem;
     color: #253353;
     font-weight: 600;
@@ -96,7 +135,7 @@
     display: block;
     text-align: center;
     font-weight: 700;
-    color: var(--text-light);
+    color: var(--text-light, #fff);
     margin-bottom: 0.8rem;
 }
 
@@ -140,7 +179,7 @@
     align-items: center;
     gap: 0.5rem;
     cursor: pointer;
-    color: var(--text-muted);
+    color: var(--text-muted, #9ca3af);
     transition: transform 0.2s, color 0.2s;
 }
 
@@ -155,7 +194,7 @@
 }
 
 .mood-option:hover {
-    color: var(--text-light);
+    color: var(--text-light, #fff);
     transform: translateY(-2px);
 }
 
@@ -172,7 +211,7 @@
 
 .mood-option.in-love:hover .mood-icon,
 .mood-option.in-love.selected .mood-icon {
-    color: #ff4081;
+    color: #f187c8;
 }
 
 .mood-option.angry:hover .mood-icon,
@@ -186,13 +225,13 @@
 }
 
 .mood-option.selected {
-    color: var(--text-light);
+    color: var(--text-light, #fff);
 }
 
 .submit-send-button {
     margin-top: 1rem;
-    background: linear-gradient(135deg, var(--accent-blue) 0%, #39a4f4 100%);
-    color: var(--text-light);
+    background: linear-gradient(135deg, var(--accent-blue, #3b82f6) 0%, #39a4f4 100%);
+    color: var(--text-light, #fff);
     padding: 0.8rem;
     border-radius: 8px;
     border: none;
@@ -220,9 +259,17 @@
 @keyframes fadeIn {
     from {
         opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
         transform: translateY(20px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
@@ -231,8 +278,15 @@
 
 /* Responsive */
 @media (max-width: 600px) {
-    .submit-card {
+    .submit-modal-card {
         max-width: 100%;
+        border-radius: 20px 20px 0 0;
+        margin-top: auto;
+        animation: slideUpMobile 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .modal-overlay {
+        align-items: flex-end;
     }
 
     .mood-options {
@@ -241,5 +295,14 @@
 
     .mood-icon {
         font-size: 1.5rem;
+    }
+    
+    @keyframes slideUpMobile {
+        from {
+            transform: translateY(100%);
+        }
+        to {
+            transform: translateY(0);
+        }
     }
 }

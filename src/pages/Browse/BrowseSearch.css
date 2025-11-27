@@ -45,12 +45,27 @@
     border-color: rgba(255, 255, 255, 0.4);
 }
 
-.search-button {
+@media (max-width: 600px) {
+    .search-container {
+        flex-direction: column;
+    }
+
+    .search-button {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .create-post-button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+.create-post-button {
     padding: 12px 24px;
     border-radius: 8px;
     border: none;
     background: #d4b898;
-    /* Beige/Gold from image */
     color: #fff;
     font-weight: 700;
     font-size: 1rem;
@@ -61,18 +76,7 @@
     transition: transform 0.2s;
 }
 
-.search-button:hover {
+.create-post-button:hover {
     transform: translateY(-2px);
     background: #e8c89a;
-}
-
-@media (max-width: 600px) {
-    .search-container {
-        flex-direction: column;
-    }
-
-    .search-button {
-        width: 100%;
-        justify-content: center;
-    }
 }

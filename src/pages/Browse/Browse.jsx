@@ -5,6 +5,7 @@ import { messageController } from '../../backend/controllers/messageController'
 import { reportController } from '../../backend/controllers/reportController'
 import ReportModal from '../../components/ReportModal'
 import LoginModal from '../../components/LoginModal'
+import SubmitModal from '../../components/SubmitModal/SubmitModal'
 import './Browse.css'
 
 const MOOD_ICONS = {
@@ -24,6 +25,7 @@ export default function Browse() {
     const [isReportModalOpen, setIsReportModalOpen] = useState(false)
     const [postToReport, setPostToReport] = useState(null)
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+    const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false)
 
     // Fetch messages from Firebase
     useEffect(() => {
@@ -77,6 +79,10 @@ export default function Browse() {
         }
     }
 
+    const handleCreatePostClick = () => {
+        setIsSubmitModalOpen(true)
+    }
+
     return (
         <div className="browse-container">
             <div className="search-container">
@@ -90,8 +96,8 @@ export default function Browse() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <button className="search-button">
-                    <i className="fa-solid fa-magnifying-glass"></i> Search
+                <button className="create-post-button" onClick={handleCreatePostClick}>
+                    <i className="fa-solid fa-plus"></i> Create Post
                 </button>
             </div>
 
@@ -154,6 +160,11 @@ export default function Browse() {
             <LoginModal
                 isOpen={isLoginModalOpen}
                 onClose={() => setIsLoginModalOpen(false)}
+            />
+
+            <SubmitModal
+                isOpen={isSubmitModalOpen}
+                onClose={() => setIsSubmitModalOpen(false)}
             />
         </div >
     )
