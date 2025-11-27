@@ -1,0 +1,65 @@
+.report-success-modal {
+    text-align: center;
+    padding: 32px;
+    max-width: 400px;
+    border-radius: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+.success-icon-container {
+    margin-bottom: 20px;
+}
+
+.success-icon {
+    font-size: 64px;
+    color: var(--accent-green, #4caf50);
+    /* Fallback if variable not defined */
+    filter: drop-shadow(0 0 10px rgba(76, 175, 80, 0.3));
+}
+
+.success-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text-light);
+}
+
+.success-message {
+    color: var(--text-muted);
+    margin-bottom: 28px;
+    line-height: 1.5;
+    font-size: 16px;
+}
+
+.btn-close-success {
+    background: var(--accent-blue);
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.btn-close-success:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
