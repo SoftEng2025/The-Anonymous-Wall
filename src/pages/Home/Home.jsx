@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import HeroButton from '../../components/HeroButton'
 import MessageCard from '../../components/MessageCard'
 import Stats from '../../components/Stats'
@@ -11,6 +13,7 @@ import {
 } from '../../utils/constants'
 
 export default function Home() {
+    const navigate = useNavigate()
     const typedText = useTypedLyrics(LYRICS_TIMELINE, TYPING_CONFIG)
 
     return (
@@ -28,7 +31,10 @@ export default function Home() {
                 </div>
                 <div className="hero-actions">
                     {HERO_BUTTONS.map((button) => (
-                        <HeroButton key={button.label} {...button} />
+                        <HeroButton
+                            key={button.label}
+                            {...button}
+                        />
                     ))}
                 </div>
             </div>
