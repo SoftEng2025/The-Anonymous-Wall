@@ -6,7 +6,6 @@ import { getAvatarUrl } from './backend/api/avatar'
 import { NAV_LINKS } from './utils/constants'
 import Home from './pages/Home'
 import About from './pages/About'
-import Submit from './pages/Submit'
 import Browse from './pages/Browse'
 import Forum from './pages/Forum'
 import ForumPost from './pages/ForumPost';
@@ -60,9 +59,7 @@ function AppContent() {
                     <Link to="/freedom-wall" className={`nav-link ${location.pathname === '/freedom-wall' || location.pathname === '/browse' ? 'active' : ''}`}>
                         Freedom Wall
                     </Link>
-                    <Link to="/submit" className={`nav-link ${location.pathname === '/submit' ? 'active' : ''}`}>
-                        Submit
-                    </Link>
+
                     <Link to="/forum" className={`nav-link ${location.pathname === '/forum' ? 'active' : ''}`}>
                         Forum
                     </Link>
@@ -106,7 +103,6 @@ function AppContent() {
                 <Route path="/about" element={<About />} />
                 <Route path="/browse" element={<Browse />} />
                 <Route path="/freedom-wall" element={<Browse />} />
-                <Route path="/submit" element={<Submit />} />
                 <Route path="/forum" element={<Forum />} />
                 <Route path="/forum/:postId" element={<ForumPost />} />
                 <Route path="/profile" element={<Profile />} />
