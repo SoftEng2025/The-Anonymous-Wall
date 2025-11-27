@@ -22,7 +22,12 @@
     color: inherit;
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: 12px;
+}
+
+.logo-image {
+    height: 40px;
+    width: auto;
 }
 
 .logo-primary {

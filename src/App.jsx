@@ -51,8 +51,11 @@ function AppContent() {
             <header className="site-header">
                 <div className="logo">
                     <Link to="/" className="logo-link">
-                        <span className="logo-primary">Anony</span>
-                        <span className="logo-accent">Wall</span>
+                        <img src="/AnonyWallLogo.svg" alt="AnonyWall Logo" className="logo-image" />
+                        <span>
+                            <span className="logo-primary">Anony</span>
+                            <span className="logo-accent">Wall</span>
+                        </span>
                     </Link>
                 </div>
                 <nav className="nav-links" aria-label="Primary navigation">
