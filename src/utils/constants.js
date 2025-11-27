@@ -1,8 +1,8 @@
 const toMs = (seconds) => Math.round(seconds * 1000)
 
 export const HERO_BUTTONS = [
-    { label: 'Freedom Wall', variant: 'outlined', iconClass: 'fa-regular fa-comment-dots', path: '/freedom-wall' },
-    { label: 'Message', variant: 'filled', iconClass: 'fa-solid fa-paper-plane', path: '/submit' },
+    { id: 'freedom-wall', label: 'Freedom Wall', variant: 'outlined', iconClass: 'fa-regular fa-comment-dots', path: '/freedom-wall' },
+    { id: 'forum', label: 'Forum', variant: 'filled', iconClass: 'fa-solid fa-users', path: '/forum' },
 ]
 
 export const CARD_MESSAGES = [
