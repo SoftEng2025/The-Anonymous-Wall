@@ -16,7 +16,9 @@ const Footer = ({ location }) => {
                 <nav className="footer-links">
                     <Link to="/about" className={`footer-link ${location.pathname === '/about' ? 'active' : ''}`}>About</Link>
                     <Link to="/contact" className={`footer-link ${location.pathname === '/contact' ? 'active' : ''}`}>Contact</Link>
-                    <Link to="/terms" className={`footer-link ${location.pathname === '/terms' ? 'active' : ''}`}>Terms & Privacy</Link>
+                    <Link to="/terms" className={`footer-link ${location.pathname === '/terms' ? 'active' : ''}`}>Terms</Link>
+                    <Link to="/privacy" className={`footer-link ${location.pathname === '/privacy' ? 'active' : ''}`}>Privacy</Link>
+                    <Link to="/security" className={`footer-link ${location.pathname === '/security' ? 'active' : ''}`}>Security</Link>
                 </nav>
             </div>
         </footer>
