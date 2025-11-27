@@ -8,10 +8,10 @@ const Contact = () => {
             <h1>Contact Us</h1>
 
             <div className="info-page-section">
-                <h2>Email Address</h2>
-                <p>This is the most professional standard. It shows where users could submit questions or report issues.</p>
+                <h2>Report Issues & Feedback</h2>
+                <p>Found a bug or have a suggestion? Please report it on our GitHub repository.</p>
                 <p>
-                    <strong>Email:</strong> <a href="mailto:project.anonywall@gmail.com">project.anonywall@gmail.com</a>
+                    <strong>GitHub Issues:</strong> <a href="https://github.com/SoftEng2025/The-Anonymous-Wall/issues" target="_blank" rel="noopener noreferrer">SoftEng2025/The-Anonymous-Wall/issues</a>
                 </p>
             </div>
 
