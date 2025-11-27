@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useMessages } from '../../contexts/MessageContext'
 import { useAuth } from '../../contexts/AuthContext'
 import { messageController } from '../../backend/controllers/messageController'
@@ -20,6 +21,7 @@ const MOOD_ICONS = {
 export default function Browse() {
     const { messages: contextMessages } = useMessages()
     const { currentUser } = useAuth()
+    const location = useLocation()
     const [searchTerm, setSearchTerm] = useState('')
     const [messages, setMessages] = useState([])
     const [loading, setLoading] = useState(true)
@@ -28,6 +30,14 @@ export default function Browse() {
     const [postToReport, setPostToReport] = useState(null)
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
     const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false)
+
+    useEffect(() => {
+        if (location.state?.openSubmitModal) {
+            setIsSubmitModalOpen(true)
+            // Clear the state so it doesn't reopen on refresh/navigation back
+            window.history.replaceState({}, document.title)
+        }
+    }, [location])
 
     // Fetch messages from Firebase
     useEffect(() => {
