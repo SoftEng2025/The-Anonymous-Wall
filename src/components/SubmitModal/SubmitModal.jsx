@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
 import { useMessages } from '../../contexts/MessageContext'
-import { useNavigate } from 'react-router-dom'
 import { messageController } from '../../backend/controllers/messageController'
-import './Submit.css'
+import './SubmitModal.css'
 
 const THEMES = [
     { id: 'coral', color: 'var(--coral)' },
@@ -23,7 +22,7 @@ const MOODS = [
 
 const MAX_MESSAGE_LENGTH = 95
 
-export default function Submit() {
+export default function SubmitModal({ isOpen, onClose }) {
     const [recipient, setRecipient] = useState('')
     const [message, setMessage] = useState('')
     const [selectedTheme, setSelectedTheme] = useState(THEMES[2]) // Default to mint
@@ -31,7 +30,8 @@ export default function Submit() {
     const [isSubmitting, setIsSubmitting] = useState(false)
 
     const { addMessage } = useMessages()
-    const navigate = useNavigate()
+
+    if (!isOpen) return null
 
     const handleMessageChange = (e) => {
         setMessage(e.target.value)
@@ -67,8 +67,13 @@ export default function Submit() {
             // Also add to local context for immediate UI update
             addMessage(messageData)
 
-            // Navigate to freedom wall page
-            navigate('/freedom-wall')
+            // Close modal and reset form
+            onClose()
+            setRecipient('')
+            setMessage('')
+            setSelectedTheme(THEMES[2])
+            setSelectedMood(null)
+            
         } catch (error) {
             console.error("Failed to submit message:", error)
             alert("Failed to send message. Please try again.")
@@ -78,10 +83,14 @@ export default function Submit() {
     }
 
     return (
-        <div className="submit-container">
-            <div className="submit-card">
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="submit-modal-card" onClick={e => e.stopPropagation()}>
+                <button className="close-button" onClick={onClose}>
+                    <i className="fa-solid fa-xmark"></i>
+                </button>
+
                 <div className="submit-header">
-                    <h2 className="submit-title">Send a Message to Someone</h2>
+                    <h2 className="submit-title">Send a Message</h2>
                 </div>
 
                 <div className="submit-body">
