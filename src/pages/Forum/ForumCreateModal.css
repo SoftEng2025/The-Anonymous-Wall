@@ -150,6 +150,52 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
+/* Fixed board display when creating from within a board */
+.board-selector.board-fixed {
+    gap: 0.25rem;
+}
+
+.board-fixed-value {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: white;
+    max-width: 100%;
+}
+
+.board-fixed-value i {
+    font-size: 1.1rem;
+    color: white;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--board-color, #60a5fa);
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.board-fixed-value span {
+    font-weight: 700;
+    font-size: 1rem;
+    color: white;
+    line-height: 1;
+}
+
+@media (max-width: 480px) {
+    .board-fixed-value {
+        padding: 0.6rem 0.8rem;
+    }
+    .board-fixed-value span {
+        font-size: 0.95rem;
+    }
+}
+
 /* Ensure textarea matches input style */
 .modal-textarea {
     width: 100%;
