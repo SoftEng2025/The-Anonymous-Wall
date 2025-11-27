@@ -137,6 +137,10 @@ const Forum = () => {
 
     const handleCreatePostClick = () => {
         if (currentUser) {
+            // If we're inside a specific board view, pre-select that board
+            if (selectedBoard) {
+                setNewPostBoard(selectedBoard);
+            }
             setIsCreatePostOpen(true);
         } else {
             setIsLoginModalOpen(true);
@@ -324,7 +328,10 @@ const Forum = () => {
                                                 .filter(b => b.name.toLowerCase().includes(boardSearch.toLowerCase()))
                                                 .map(b => b.id);
 
-                                            const postsToShow = filteredPosts.filter(p => visibleBoardIds.length === 0 || visibleBoardIds.includes(p.board));
+                                            const postsToShow = filteredPosts
+                                                .filter(p => visibleBoardIds.length === 0 || visibleBoardIds.includes(p.board))
+                                                .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+                                                .slice(0, 5); // show only 5 most recent posts
 
                                             return postsToShow.map(post => (
                                                 <div
@@ -541,23 +548,33 @@ const Forum = () => {
                                     onChange={e => setNewPostTitle(e.target.value)}
                                 />
 
-                                <div className="board-selector">
-                                    <label className="board-label">Select Board *</label>
-                                    <div className="board-options">
-                                        {BOARDS.map(board => (
-                                            <button
-                                                key={board.id}
-                                                type="button"
-                                                className={`board-option ${newPostBoard === board.id ? 'selected' : ''}`}
-                                                onClick={() => setNewPostBoard(board.id)}
-                                                style={{ '--board-color': board.color }}
-                                            >
-                                                <i className={`fa-solid ${board.icon}`}></i>
-                                                <span>{board.name}</span>
-                                            </button>
-                                        ))}
+                                {selectedBoard ? (
+                                    <div className="board-selector board-fixed">
+                                        <label className="board-label">Board</label>
+                                        <div className="board-fixed-value" style={{ '--board-color': getBoardColor(selectedBoard) }}>
+                                            <i className={`fa-solid ${getBoardById(selectedBoard)?.icon}`}></i>
+                                            <span>{getBoardName(selectedBoard)}</span>
+                                        </div>
                                     </div>
-                                </div>
+                                ) : (
+                                    <div className="board-selector">
+                                        <label className="board-label">Select Board *</label>
+                                        <div className="board-options">
+                                            {BOARDS.map(board => (
+                                                <button
+                                                    key={board.id}
+                                                    type="button"
+                                                    className={`board-option ${newPostBoard === board.id ? 'selected' : ''}`}
+                                                    onClick={() => setNewPostBoard(board.id)}
+                                                    style={{ '--board-color': board.color }}
+                                                >
+                                                    <i className={`fa-solid ${board.icon}`}></i>
+                                                    <span>{board.name}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
 
                                 <textarea
                                     placeholder="Share your message here"
