@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-const HeroButton = ({ label, variant, iconClass, path }) => {
+const HeroButton = ({ label, variant, iconClass, path, onClick }) => {
     const [isPressed, setIsPressed] = useState(false)
     const navigate = useNavigate()
 
@@ -11,7 +11,9 @@ const HeroButton = ({ label, variant, iconClass, path }) => {
     const handlePressEnd = () => setIsPressed(false)
 
     const handleClick = () => {
-        if (path) {
+        if (onClick) {
+            onClick()
+        } else if (path) {
             navigate(path)
         }
     }
