@@ -31,6 +31,7 @@ const Forum = () => {
     const [selectedBoard, setSelectedBoard] = useState(null); // null = all boards
     const [filterType, setFilterType] = useState('latest'); // latest, likes, comments
     const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
+    const [boardSearch, setBoardSearch] = useState('');
 
     // Form State
     const [newPostTitle, setNewPostTitle] = useState('');
@@ -268,125 +269,259 @@ const Forum = () => {
 
     return (
         <div className="forum-page">
-            {/* Board Navigation */}
-            <div className="board-navigation">
-                <button
-                    className={`board-tab ${selectedBoard === null ? 'active' : ''}`}
-                    onClick={() => setSelectedBoard(null)}
-                >
-                    <i className="fa-solid fa-border-all"></i>
-                    All Boards
-                </button>
-                {BOARDS.map(board => (
-                    <button
-                        key={board.id}
-                        className={`board-tab ${selectedBoard === board.id ? 'active' : ''}`}
-                        onClick={() => setSelectedBoard(board.id)}
-                        style={{ '--board-color': board.color }}
-                    >
-                        <i className={`fa-solid ${board.icon}`}></i>
-                        {board.name}
-                    </button>
-                ))}
-            </div>
-
-            <div className="forum-controls">
-                <div className="filter-container">
-                    <button
-                        className={`filter-btn ${isFilterMenuOpen ? 'active' : ''}`}
-                        onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
-                    >
-                        <i className="fa-solid fa-sliders"></i>
-                        Sort
-                    </button>
-
-                    {isFilterMenuOpen && (
-                        <div className="filter-menu">
-                            <button
-                                className={`filter-option ${filterType === 'latest' ? 'active' : ''}`}
-                                onClick={() => { setFilterType('latest'); setIsFilterMenuOpen(false); }}
-                            >
-                                <i className="fa-regular fa-clock"></i> Latest
-                            </button>
-                            <button
-                                className={`filter-option ${filterType === 'likes' ? 'active' : ''}`}
-                                onClick={() => { setFilterType('likes'); setIsFilterMenuOpen(false); }}
-                            >
-                                <i className="fa-regular fa-heart"></i> Most Liked
-                            </button>
-                            <button
-                                className={`filter-option ${filterType === 'comments' ? 'active' : ''}`}
-                                onClick={() => { setFilterType('comments'); setIsFilterMenuOpen(false); }}
-                            >
-                                <i className="fa-regular fa-comment"></i> Most Discussed
-                            </button>
+            {/* Show Board Grid or Posts Feed */}
+            {selectedBoard === null ? (
+                // Board Selection Grid View
+                <div className="board-grid-container">
+                    <div className="board-grid-header">
+                        <h2 className="board-grid-title">All Boards</h2>
+                        <div className="board-search">
+                            <div className="search-input-wrapper">
+                                <i className="fa-solid fa-magnifying-glass search-icon"></i>
+                                <input
+                                    className="search-input"
+                                    type="text"
+                                    placeholder="Search boards"
+                                    value={boardSearch}
+                                    onChange={(e) => setBoardSearch(e.target.value)}
+                                    aria-label="Search boards"
+                                />
+                            </div>
                         </div>
-                    )}
-                </div >
-                <button className="create-post-btn" onClick={handleCreatePostClick}>
-                    <i className="fa-solid fa-plus"></i> Create Post
-                </button>
-            </div >
-
-            <div className="posts-feed">
-                {loading ? (
-                    <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.7)', padding: '2rem' }}>
-                        <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '10px' }}></i>
-                        Loading posts...
                     </div>
-                ) : (
-                    <>
-                        {filteredPosts.map(post => (
-                            <div
-                                key={post.id}
-                                className="post-card clickable"
-                                onClick={() => setSelectedPostId(post.id)}
+                    <div className="boards-grid">
+                        {BOARDS.filter(b => b.name.toLowerCase().includes(boardSearch.toLowerCase())).map(board => (
+                            <button
+                                key={board.id}
+                                className="board-card"
+                                onClick={() => setSelectedBoard(board.id)}
+                                style={{ '--board-color': board.color }}
+                                title={board.description}
                             >
-                                <div className="post-header">
-                                    <img
-                                        src={getAvatarUrl(post.avatarSeed)}
-                                        alt={post.author}
-                                        className="user-avatar"
-                                    />
-                                    <div className="header-content">
-                                        <div className="post-info">
-                                            <span className="username">{post.author}</span>
-                                            <span>•</span>
-                                            <span className="time">{post.timeAgo}</span>
-                                        </div>
-                                        {post.board && (
-                                            <div className="post-board">
-                                                <BoardBadge board={getBoardById(post.board)} />
-                                            </div>
-                                        )}
-                                    </div>
+                                <div className="board-card-icon">
+                                    <i className={`fa-solid ${board.icon}`}></i>
                                 </div>
-                                <h3 className="post-title">{post.title}</h3>
-                                <p className="post-content">{post.content}</p>
-                                <div className="post-actions">
-                                    <button
-                                        className={`action-btn ${post.isLikedByCurrentUser ? 'liked' : ''}`}
-                                        onClick={(e) => handleLikePost(e, post)}
-                                    >
-                                        <i className={`fa-${post.isLikedByCurrentUser ? 'solid' : 'regular'} fa-heart`}></i> {post.likes}
-                                    </button>
-                                    <button className="action-btn" onClick={(e) => handleCommentClick(e, post.id)}>
-                                        <i className="fa-regular fa-comment"></i> {post.comments}
-                                    </button>
-                                    <button className="action-btn report-btn" onClick={(e) => { e.stopPropagation(); handleReportClick(post); }}>
-                                        <i className="fa-regular fa-flag"></i> Report
-                                    </button>
-                                </div>
-                            </div>
+                                <h3 className="board-card-name">{board.name}</h3>
+                            </button>
                         ))}
-                        {filteredPosts.length === 0 && (
-                            <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)', padding: '2rem' }}>
-                                No posts found matching your criteria.
+                    </div>
+
+                    {/* Latest posts below boards - filtered by board search */}
+                    <div className="latest-posts">
+                        <h3 className="latest-posts-title">Latest Posts</h3>
+                        <div className="posts-feed">
+                            {loading ? (
+                                <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.7)', padding: '2rem' }}>
+                                    <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '10px' }}></i>
+                                    Loading posts...
+                                </div>
+                            ) : (
+                                <>
+                                    {
+                                        // Filter posts to only those whose board is visible in the board search
+                                        (() => {
+                                            const visibleBoardIds = BOARDS
+                                                .filter(b => b.name.toLowerCase().includes(boardSearch.toLowerCase()))
+                                                .map(b => b.id);
+
+                                            const postsToShow = filteredPosts.filter(p => visibleBoardIds.length === 0 || visibleBoardIds.includes(p.board));
+
+                                            return postsToShow.map(post => (
+                                                <div
+                                                    key={post.id}
+                                                    className="post-card clickable"
+                                                    onClick={() => setSelectedPostId(post.id)}
+                                                >
+                                                    <div className="post-header">
+                                                        <img
+                                                            src={getAvatarUrl(post.avatarSeed)}
+                                                            alt={post.author}
+                                                            className="user-avatar"
+                                                        />
+                                                        <div className="header-content">
+                                                            <div className="post-info">
+                                                                <span className="username">{post.author}</span>
+                                                                <span>•</span>
+                                                                <span className="time">{post.timeAgo}</span>
+                                                            </div>
+                                                            {post.board && (
+                                                                <div className="post-board">
+                                                                    <BoardBadge board={getBoardById(post.board)} />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <h3 className="post-title">{post.title}</h3>
+                                                    <p className="post-content">{post.content}</p>
+                                                    <div className="post-actions">
+                                                        <button
+                                                            className={`action-btn ${post.isLikedByCurrentUser ? 'liked' : ''}`}
+                                                            onClick={(e) => handleLikePost(e, post)}
+                                                        >
+                                                            <i className={`fa-${post.isLikedByCurrentUser ? 'solid' : 'regular'} fa-heart`}></i> {post.likes}
+                                                        </button>
+                                                        <button className="action-btn" onClick={(e) => handleCommentClick(e, post.id)}>
+                                                            <i className="fa-regular fa-comment"></i> {post.comments}
+                                                        </button>
+                                                        <button className="action-btn report-btn" onClick={(e) => { e.stopPropagation(); handleReportClick(post); }}>
+                                                            <i className="fa-regular fa-flag"></i> Report
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ));
+                                        })()
+                                    }
+                                    {filteredPosts.length === 0 && (
+                                        <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)', padding: '2rem' }}>
+                                            No posts found matching your criteria.
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                // Posts Feed View
+                <>
+                    {/* Back to Boards and Board Title */}
+                    <div className="forum-header">
+                        <div className="forum-header-inner">
+                            <div className="header-center">
+                                <div className="forum-title-wrapper">
+                                    <button
+                                        className="back-to-boards-btn"
+                                        aria-label="Back to boards"
+                                        onClick={() => {
+                                            setSelectedBoard(null);
+                                            setIsFilterMenuOpen(false);
+                                        }}
+                                    >
+                                        <i className="fa-solid fa-arrow-left"></i>
+                                    </button>
+                                    <h1 className="forum-title">{getBoardName(selectedBoard)}</h1>
+                                </div>
+                                <p className="forum-description">{getBoardById(selectedBoard)?.description}</p>
+
+                                <div className="icon-rules-row">
+                                    <div
+                                        className="forum-board-icon"
+                                        style={{ '--board-color': getBoardColor(selectedBoard) }}
+                                    >
+                                        <i className={`fa-solid ${getBoardById(selectedBoard)?.icon}`}></i>
+                                    </div>
+
+                                    {getBoardById(selectedBoard)?.rules && (
+                                        <ol className="board-rules inline-rules">
+                                            {getBoardById(selectedBoard).rules.map((r, idx) => (
+                                                <li key={idx}>{r}</li>
+                                            ))}
+                                        </ol>
+                                    )}
+                                </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div className="forum-controls">
+                        <div className="filter-container">
+                            <button
+                                className={`filter-btn ${isFilterMenuOpen ? 'active' : ''}`}
+                                onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
+                            >
+                                <i className="fa-solid fa-sliders"></i>
+                                Sort
+                            </button>
+
+                            {isFilterMenuOpen && (
+                                <div className="filter-menu">
+                                    <button
+                                        className={`filter-option ${filterType === 'latest' ? 'active' : ''}`}
+                                        onClick={() => { setFilterType('latest'); setIsFilterMenuOpen(false); }}
+                                    >
+                                        <i className="fa-regular fa-clock"></i> Latest
+                                    </button>
+                                    <button
+                                        className={`filter-option ${filterType === 'likes' ? 'active' : ''}`}
+                                        onClick={() => { setFilterType('likes'); setIsFilterMenuOpen(false); }}
+                                    >
+                                        <i className="fa-regular fa-heart"></i> Most Liked
+                                    </button>
+                                    <button
+                                        className={`filter-option ${filterType === 'comments' ? 'active' : ''}`}
+                                        onClick={() => { setFilterType('comments'); setIsFilterMenuOpen(false); }}
+                                    >
+                                        <i className="fa-regular fa-comment"></i> Most Discussed
+                                    </button>
+                                </div>
+                            )}
+                        </div >
+                        <button className="create-post-btn" onClick={handleCreatePostClick}>
+                            <i className="fa-solid fa-plus"></i> Create Post
+                        </button>
+                    </div>
+
+                    <div className="posts-feed">
+                        {loading ? (
+                            <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.7)', padding: '2rem' }}>
+                                <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '10px' }}></i>
+                                Loading posts...
+                            </div>
+                        ) : (
+                            <>
+                                {filteredPosts.map(post => (
+                                    <div
+                                        key={post.id}
+                                        className="post-card clickable"
+                                        onClick={() => setSelectedPostId(post.id)}
+                                    >
+                                        <div className="post-header">
+                                            <img
+                                                src={getAvatarUrl(post.avatarSeed)}
+                                                alt={post.author}
+                                                className="user-avatar"
+                                            />
+                                            <div className="header-content">
+                                                <div className="post-info">
+                                                    <span className="username">{post.author}</span>
+                                                    <span>•</span>
+                                                    <span className="time">{post.timeAgo}</span>
+                                                </div>
+                                                {post.board && (
+                                                    <div className="post-board">
+                                                        <BoardBadge board={getBoardById(post.board)} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <h3 className="post-title">{post.title}</h3>
+                                        <p className="post-content">{post.content}</p>
+                                        <div className="post-actions">
+                                            <button
+                                                className={`action-btn ${post.isLikedByCurrentUser ? 'liked' : ''}`}
+                                                onClick={(e) => handleLikePost(e, post)}
+                                            >
+                                                <i className={`fa-${post.isLikedByCurrentUser ? 'solid' : 'regular'} fa-heart`}></i> {post.likes}
+                                            </button>
+                                            <button className="action-btn" onClick={(e) => handleCommentClick(e, post.id)}>
+                                                <i className="fa-regular fa-comment"></i> {post.comments}
+                                            </button>
+                                            <button className="action-btn report-btn" onClick={(e) => { e.stopPropagation(); handleReportClick(post); }}>
+                                                <i className="fa-regular fa-flag"></i> Report
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {filteredPosts.length === 0 && (
+                                    <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)', padding: '2rem' }}>
+                                        No posts found matching your criteria.
+                                    </div>
+                                )}
+                            </>
                         )}
-                    </>
-                )}
-            </div>
+                    </div>
+                </>
+            )}
 
             {/* Create Post Modal */}
             {

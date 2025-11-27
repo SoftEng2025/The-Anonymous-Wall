@@ -1,49 +1,280 @@
 .forum-page {
+    width: 100%;
     max-width: 1200px;
     margin: 0 auto;
     color: white;
     min-height: 100vh;
-}
-
-/* Board Navigation */
-.board-navigation {
     display: flex;
-    gap: 0.75rem;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-    justify-content: center;
+    flex-direction: column;
+    /* align content to the top so boards sit higher in the viewport */
+    justify-content: flex-start;
+    padding: 0.75rem 1rem 1rem 1rem;
+    /* reduce top padding to move boards up */
 }
 
-.board-tab {
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.8);
-    font-weight: 600;
-    font-size: 0.95rem;
-    cursor: pointer;
+/* Board Grid View */
+.board-grid-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    /* remove large bottom margin and tighten spacing */
+    margin: 0.25rem 0 1rem 0;
+    flex: none;
+    /* let container size naturally so it sits higher */
+}
+
+.board-grid-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    /* align to left as requested */
+    text-align: left;
+    margin: 0;
+    color: white;
+}
+
+.board-grid-header {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+}
+
+.search-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.board-search .search-icon {
+    position: absolute;
+    left: 10px;
+    color: rgba(255, 255, 255, 0.6);
+    pointer-events: none;
+    font-size: 0.95rem;
+}
+
+.board-search .search-input {
+    width: 100%;
+    padding: 10px 12px 10px 36px;
+    /* left padding for the icon */
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.03);
+    color: white;
+    min-width: 160px;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.board-search .search-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.board-search .search-input:focus {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.boards-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.8rem;
+    /* slightly reduce gap to compact boards further */
+    width: 100%;
+}
+
+@media (max-width: 1200px) {
+    .boards-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .boards-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .boards-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.board-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem 0.75rem;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    gap: 0.6rem;
+    min-height: 120px;
+}
+
+.board-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--board-color, #60a5fa);
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+.board-card-icon {
+    font-size: 2rem;
+    color: var(--board-color, #60a5fa);
     transition: all 0.3s ease;
 }
 
-.board-tab i {
-    font-size: 1.1rem;
+.board-card:hover .board-card-icon {
+    font-size: 2.3rem;
+    filter: drop-shadow(0 0 6px var(--board-color, #60a5fa));
 }
 
-.board-tab:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px);
-}
-
-.board-tab.active {
-    background: var(--board-color, #60a5fa);
-    border-color: var(--board-color, #60a5fa);
+.board-card-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-align: center;
     color: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    margin: 0;
+    line-height: 1.2;
+}
+
+/* Forum Header (when board is selected) */
+.forum-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem 0;
+}
+
+.forum-header-inner {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    justify-content: center;
+}
+
+.back-to-boards-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.back-to-boards-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: scale(1.05);
+}
+
+.forum-title-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.header-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.icon-rules-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+
+.forum-board-icon {
+    font-size: 2.2rem;
+    color: var(--board-color, #60a5fa);
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.06);
+    flex-shrink: 0;
+}
+
+.forum-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    color: white;
+}
+
+.forum-description {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0.5rem 0 0 0;
+}
+
+/* Board rules list shown under title/description when viewing a board */
+.board-rules {
+    margin: 0.5rem 0 0 0;
+    padding-left: 1.1rem;
+    /* keep numbering flush */
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 0.98rem;
+}
+
+.board-rules li {
+    margin: 0.25rem 0;
+}
+
+/* Inline rules: remove extra left padding when rules are inline with the icon */
+.inline-rules {
+    margin: 0;
+    padding-left: 0;
+    list-style-position: inside;
+    text-align: left;
+    /* keep rules left-aligned next to icon */
+}
+
+@media (max-width: 900px) {
+    .forum-header {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .icon-rules-row {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .inline-rules {
+        text-align: center;
+    }
+
+    .back-to-boards-btn {
+        margin-left: 0;
+        /* reset tuck on small screens */
+    }
 }
 
 .forum-controls {
@@ -51,6 +282,17 @@
     justify-content: center;
     gap: 1rem;
     width: 100%;
-    max-width: 600px;
+    max-width: 100%;
     margin: 0 auto 2rem auto;
+}
+
+.latest-posts {
+    margin-top: 1rem;
+}
+
+.latest-posts-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 0.75rem 0;
 }
