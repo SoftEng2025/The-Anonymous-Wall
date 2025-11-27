@@ -11,6 +11,8 @@ import Forum from './pages/Forum'
 import ForumPost from './pages/ForumPost';
 import Profile from './pages/Profile';
 import TermsOfService from './pages/TermsOfService';
+import PrivacyPolicy from './pages/PrivacyPolicy/PrivacyPolicy';
+import SecurityPolicy from './pages/SecurityPolicy/SecurityPolicy';
 import LoginModal from './components/LoginModal';
 import Contact from './pages/Contact';
 import Footer from './components/Footer';
@@ -111,6 +113,8 @@ function AppContent() {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/security" element={<SecurityPolicy />} />
                 <Route path="/contact" element={<Contact />} />
             </Routes>
 
