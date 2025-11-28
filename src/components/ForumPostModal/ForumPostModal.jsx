@@ -18,6 +18,13 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
     const [replyingTo, setReplyingTo] = useState(null);
     const replyInputRef = useRef(null);
 
+    // Edit State
+    const [isEditingPost, setIsEditingPost] = useState(false);
+    const [editPostTitle, setEditPostTitle] = useState('');
+    const [editPostContent, setEditPostContent] = useState('');
+    const [editingReplyId, setEditingReplyId] = useState(null);
+    const [editReplyContent, setEditReplyContent] = useState('');
+
     useEffect(() => {
         const fetchPostAndReplies = async () => {
             try {
@@ -221,6 +228,50 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
         }
     };
 
+    const handleEditPostClick = () => {
+        setEditPostTitle(post.title);
+        setEditPostContent(post.content);
+        setIsEditingPost(true);
+    };
+
+    const handleSavePost = async () => {
+        if (!editPostContent.trim()) return;
+        try {
+            await postController.updatePost(postId, {
+                content: editPostContent,
+                editedAt: Date.now()
+            });
+            setPost(prev => ({ ...prev, content: editPostContent, editedAt: Date.now() }));
+            setIsEditingPost(false);
+            if (onPostUpdate) {
+                onPostUpdate({ id: postId, title: post.title, content: editPostContent });
+            }
+        } catch (error) {
+            console.error("Failed to update post:", error);
+            alert("Failed to update post.");
+        }
+    };
+
+    const handleEditReplyClick = (reply) => {
+        setEditReplyContent(reply.content);
+        setEditingReplyId(reply.id);
+    };
+
+    const handleSaveReply = async (replyId) => {
+        if (!editReplyContent.trim()) return;
+        try {
+            await replyController.updateReply(postId, replyId, {
+                content: editReplyContent,
+                editedAt: Date.now()
+            });
+            setReplies(prev => prev.map(r => r.id === replyId ? { ...r, content: editReplyContent, editedAt: Date.now() } : r));
+            setEditingReplyId(null);
+        } catch (error) {
+            console.error("Failed to update reply:", error);
+            alert("Failed to update reply.");
+        }
+    };
+
     if (loading) {
         return (
             <div className="forum-post-modal-overlay" onClick={handleOverlayClick}>
@@ -265,26 +316,56 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
                             <div className="modal-post-info">
                                 <span className="modal-username">{post.author}</span>
                                 <span className="modal-separator">•</span>
-                                <span className="modal-time">{post.timeAgo || 'Recently'}</span>
+                                <span className="modal-time">
+                                    {post.timeAgo || 'Recently'}
+                                    {post.editedAt && <span className="modal-edited-indicator"> (edited)</span>}
+                                </span>
                             </div>
                         </div>
 
-                        <h1 className="modal-post-title">{post.title}</h1>
-                        <p className="modal-post-content">{post.content}</p>
-
-                        <div className="modal-post-stats">
-                            <button
-                                className={`modal-stat-btn ${isLiked ? 'liked' : ''}`}
-                                onClick={handleLike}
-                            >
-                                <i className={`fa-${isLiked ? 'solid' : 'regular'} fa-heart`}></i>
-                                <span>{likes}</span>
-                            </button>
-                            <div className="modal-stat-item">
-                                <i className="fa-regular fa-comment"></i>
-                                <span>{replies.length}</span>
+                        {isEditingPost ? (
+                            <div className="modal-edit-form">
+                                <h1 className="modal-post-title">{post.title}</h1>
+                                <textarea
+                                    className="modal-edit-textarea"
+                                    value={editPostContent}
+                                    onChange={(e) => setEditPostContent(e.target.value)}
+                                    placeholder="Post Content"
+                                />
+                                <div className="modal-edit-actions">
+                                    <button className="modal-edit-btn-cancel" onClick={() => setIsEditingPost(false)}>Cancel</button>
+                                    <button className="modal-edit-btn-save" onClick={handleSavePost}>Save</button>
+                                </div>
                             </div>
-                        </div>
+                        ) : (
+                            <>
+                                <h1 className="modal-post-title">{post.title}</h1>
+                                <p className="modal-post-content">{post.content}</p>
+
+                                <div className="modal-post-stats">
+                                    <button
+                                        className={`modal-stat-btn ${isLiked ? 'liked' : ''}`}
+                                        onClick={handleLike}
+                                    >
+                                        <i className={`fa-${isLiked ? 'solid' : 'regular'} fa-heart`}></i>
+                                        <span>{likes}</span>
+                                    </button>
+                                    <button
+                                        className="modal-stat-btn"
+                                        onClick={() => replyInputRef.current?.focus()}
+                                    >
+                                        <i className="fa-regular fa-comment"></i>
+                                        <span>{replies.length}</span>
+                                    </button>
+                                    {currentUser && !currentUser.isAnonymous && post.uid === currentUser.uid && (
+                                        <button className="modal-stat-btn" onClick={handleEditPostClick}>
+                                            <i className="fa-solid fa-pen-to-square"></i>
+                                            <span>Edit</span>
+                                        </button>
+                                    )}
+                                </div>
+                            </>
+                        )}
                     </div>
 
                     {/* Replies Section */}
@@ -307,26 +388,57 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
                                                 </>
                                             )}
                                             <span className="modal-separator">•</span>
-                                            <span className="modal-reply-time">{reply.timeAgo || 'Recently'}</span>
+                                            <span className="modal-reply-time">
+                                                {reply.timeAgo || 'Recently'}
+                                                {reply.editedAt && <span className="modal-edited-indicator"> (edited)</span>}
+                                            </span>
                                         </div>
-                                        <p className="modal-reply-text">{reply.content}</p>
+
+                                        {editingReplyId === reply.id ? (
+                                            <div className="modal-edit-form">
+                                                <textarea
+                                                    className="modal-edit-textarea"
+                                                    value={editReplyContent}
+                                                    onChange={(e) => setEditReplyContent(e.target.value)}
+                                                    placeholder="Reply Content"
+                                                />
+                                                <div className="modal-edit-actions">
+                                                    <button className="modal-edit-btn-cancel" onClick={() => setEditingReplyId(null)}>Cancel</button>
+                                                    <button className="modal-edit-btn-save" onClick={() => handleSaveReply(reply.id)}>Save</button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <p className="modal-reply-text">{reply.content}</p>
+                                        )}
                                     </div>
-                                    <div className="modal-reply-actions">
-                                        <button
-                                            className={`modal-reply-action-btn ${reply.isLikedByCurrentUser ? 'liked' : ''}`}
-                                            onClick={() => handleReplyLike(reply.id, reply)}
-                                        >
-                                            <i className={`fa-${reply.isLikedByCurrentUser ? 'solid' : 'regular'} fa-heart`}></i>
-                                            <span>{reply.likes || 0}</span>
-                                        </button>
-                                        <button
-                                            className="modal-reply-action-btn"
-                                            onClick={() => handleReplyClick(reply)}
-                                        >
-                                            <i className="fa-solid fa-reply"></i>
-                                            <span>Reply</span>
-                                        </button>
-                                    </div>
+
+                                    {!editingReplyId && (
+                                        <div className="modal-reply-actions">
+                                            <button
+                                                className={`modal-reply-action-btn ${reply.isLikedByCurrentUser ? 'liked' : ''}`}
+                                                onClick={() => handleReplyLike(reply.id, reply)}
+                                            >
+                                                <i className={`fa-${reply.isLikedByCurrentUser ? 'solid' : 'regular'} fa-heart`}></i>
+                                                <span>{reply.likes || 0}</span>
+                                            </button>
+                                            <button
+                                                className="modal-reply-action-btn"
+                                                onClick={() => handleReplyClick(reply)}
+                                            >
+                                                <i className="fa-solid fa-reply"></i>
+                                                <span>Reply</span>
+                                            </button>
+                                            {currentUser && !currentUser.isAnonymous && reply.uid === currentUser.uid && (
+                                                <button
+                                                    className="modal-reply-action-btn"
+                                                    onClick={() => handleEditReplyClick(reply)}
+                                                >
+                                                    <i className="fa-solid fa-pen-to-square"></i>
+                                                    <span>Edit</span>
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))}

@@ -478,3 +478,73 @@
         padding: 1rem;
     }
 }
+/* Edit Mode Styles */
+.modal-edit-input {
+    width: 100%;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0.75rem 0;
+}
+
+.modal-edit-textarea {
+    width: 100%;
+    min-height: 60px;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.modal-edit-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    justify-content: flex-end;
+}
+
+.modal-edit-btn-save,
+.modal-edit-btn-cancel {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.modal-edit-btn-save {
+    background: #667eea;
+    color: white;
+}
+
+.modal-edit-btn-save:hover {
+    background: #5a6fd6;
+}
+
+.modal-edit-btn-cancel {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.modal-edit-btn-cancel:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.modal-edited-indicator {
+    font-style: italic;
+    opacity: 0.7;
+    font-size: 0.8em;
+    margin-left: 4px;
+}
