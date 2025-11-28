@@ -28,6 +28,7 @@ export default function SubmitModal({ isOpen, onClose }) {
     const [selectedTheme, setSelectedTheme] = useState(THEMES[2]) // Default to mint
     const [selectedMood, setSelectedMood] = useState(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [submitError, setSubmitError] = useState('')
 
     const { addMessage } = useMessages()
 
@@ -42,15 +43,16 @@ export default function SubmitModal({ isOpen, onClose }) {
 
     const handleSubmit = async () => {
         if (!message || !selectedMood) {
-            alert('Please write a message and select a mood')
+            setSubmitError('Please write a message and select a mood')
             return
         }
 
         if (message.length > MAX_MESSAGE_LENGTH) {
-            alert(`Message is too long. Please keep it under ${MAX_MESSAGE_LENGTH} characters.`)
+            setSubmitError(`Message is too long. Please keep it under ${MAX_MESSAGE_LENGTH} characters.`)
             return
         }
 
+        setSubmitError('')
         setIsSubmitting(true)
 
         try {
@@ -75,7 +77,7 @@ export default function SubmitModal({ isOpen, onClose }) {
             setSelectedMood(null)
         } catch (error) {
             console.error("Failed to submit message:", error)
-            alert("Failed to send message. Please try again.")
+            setSubmitError("Failed to send message. Please try again.")
         } finally {
             setIsSubmitting(false)
         }
@@ -93,6 +95,12 @@ export default function SubmitModal({ isOpen, onClose }) {
                 </div>
 
                 <div className="submit-body">
+                    {submitError && (
+                        <div className="submit-error-message">
+                            <span>{submitError}</span>
+                        </div>
+                    )}
+
                     <div className="message-input-wrapper">
                         <textarea
                             className="submit-textarea"
