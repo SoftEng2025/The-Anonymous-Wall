@@ -23,7 +23,7 @@ const MOODS = [
 const MAX_MESSAGE_LENGTH = 95
 
 export default function SubmitModal({ isOpen, onClose }) {
-    const [recipient, setRecipient] = useState('')
+
     const [message, setMessage] = useState('')
     const [selectedTheme, setSelectedTheme] = useState(THEMES[2]) // Default to mint
     const [selectedMood, setSelectedMood] = useState(null)
@@ -41,8 +41,8 @@ export default function SubmitModal({ isOpen, onClose }) {
     const isOverLimit = message.length > MAX_MESSAGE_LENGTH
 
     const handleSubmit = async () => {
-        if (!recipient || !message || !selectedMood) {
-            alert('Please fill in all fields and select a mood')
+        if (!message || !selectedMood) {
+            alert('Please write a message and select a mood')
             return
         }
 
@@ -55,7 +55,7 @@ export default function SubmitModal({ isOpen, onClose }) {
 
         try {
             const messageData = {
-                recipient,
+                recipient: 'Anonymous',
                 message,
                 theme: selectedTheme.id,
                 mood: selectedMood
@@ -69,11 +69,11 @@ export default function SubmitModal({ isOpen, onClose }) {
 
             // Close modal and reset form
             onClose()
-            setRecipient('')
+
             setMessage('')
             setSelectedTheme(THEMES[2])
             setSelectedMood(null)
-            
+
         } catch (error) {
             console.error("Failed to submit message:", error)
             alert("Failed to send message. Please try again.")
