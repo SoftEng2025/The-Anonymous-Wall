@@ -157,5 +157,20 @@ export const postController = {
             console.error("Error deleting post:", error);
             throw error;
         }
+    },
+
+    /**
+     * Updates a post by ID.
+     * @param {string} postId 
+     * @param {Object} updateData 
+     */
+    updatePost: async (postId, updateData) => {
+        try {
+            const docRef = doc(db, POSTS_COLLECTION, postId);
+            await updateDoc(docRef, updateData);
+        } catch (error) {
+            console.error("Error updating post:", error);
+            throw error;
+        }
     }
 };

@@ -108,5 +108,21 @@ export const replyController = {
             console.error("Error toggling reply like:", error);
             throw error;
         }
+    },
+
+    /**
+     * Updates a reply by ID.
+     * @param {string} postId
+     * @param {string} replyId
+     * @param {Object} updateData
+     */
+    updateReply: async (postId, replyId, updateData) => {
+        try {
+            const replyRef = doc(db, POSTS_COLLECTION, postId, REPLIES_SUBCOLLECTION, replyId);
+            await updateDoc(replyRef, updateData);
+        } catch (error) {
+            console.error("Error updating reply:", error);
+            throw error;
+        }
     }
 };
