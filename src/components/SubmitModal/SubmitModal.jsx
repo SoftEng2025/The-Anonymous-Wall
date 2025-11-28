@@ -73,7 +73,6 @@ export default function SubmitModal({ isOpen, onClose }) {
             setMessage('')
             setSelectedTheme(THEMES[2])
             setSelectedMood(null)
-
         } catch (error) {
             console.error("Failed to submit message:", error)
             alert("Failed to send message. Please try again.")
