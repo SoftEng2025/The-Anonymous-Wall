@@ -73,6 +73,23 @@
     gap: 1.5rem;
 }
 
+.submit-error-message {
+    background: rgba(220, 53, 69, 0.15);
+    border: 1px solid rgba(220, 53, 69, 0.5);
+    color: #ff6b6b;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.submit-error-message::before {
+    content: '⚠';
+    font-size: 1.1em;
+}
+
 .submit-input {
     width: 100%;
     padding: 1rem;
