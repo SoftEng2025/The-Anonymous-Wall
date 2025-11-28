@@ -94,14 +94,6 @@ export default function SubmitModal({ isOpen, onClose }) {
                 </div>
 
                 <div className="submit-body">
-                    <input
-                        type="text"
-                        className="submit-input"
-                        placeholder="Enter recipient's name"
-                        value={recipient}
-                        onChange={(e) => setRecipient(e.target.value)}
-                    />
-
                     <div className="message-input-wrapper">
                         <textarea
                             className="submit-textarea"
