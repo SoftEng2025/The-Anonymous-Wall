@@ -1,6 +1,10 @@
 /* Post History Styles */
 .history-posts {
     margin-top: 1.5rem;
+    max-height: 180px;
+    overflow-y: auto;
+    scrollbar-width: thick;
+    scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
 }
 
 .no-posts {
@@ -80,4 +84,22 @@
 
 .history-post-stats i {
     font-size: 0.9rem;
+}
+
+.history-posts::-webkit-scrollbar {
+    display: block;
+    width: 8px;
+}
+
+.history-posts::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.history-posts::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.history-posts::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
