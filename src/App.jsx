@@ -18,6 +18,7 @@ import Contact from './pages/Contact';
 import Footer from './components/Footer';
 import BackToTop from './components/BackToTop';
 import AdminDashboard from './pages/AdminDashboard';
+import NotFound from './pages/NotFound/NotFound';
 import { userController } from './backend/controllers/userController';
 import { useState, useEffect } from 'react';
 
@@ -116,6 +117,7 @@ function AppContent() {
                 <Route path="/privacy" element={<PrivacyPolicy />} />
                 <Route path="/security" element={<SecurityPolicy />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="*" element={<NotFound />} />
             </Routes>
 
             <BackToTop />
