@@ -23,6 +23,8 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
     const [editPostContent, setEditPostContent] = useState('');
     const [editingReplyId, setEditingReplyId] = useState(null);
     const [editReplyContent, setEditReplyContent] = useState('');
+    const [editError, setEditError] = useState(null);
+    const [editingType, setEditingType] = useState(null); // 'post' or 'reply'
 
     useEffect(() => {
         const fetchPostAndReplies = async () => {
@@ -242,11 +244,13 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
             });
             setPost(prev => ({ ...prev, content: editPostContent, editedAt: editedTimestamp }));
             setIsEditingPost(false);
+            setEditError(null);
             if (onPostUpdate) {
                 onPostUpdate({ id: postId, title: post.title, content: editPostContent, editedAt: editedTimestamp });
             }
         } catch (error) {
             console.error("Failed to update post:", error);
+            setEditError("Failed to save your changes. Please try again.");
         }
     };
 
@@ -265,8 +269,10 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
             });
             setReplies(prev => prev.map(r => r.id === replyId ? { ...r, content: editReplyContent, editedAt: editedTimestamp } : r));
             setEditingReplyId(null);
+            setEditError(null);
         } catch (error) {
             console.error("Failed to update reply:", error);
+            setEditError("Failed to save your changes. Please try again.");
         }
     };
 
@@ -330,6 +336,7 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
                                     onChange={(e) => setEditPostContent(e.target.value)}
                                     placeholder="Post Content"
                                 />
+                                {editError && <div className="modal-error-message">{editError}</div>}
                                 <div className="modal-edit-actions">
                                     <button className="modal-edit-btn-cancel" onClick={() => setIsEditingPost(false)}>Cancel</button>
                                     <button className="modal-edit-btn-save" onClick={handleSavePost}>Save</button>
@@ -400,6 +407,7 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
                                                     onChange={(e) => setEditReplyContent(e.target.value)}
                                                     placeholder="Reply Content"
                                                 />
+                                                {editError && <div className="modal-error-message">{editError}</div>}
                                                 <div className="modal-edit-actions">
                                                     <button className="modal-edit-btn-cancel" onClick={() => setEditingReplyId(null)}>Cancel</button>
                                                     <button className="modal-edit-btn-save" onClick={() => handleSaveReply(reply.id)}>Save</button>
@@ -410,7 +418,7 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
                                         )}
                                     </div>
 
-                                    {!editingReplyId && (
+                                    {editingReplyId !== reply.id && (
                                         <div className="modal-reply-actions">
                                             <button
                                                 className={`modal-reply-action-btn ${reply.isLikedByCurrentUser ? 'liked' : ''}`}
