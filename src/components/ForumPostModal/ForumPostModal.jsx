@@ -20,7 +20,6 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
 
     // Edit State
     const [isEditingPost, setIsEditingPost] = useState(false);
-    const [editPostTitle, setEditPostTitle] = useState('');
     const [editPostContent, setEditPostContent] = useState('');
     const [editingReplyId, setEditingReplyId] = useState(null);
     const [editReplyContent, setEditReplyContent] = useState('');
@@ -229,7 +228,6 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
     };
 
     const handleEditPostClick = () => {
-        setEditPostTitle(post.title);
         setEditPostContent(post.content);
         setIsEditingPost(true);
     };
@@ -237,18 +235,18 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
     const handleSavePost = async () => {
         if (!editPostContent.trim()) return;
         try {
+            const editedTimestamp = Date.now();
             await postController.updatePost(postId, {
                 content: editPostContent,
-                editedAt: Date.now()
+                editedAt: editedTimestamp
             });
-            setPost(prev => ({ ...prev, content: editPostContent, editedAt: Date.now() }));
+            setPost(prev => ({ ...prev, content: editPostContent, editedAt: editedTimestamp }));
             setIsEditingPost(false);
             if (onPostUpdate) {
-                onPostUpdate({ id: postId, title: post.title, content: editPostContent });
+                onPostUpdate({ id: postId, title: post.title, content: editPostContent, editedAt: editedTimestamp });
             }
         } catch (error) {
             console.error("Failed to update post:", error);
-            alert("Failed to update post.");
         }
     };
 
@@ -260,15 +258,15 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
     const handleSaveReply = async (replyId) => {
         if (!editReplyContent.trim()) return;
         try {
+            const editedTimestamp = Date.now();
             await replyController.updateReply(postId, replyId, {
                 content: editReplyContent,
-                editedAt: Date.now()
+                editedAt: editedTimestamp
             });
-            setReplies(prev => prev.map(r => r.id === replyId ? { ...r, content: editReplyContent, editedAt: Date.now() } : r));
+            setReplies(prev => prev.map(r => r.id === replyId ? { ...r, content: editReplyContent, editedAt: editedTimestamp } : r));
             setEditingReplyId(null);
         } catch (error) {
             console.error("Failed to update reply:", error);
-            alert("Failed to update reply.");
         }
     };
 
