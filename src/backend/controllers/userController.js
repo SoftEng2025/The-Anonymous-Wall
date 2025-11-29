@@ -1,5 +1,5 @@
 import { db } from '../config/firebase';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, onSnapshot } from 'firebase/firestore';
 
 const USERS_COLLECTION = 'users';
 
@@ -38,13 +38,14 @@ export const userController = {
         try {
             const docRef = doc(db, USERS_COLLECTION, uid);
             const docSnap = await getDoc(docRef);
+            const existingData = docSnap.exists() ? docSnap.data() : {};
 
             // Generate a random username if not provided
             let username = data.username;
             
             // If username is not provided in data, check if it exists in DB
-            if (!username && docSnap.exists() && docSnap.data().username) {
-                username = docSnap.data().username;
+            if (!username && existingData.username) {
+                username = existingData.username;
             }
 
             if (!username) {
@@ -54,20 +55,24 @@ export const userController = {
             }
 
             // Check if user should be admin
-            const role = ADMIN_EMAILS.includes(data.email) ? 'admin' : 'user';
-
-            // Only set createdAt if it doesn't exist or if we are creating a new user
-            let createdAt = new Date().toISOString();
-            if (docSnap.exists() && docSnap.data().createdAt) {
-                createdAt = docSnap.data().createdAt;
+            // SECURITY: Role assignment must be done on the backend. 
+            // Client-side role assignment is insecure.
+            // However, for DEVELOPMENT convenience, we allow it if running locally.
+            let role = 'user';
+            if (import.meta.env.DEV && ADMIN_EMAILS.includes(data.email)) {
+                console.warn("Assigning ADMIN role based on client-side check (DEV MODE ONLY)");
+                role = 'admin';
             }
 
+            // Only set createdAt if it doesn't exist or if we are creating a new user
+            const createdAt = existingData.createdAt || new Date().toISOString();
+
             await setDoc(docRef, {
+                ...data,
                 username: username,
                 // isAnonymous is no longer needed as everyone has a pseudonym
                 createdAt: createdAt,
-                role: role,
-                ...data
+                role: role
             }, { merge: true });
 
             return { username };
@@ -109,5 +114,25 @@ export const userController = {
             console.error("Error updating user profile:", error);
             throw error;
         }
+    },
+
+    /**
+     * Subscribes to the user's admin status.
+     * @param {string} uid 
+     * @param {function} callback 
+     * @returns {function} Unsubscribe function
+     */
+    subscribeToAdminStatus: (uid, callback) => {
+        const docRef = doc(db, USERS_COLLECTION, uid);
+        return onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+                callback(docSnap.data().role === 'admin');
+            } else {
+                callback(false);
+            }
+        }, (error) => {
+            console.error("Error subscribing to admin status:", error);
+            callback(false);
+        });
     }
 };

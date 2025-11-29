@@ -34,15 +34,20 @@ function AppContent() {
     }, [location.pathname]);
 
     useEffect(() => {
-        const checkAdmin = async () => {
-            if (currentUser) {
-                const adminStatus = await userController.isAdmin(currentUser.uid);
+        let unsubscribe;
+        if (currentUser) {
+            unsubscribe = userController.subscribeToAdminStatus(currentUser.uid, (adminStatus) => {
                 setIsAdmin(adminStatus);
-            } else {
-                setIsAdmin(false);
+            });
+        } else {
+            setIsAdmin(false);
+        }
+
+        return () => {
+            if (unsubscribe) {
+                unsubscribe();
             }
         };
-        checkAdmin();
     }, [currentUser]);
 
     const handleCloseLoginModal = () => {
