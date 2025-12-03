@@ -24,6 +24,7 @@ const MAX_MESSAGE_LENGTH = 95
 
 export default function SubmitModal({ isOpen, onClose }) {
 
+    const [recipient, setRecipient] = useState('')
     const [message, setMessage] = useState('')
     const [selectedTheme, setSelectedTheme] = useState(THEMES[2]) // Default to mint
     const [selectedMood, setSelectedMood] = useState(null)
@@ -34,16 +35,21 @@ export default function SubmitModal({ isOpen, onClose }) {
 
     if (!isOpen) return null
 
+    const handleRecipientChange = (e) => {
+        setRecipient(e.target.value)
+    }
+
     const handleMessageChange = (e) => {
         setMessage(e.target.value)
     }
 
     const remainingChars = MAX_MESSAGE_LENGTH - message.length
     const isOverLimit = message.length > MAX_MESSAGE_LENGTH
+    const isRecipientMissing = recipient.trim().length === 0
 
     const handleSubmit = async () => {
-        if (!message || !selectedMood) {
-            setSubmitError('Please write a message and select a mood')
+        if (isRecipientMissing || !message || !selectedMood) {
+            setSubmitError('Please add a recipient, write a message, and select a mood')
             return
         }
 
@@ -56,8 +62,10 @@ export default function SubmitModal({ isOpen, onClose }) {
         setIsSubmitting(true)
 
         try {
+            const trimmedRecipient = recipient.trim()
+
             const messageData = {
-                recipient: 'Anonymous',
+                recipient: trimmedRecipient || 'Anonymous',
                 message,
                 theme: selectedTheme.id,
                 mood: selectedMood
@@ -72,6 +80,7 @@ export default function SubmitModal({ isOpen, onClose }) {
             // Close modal and reset form
             onClose()
 
+            setRecipient('')
             setMessage('')
             setSelectedTheme(THEMES[2])
             setSelectedMood(null)
@@ -91,7 +100,7 @@ export default function SubmitModal({ isOpen, onClose }) {
                 </button>
 
                 <div className="submit-header">
-                    <h2 className="submit-title">Send a Message</h2>
+                    <h2 className="submit-title">Send a Message to Someone</h2>
                 </div>
 
                 <div className="submit-body">
@@ -100,6 +109,18 @@ export default function SubmitModal({ isOpen, onClose }) {
                             <span>{submitError}</span>
                         </div>
                     )}
+
+                    <div className="recipient-input">
+                        <label className="selector-label">Recipient</label>
+                        <input
+                            type="text"
+                            className="submit-input"
+                            placeholder="Who is this message for?"
+                            value={recipient}
+                            maxLength={40}
+                            onChange={handleRecipientChange}
+                        />
+                    </div>
 
                     <div className="message-input-wrapper">
                         <textarea
@@ -148,7 +169,7 @@ export default function SubmitModal({ isOpen, onClose }) {
                     <button
                         className="submit-send-button"
                         onClick={handleSubmit}
-                        disabled={isSubmitting || isOverLimit}
+                        disabled={isSubmitting || isOverLimit || isRecipientMissing}
                     >
                         {isSubmitting ? 'Sending...' : 'Send'} <i className="fa-solid fa-paper-plane"></i>
                     </button>

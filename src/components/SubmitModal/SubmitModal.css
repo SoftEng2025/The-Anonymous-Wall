@@ -16,7 +16,7 @@
 
 /* Submit Card - Adapted from User's .submit-card */
 .submit-modal-card {
-    background: var(--card-body, #1e293b);
+    background: #344172;
     border-radius: 12px;
     width: 100%;
     max-width: 500px;
@@ -54,14 +54,14 @@
 /* User's Styles Integrated */
 
 .submit-header {
-    background: var(--card-top, #2d3748);
+    background: #5963a1;
     padding: 1.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .submit-title {
     margin: 0;
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     font-weight: 700;
     color: var(--text-light, #fff);
 }
@@ -71,6 +71,7 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    background: #344172;
 }
 
 .submit-error-message {
@@ -92,18 +93,30 @@
 
 .submit-input {
     width: 100%;
-    padding: 1rem;
+    padding: 0.9rem 1rem;
     border-radius: 8px;
-    border: none;
-    background: #ffffff;
+    border: 1px solid #d6d9e6;
+    background: #f8fafc;
     font-family: var(--font-primary, sans-serif);
     font-size: 1rem;
-    color: #333;
+    color: #273455;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 .submit-input::placeholder {
-    color: #a0a0a0;
+    color: #a1a9bb;
     font-weight: 600;
+}
+
+.submit-input:focus,
+.submit-textarea:focus {
+    outline: 2px solid #8ea2ff;
+    border-color: #8ea2ff;
+}
+
+.recipient-input {
+    width: 100%;
 }
 
 .message-input-wrapper {
@@ -117,17 +130,19 @@
     padding: 1rem;
     padding-bottom: 2.5rem;
     border-radius: 8px;
-    border: none;
+    border: 1px solid #d6d9e6;
     font-family: var(--font-primary, sans-serif);
     font-size: 1rem;
-    color: #253353;
+    color: #273455;
     font-weight: 600;
+    background: #ffffff;
     resize: none;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 .submit-textarea::placeholder {
-    color: rgba(37, 51, 83, 0.6);
+    color: rgba(37, 51, 83, 0.55);
 }
 
 .char-counter {
@@ -162,6 +177,8 @@
     gap: 0;
     border-radius: 8px;
     overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 .theme-option {
