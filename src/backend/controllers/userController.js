@@ -37,25 +37,39 @@ export const userController = {
     createUserProfile: async (uid, data) => {
         try {
             const docRef = doc(db, USERS_COLLECTION, uid);
+            const docSnap = await getDoc(docRef);
 
-            // Generate a random username if not provided
+            // Generate a random username if not provided and not already existing
             let username = data.username;
+
             if (!username) {
-                // Simple uniqueness check could be added here, but for now we rely on the random space
-                const { generateRandomName } = await import('../../utils/nameGenerator');
-                username = generateRandomName();
+                if (docSnap.exists() && docSnap.data().username) {
+                    // Use existing username
+                    username = docSnap.data().username;
+                } else {
+                    // Generate new random username
+                    const { generateRandomName } = await import('../../utils/nameGenerator');
+                    username = generateRandomName();
+                }
             }
 
             // Check if user should be admin
             const role = ADMIN_EMAILS.includes(data.email) ? 'admin' : 'user';
 
-            await setDoc(docRef, {
+            // Prepare data to save
+            const userData = {
                 username: username,
                 // isAnonymous is no longer needed as everyone has a pseudonym
-                createdAt: new Date().toISOString(),
                 role: role,
                 ...data
-            }, { merge: true });
+            };
+
+            // Only set createdAt if it doesn't exist
+            if (!docSnap.exists()) {
+                userData.createdAt = new Date().toISOString();
+            }
+
+            await setDoc(docRef, userData, { merge: true });
 
             return { username };
         } catch (error) {
