@@ -2,11 +2,20 @@
 .site-header {
     background: var(--header-bg);
     border-radius: 0;
-    padding: 18px 32px;
+    padding: 0;
+    box-shadow: none;
+    width: 100%;
+    position: relative;
+    z-index: 1000;
+}
+
+.header-content-wrapper {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: none;
+    padding: 18px 32px;
+    max-width: 1200px;
+    margin: 0 auto;
     width: 100%;
 }
 
@@ -14,7 +23,7 @@
     font-weight: 800;
     font-size: 24px;
     letter-spacing: 0.04em;
-    flex: 1;
+    z-index: 1001;
 }
 
 .logo-link {
@@ -38,10 +47,18 @@
     color: var(--accent-gold);
 }
 
+.nav-container {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    flex: 1;
+    justify-content: flex-end;
+}
+
 .nav-links {
     display: flex;
     gap: 32px;
-    justify-content: center;
+    align-items: center;
 }
 
 .nav-link {
@@ -97,8 +114,6 @@
 .auth-container {
     display: flex;
     align-items: center;
-    flex: 1;
-    justify-content: flex-end;
 }
 
 .user-menu {
@@ -115,14 +130,68 @@
     border: 2px solid var(--accent-gold);
 }
 
+.mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text-light);
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1001;
+}
+
 /* Responsive */
 @media (max-width: 960px) {
-    .site-header {
+    .header-content-wrapper {
+        padding: 18px 20px;
+    }
+
+    .mobile-menu-toggle {
+        display: block;
+    }
+
+    .nav-container {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: var(--header-bg);
         flex-direction: column;
+        padding: 20px;
         gap: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+
+        /* Animation setup */
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+    }
+
+    .nav-container.open {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
     }
 
     .nav-links {
-        flex-wrap: wrap;
+        flex-direction: column;
+        width: 100%;
+        gap: 20px;
+    }
+
+    .nav-link {
+        width: 100%;
+        text-align: center;
+        padding: 10px 0;
+        font-size: 18px;
+    }
+
+    .auth-container {
+        width: 100%;
+        justify-content: center;
+        padding-top: 10px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
     }
 }
