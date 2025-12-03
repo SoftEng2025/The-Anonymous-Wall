@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom'
 import './App.css'
-import './components/Header.css'
+import Header from './components/Header';
 import { useAuth } from './contexts/AuthContext'
 import { getAvatarUrl } from './backend/api/avatar'
 import { NAV_LINKS } from './utils/constants'
@@ -19,101 +19,32 @@ import Footer from './components/Footer';
 import BackToTop from './components/BackToTop';
 import AdminDashboard from './pages/AdminDashboard';
 import NotFound from './pages/NotFound/NotFound';
-import { userController } from './backend/controllers/userController';
+
 import { useState, useEffect } from 'react';
 
 function AppContent() {
     const { currentUser, logout } = useAuth()
     const location = useLocation()
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
-    const [isAdmin, setIsAdmin] = useState(false)
 
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
 
     // Scroll to top on route change
     useEffect(() => {
         window.scrollTo(0, 0);
-        setIsMobileMenuOpen(false); // Close menu on route change
     }, [location.pathname]);
 
-    useEffect(() => {
-        const checkAdmin = async () => {
-            if (currentUser) {
-                const adminStatus = await userController.isAdmin(currentUser.uid);
-                setIsAdmin(adminStatus);
-            } else {
-                setIsAdmin(false);
-            }
-        };
-        checkAdmin();
-    }, [currentUser]);
+
 
     const handleCloseLoginModal = () => {
         setIsLoginModalOpen(false);
     };
 
-    const toggleMobileMenu = () => {
-        setIsMobileMenuOpen(!isMobileMenuOpen);
-    };
+
 
     return (
         <div className="page">
-            <header className="site-header">
-                <div className="header-content-wrapper">
-                    <div className="logo">
-                        <Link to="/" className="logo-link">
-                            <img src="/AnonyWallLogo.svg" alt="AnonyWall Logo" className="logo-image" />
-                            <span>
-                                <span className="logo-primary">Anony</span>
-                                <span className="logo-accent">Wall</span>
-                            </span>
-                        </Link>
-                    </div>
-
-                    <button className="mobile-menu-toggle" onClick={toggleMobileMenu} aria-label="Toggle menu">
-                        <i className={`fa-solid ${isMobileMenuOpen ? 'fa-xmark' : 'fa-bars'}`}></i>
-                    </button>
-
-                    <div className={`nav-container ${isMobileMenuOpen ? 'open' : ''}`}>
-                        <nav className="nav-links" aria-label="Primary navigation">
-                            <Link to="/freedom-wall" className={`nav-link ${location.pathname === '/freedom-wall' || location.pathname === '/browse' ? 'active' : ''}`}>
-                                Freedom Wall
-                            </Link>
-
-                            <Link to="/forum" className={`nav-link ${location.pathname === '/forum' ? 'active' : ''}`}>
-                                Forum
-                            </Link>
-                            {isAdmin && (
-                                <Link
-                                    to="/admin"
-                                    className={`nav-link ${location.pathname === '/admin' ? 'active' : ''}`}
-                                >
-                                    Admin
-                                </Link>
-                            )}
-
-                        </nav>
-                        <div className="auth-container">
-                            {currentUser ? (
-                                <div className="user-menu">
-                                    <Link to="/profile">
-                                        <img
-                                            src={getAvatarUrl(currentUser.uid)}
-                                            alt={currentUser.displayName || 'User'}
-                                            className="user-avatar"
-                                            title="Go to Profile"
-                                        />
-                                    </Link>
-                                </div>
-                            ) : (
-                                <button className="login-button" onClick={() => setIsLoginModalOpen(true)}>
-                                    Login
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </header>
+            <Header onLoginClick={() => setIsLoginModalOpen(true)} />
 
             <LoginModal
                 isOpen={isLoginModalOpen}
