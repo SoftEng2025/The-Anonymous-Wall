@@ -4,41 +4,52 @@ import { useAuth } from '../../contexts/AuthContext';
 import { getAvatarUrl } from '../../backend/api/avatar';
 import { postController } from '../../backend/controllers/postController';
 import { userController } from '../../backend/controllers/userController';
-import { MOCK_POSTS } from '../../data/mockForumData';
+import { reportController } from '../../backend/controllers/reportController';
 import { BOARDS, getBoardById, getBoardColor, getBoardName } from '../../data/boardConfig';
+import { formatTimeAgo } from '../../utils/timeUtils';
+
+// Components
 import LoginModal from '../../components/LoginModal';
-import Stats from '../../components/Stats';
-import BoardBadge from '../../components/BoardBadge';
 import ReportModal from '../../components/ReportModal';
 import ReportSuccessModal from '../../components/ReportSuccessModal/ReportSuccessModal';
 import ForumPostModal from '../../components/ForumPostModal';
-import { reportController } from '../../backend/controllers/reportController';
-import { formatTimeAgo } from '../../utils/timeUtils';
+import BoardBadge from '../../components/BoardBadge'; // Used in Grid View
+import ForumHeader from './components/ForumHeader';
+import ForumFilters from './components/ForumFilters';
+import ForumFeed from './components/ForumFeed';
+
 import './Forum.css';
 
 const Forum = () => {
     const { currentUser } = useAuth();
     const navigate = useNavigate();
+
+    // UI State
     const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+    const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
+
+    // Data State
     const [posts, setPosts] = useState([]);
-    const [filteredPosts, setFilteredPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [username, setUsername] = useState('');
 
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    // Pagination State
+    const [lastDoc, setLastDoc] = useState(null);
+    const [hasMore, setHasMore] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
 
-    // Board and Filter State
+    // Filter State
     const [selectedBoard, setSelectedBoard] = useState(null); // null = all boards
     const [filterType, setFilterType] = useState('latest'); // latest, likes, comments
-    const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
     const [boardSearch, setBoardSearch] = useState('');
 
     // Form State
     const [newPostTitle, setNewPostTitle] = useState('');
     const [newPostContent, setNewPostContent] = useState('');
-    const [newPostBoard, setNewPostBoard] = useState(''); // Selected board for new post
+    const [newPostBoard, setNewPostBoard] = useState('');
     const [error, setError] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Report State
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -49,46 +60,7 @@ const Forum = () => {
     const [selectedPostId, setSelectedPostId] = useState(null);
     const [focusCommentInput, setFocusCommentInput] = useState(false);
 
-    const handlePostUpdate = (updatedData) => {
-        setPosts(prevPosts => prevPosts.map(p => p.id === updatedData.id ? { ...p, ...updatedData } : p));
-        setFilteredPosts(prevPosts => prevPosts.map(p => p.id === updatedData.id ? { ...p, ...updatedData } : p));
-    };
-
-    // Fetch Posts
-    useEffect(() => {
-        const fetchPosts = async () => {
-            try {
-                setLoading(true);
-                const fetchedPosts = await postController.getAllPosts();
-                // Use mock data if Firebase is empty
-                if (fetchedPosts.length === 0) {
-                    console.log("Using mock data - Firebase is empty");
-                    setPosts(MOCK_POSTS);
-                    setFilteredPosts(MOCK_POSTS);
-                } else {
-                    const processedPosts = fetchedPosts.map(post => ({
-                        ...post,
-                        timeAgo: formatTimeAgo(post.timestamp),
-                        isLikedByCurrentUser: currentUser ? (post.likedBy || []).includes(currentUser.uid) : false
-                    }));
-                    setPosts(processedPosts);
-                    setFilteredPosts(processedPosts);
-                }
-            } catch (error) {
-                console.error("Failed to fetch posts:", error);
-                // Use mock data on error
-                console.log("Using mock data due to error");
-                setPosts(MOCK_POSTS);
-                setFilteredPosts(MOCK_POSTS);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchPosts();
-    }, []);
-
-    // Fetch user profile to get username
+    // Fetch Username
     useEffect(() => {
         const fetchUsername = async () => {
             if (currentUser) {
@@ -97,7 +69,6 @@ const Forum = () => {
                     if (profile && profile.username) {
                         setUsername(profile.username);
                     } else {
-                        // Create profile if it doesn't exist
                         const newProfile = await userController.createUserProfile(currentUser.uid, {});
                         setUsername(newProfile.username);
                     }
@@ -107,39 +78,67 @@ const Forum = () => {
                 }
             }
         };
-
         fetchUsername();
     }, [currentUser]);
 
-    // Filter Logic
+    // Fetch Posts (Pagination)
+    const fetchPosts = async (isLoadMore = false) => {
+        try {
+            if (isLoadMore) {
+                setLoadingMore(true);
+            } else {
+                setLoading(true);
+            }
+
+            const currentLastDoc = isLoadMore ? lastDoc : null;
+            // Pass selectedBoard to filter server-side
+            const { posts: newPosts, lastDoc: newLastDoc } = await postController.getPostsPaginated(
+                currentLastDoc,
+                10,
+                selectedBoard
+            );
+
+            const processedPosts = newPosts.map(post => ({
+                ...post,
+                timeAgo: formatTimeAgo(post.timestamp),
+                isLikedByCurrentUser: currentUser ? (post.likedBy || []).includes(currentUser.uid) : false
+            }));
+
+            if (isLoadMore) {
+                setPosts(prev => [...prev, ...processedPosts]);
+            } else {
+                setPosts(processedPosts);
+            }
+
+            setLastDoc(newLastDoc);
+            // If we got fewer posts than requested, we reached the end
+            setHasMore(newPosts.length === 10);
+
+        } catch (error) {
+            console.error("Failed to fetch posts:", error);
+        } finally {
+            setLoading(false);
+            setLoadingMore(false);
+        }
+    };
+
+    // Reset and fetch when board changes
     useEffect(() => {
-        let result = [...posts];
+        setPosts([]);
+        setLastDoc(null);
+        setHasMore(true);
+        fetchPosts(false);
+    }, [selectedBoard]);
 
-        // Filter by Board
-        if (selectedBoard) {
-            result = result.filter(post => post.board === selectedBoard);
+    const handleLoadMore = () => {
+        if (!loadingMore && hasMore) {
+            fetchPosts(true);
         }
+    };
 
-        // Sort by Filter Type
-        switch (filterType) {
-            case 'likes':
-                result.sort((a, b) => b.likes - a.likes);
-                break;
-            case 'comments':
-                result.sort((a, b) => b.comments - a.comments);
-                break;
-            case 'latest':
-            default:
-                result.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-                break;
-        }
-
-        setFilteredPosts(result);
-    }, [posts, selectedBoard, filterType]);
-
+    // Handlers
     const handleCreatePostClick = () => {
         if (currentUser) {
-            // If we're inside a specific board view, pre-select that board
             if (selectedBoard) {
                 setNewPostBoard(selectedBoard);
             }
@@ -184,7 +183,7 @@ const Forum = () => {
         const shouldLike = !isCurrentlyLiked;
 
         // Optimistic update
-        const updatedPosts = posts.map(p => {
+        setPosts(prevPosts => prevPosts.map(p => {
             if (p.id === post.id) {
                 return {
                     ...p,
@@ -196,10 +195,7 @@ const Forum = () => {
                 };
             }
             return p;
-        });
-
-        setPosts(updatedPosts);
-        setFilteredPosts(updatedPosts);
+        }));
 
         try {
             await postController.toggleLikePost(post.id, currentUser.uid, shouldLike);
@@ -246,18 +242,20 @@ const Forum = () => {
 
             const newPostId = await postController.createPost(newPostData);
 
-            // Optimistic update or refetch
-            const createdPost = {
-                id: newPostId,
-                ...newPostData,
-                likes: 0,
-                comments: 0,
-                timeAgo: formatTimeAgo(Date.now()),
-                avatarSeed: currentUser.uid,
-                timestamp: Date.now()
-            };
-
-            setPosts([createdPost, ...posts]);
+            // Add new post to top of list if it matches current board filter
+            if (!selectedBoard || selectedBoard === newPostBoard) {
+                const createdPost = {
+                    id: newPostId,
+                    ...newPostData,
+                    likes: 0,
+                    comments: 0,
+                    timeAgo: formatTimeAgo(Date.now()),
+                    avatarSeed: currentUser.uid,
+                    timestamp: Date.now(),
+                    isLikedByCurrentUser: false
+                };
+                setPosts([createdPost, ...posts]);
+            }
 
             // Reset Form
             setNewPostTitle('');
@@ -273,9 +271,32 @@ const Forum = () => {
         }
     };
 
+    const handlePostUpdate = (updatedData) => {
+        setPosts(prevPosts => prevPosts.map(p => p.id === updatedData.id ? { ...p, ...updatedData } : p));
+    };
+
+    // Derived state for sorting (client-side sort of loaded posts)
+    const getSortedPosts = () => {
+        let sorted = [...posts];
+        switch (filterType) {
+            case 'likes':
+                sorted.sort((a, b) => b.likes - a.likes);
+                break;
+            case 'comments':
+                sorted.sort((a, b) => b.comments - a.comments);
+                break;
+            case 'latest':
+            default:
+                sorted.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                break;
+        }
+        return sorted;
+    };
+
+    const displayedPosts = getSortedPosts();
+
     return (
         <div className="forum-page">
-            {/* Show Board Grid or Posts Feed */}
             {selectedBoard === null ? (
                 // Board Selection Grid View
                 <div className="board-grid-container">
@@ -330,9 +351,8 @@ const Forum = () => {
                                                 .filter(b => b.name.toLowerCase().includes(boardSearch.toLowerCase()))
                                                 .map(b => b.id);
 
-                                            const postsToShow = filteredPosts
+                                            const postsToShow = posts
                                                 .filter(p => visibleBoardIds.length === 0 || visibleBoardIds.includes(p.board))
-                                                .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
                                                 .slice(0, 5); // show only 5 most recent posts
 
                                             return postsToShow.map(post => (
@@ -380,9 +400,9 @@ const Forum = () => {
                                             ));
                                         })()
                                     }
-                                    {filteredPosts.length === 0 && (
+                                    {posts.length === 0 && (
                                         <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)', padding: '2rem' }}>
-                                            No posts found matching your criteria.
+                                            No posts found.
                                         </div>
                                     )}
                                 </>
@@ -393,142 +413,30 @@ const Forum = () => {
             ) : (
                 // Posts Feed View
                 <>
-                    {/* Back to Boards and Board Title */}
-                    <div className="forum-header">
-                        <div className="forum-header-inner">
-                            <div className="header-center">
-                                <div className="forum-title-wrapper">
-                                    <button
-                                        className="back-to-boards-btn"
-                                        aria-label="Back to boards"
-                                        onClick={() => {
-                                            setSelectedBoard(null);
-                                            setIsFilterMenuOpen(false);
-                                        }}
-                                    >
-                                        <i className="fa-solid fa-arrow-left"></i>
-                                    </button>
-                                    <h1 className="forum-title">{getBoardName(selectedBoard)}</h1>
-                                </div>
-                                <p className="forum-description">{getBoardById(selectedBoard)?.description}</p>
+                    <ForumHeader
+                        selectedBoard={selectedBoard}
+                        onBackToBoards={() => setSelectedBoard(null)}
+                    />
 
-                                <div className="icon-rules-row">
-                                    <div
-                                        className="forum-board-icon"
-                                        style={{ '--board-color': getBoardColor(selectedBoard) }}
-                                    >
-                                        <i className={`fa-solid ${getBoardById(selectedBoard)?.icon}`}></i>
-                                    </div>
+                    <ForumFilters
+                        isFilterMenuOpen={isFilterMenuOpen}
+                        setIsFilterMenuOpen={setIsFilterMenuOpen}
+                        filterType={filterType}
+                        setFilterType={setFilterType}
+                        onCreatePost={handleCreatePostClick}
+                    />
 
-                                    {getBoardById(selectedBoard)?.rules && (
-                                        <ol className="board-rules inline-rules">
-                                            {getBoardById(selectedBoard).rules.map((r, idx) => (
-                                                <li key={idx}>{r}</li>
-                                            ))}
-                                        </ol>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="forum-controls">
-                        <div className="filter-container">
-                            <button
-                                className={`filter-btn ${isFilterMenuOpen ? 'active' : ''}`}
-                                onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
-                            >
-                                <i className="fa-solid fa-sliders"></i>
-                                Sort
-                            </button>
-
-                            {isFilterMenuOpen && (
-                                <div className="filter-menu">
-                                    <button
-                                        className={`filter-option ${filterType === 'latest' ? 'active' : ''}`}
-                                        onClick={() => { setFilterType('latest'); setIsFilterMenuOpen(false); }}
-                                    >
-                                        <i className="fa-regular fa-clock"></i> Latest
-                                    </button>
-                                    <button
-                                        className={`filter-option ${filterType === 'likes' ? 'active' : ''}`}
-                                        onClick={() => { setFilterType('likes'); setIsFilterMenuOpen(false); }}
-                                    >
-                                        <i className="fa-regular fa-heart"></i> Most Liked
-                                    </button>
-                                    <button
-                                        className={`filter-option ${filterType === 'comments' ? 'active' : ''}`}
-                                        onClick={() => { setFilterType('comments'); setIsFilterMenuOpen(false); }}
-                                    >
-                                        <i className="fa-regular fa-comment"></i> Most Discussed
-                                    </button>
-                                </div>
-                            )}
-                        </div >
-                        <button className="create-post-btn" onClick={handleCreatePostClick}>
-                            <i className="fa-solid fa-plus"></i> Create Post
-                        </button>
-                    </div>
-
-                    <div className="posts-feed">
-                        {loading ? (
-                            <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.7)', padding: '2rem' }}>
-                                <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '10px' }}></i>
-                                Loading posts...
-                            </div>
-                        ) : (
-                            <>
-                                {filteredPosts.map(post => (
-                                    <div
-                                        key={post.id}
-                                        className="post-card clickable"
-                                        onClick={() => setSelectedPostId(post.id)}
-                                    >
-                                        <div className="post-header">
-                                            <img
-                                                src={getAvatarUrl(post.avatarSeed)}
-                                                alt={post.author}
-                                                className="user-avatar"
-                                            />
-                                            <div className="header-content">
-                                                <div className="post-info">
-                                                    <span className="username">{post.author}</span>
-                                                    <span>•</span>
-                                                    <span className="time">{post.timeAgo}</span>
-                                                </div>
-                                                {post.board && (
-                                                    <div className="post-board">
-                                                        <BoardBadge board={getBoardById(post.board)} />
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <h3 className="post-title">{post.title}</h3>
-                                        <p className="post-content">{post.content}</p>
-                                        <div className="post-actions">
-                                            <button
-                                                className={`action-btn ${post.isLikedByCurrentUser ? 'liked' : ''}`}
-                                                onClick={(e) => handleLikePost(e, post)}
-                                            >
-                                                <i className={`fa-${post.isLikedByCurrentUser ? 'solid' : 'regular'} fa-heart`}></i> {post.likes}
-                                            </button>
-                                            <button className="action-btn" onClick={(e) => handleCommentClick(e, post.id)}>
-                                                <i className="fa-regular fa-comment"></i> {post.comments}
-                                            </button>
-                                            <button className="action-btn report-btn" onClick={(e) => { e.stopPropagation(); handleReportClick(post); }}>
-                                                <i className="fa-regular fa-flag"></i> Report
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                                {filteredPosts.length === 0 && (
-                                    <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)', padding: '2rem' }}>
-                                        No posts found matching your criteria.
-                                    </div>
-                                )}
-                            </>
-                        )}
-                    </div>
+                    <ForumFeed
+                        posts={displayedPosts}
+                        loading={loading}
+                        onLike={handleLikePost}
+                        onComment={handleCommentClick}
+                        onReport={handleReportClick}
+                        onPostClick={(id) => setSelectedPostId(id)}
+                        hasMore={hasMore}
+                        onLoadMore={handleLoadMore}
+                        loadingMore={loadingMore}
+                    />
                 </>
             )}
 
