@@ -28,7 +28,13 @@
 }
 
 @media (max-width: 600px) {
+    .browse-container {
+        gap: 2rem;
+        padding: 0 16px;
+    }
+
     .messages-grid {
         grid-template-columns: 1fr;
+        gap: 1.5rem;
     }
 }
