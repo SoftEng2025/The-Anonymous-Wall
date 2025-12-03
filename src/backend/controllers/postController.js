@@ -1,5 +1,5 @@
 import { db } from '../config/firebase';
-import { collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy, increment, where, writeBatch, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy, increment, where, writeBatch, arrayUnion, arrayRemove, startAfter, limit } from 'firebase/firestore';
 import { createPostModel } from '../models/PostModel';
 
 const POSTS_COLLECTION = 'posts';
@@ -35,6 +35,46 @@ export const postController = {
             }));
         } catch (error) {
             console.error("Error fetching posts:", error);
+            throw error;
+        }
+    },
+
+    /**
+     * Retrieves posts with pagination.
+     * @param {Object} lastDoc - The last document from the previous batch (for startAfter).
+     * @param {number} limitCount - Number of posts to fetch.
+     * @param {string} boardId - Optional board ID to filter by.
+     * @returns {Promise<Object>} Object containing posts and the last document.
+     */
+    getPostsPaginated: async (lastDoc = null, limitCount = 10, boardId = null) => {
+        try {
+            let constraints = [
+                orderBy('timestamp', 'desc'),
+                limit(limitCount)
+            ];
+
+            if (boardId) {
+                constraints.unshift(where('board', '==', boardId));
+            }
+
+            if (lastDoc) {
+                constraints.push(startAfter(lastDoc));
+            }
+
+            const q = query(collection(db, POSTS_COLLECTION), ...constraints);
+            const querySnapshot = await getDocs(q);
+
+            const posts = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            return {
+                posts,
+                lastDoc: querySnapshot.docs[querySnapshot.docs.length - 1] || null
+            };
+        } catch (error) {
+            console.error("Error fetching paginated posts:", error);
             throw error;
         }
     },
