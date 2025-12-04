@@ -78,6 +78,28 @@ export const replyController = {
     },
 
     /**
+     * Updates the avatar seed for all replies by a specific user.
+     * @param {string} uid 
+     * @param {string} newSeed 
+     */
+    updateRepliesAvatar: async (uid, newSeed) => {
+        try {
+            const q = query(collectionGroup(db, REPLIES_SUBCOLLECTION), where('uid', '==', uid));
+            const querySnapshot = await getDocs(q);
+
+            const batch = writeBatch(db);
+            querySnapshot.forEach((doc) => {
+                batch.update(doc.ref, { avatarSeed: newSeed });
+            });
+
+            await batch.commit();
+        } catch (error) {
+            console.error("Error updating replies avatar:", error);
+            throw error;
+        }
+    },
+
+    /**
      * Toggles like on a reply.
      * @param {string} postId 
      * @param {string} replyId 
