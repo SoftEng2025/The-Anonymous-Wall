@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import HeroButton from '../../components/HeroButton'
 import MessageCard from '../../components/MessageCard'
 import Stats from '../../components/Stats'
-import './Home.css'
+import './HomeHero.css'
+import './HomeGrid.css'
 import { useTypedLyrics } from '../../hooks/useTypedLyrics'
 import {
     HERO_BUTTONS,
@@ -39,7 +40,7 @@ export default function Home() {
                 </div>
             </div>
 
-            <section className="cards" aria-label="Anonymous notes">
+            <section className="home-cards-grid" aria-label="Anonymous notes">
                 {CARD_MESSAGES.map((card) => (
                     <MessageCard key={card.to} {...card} />
                 ))}
