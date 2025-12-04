@@ -234,11 +234,12 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
         setIsEditingPost(true);
     };
 
+    const { toggleSave } = useAuth();
     const [isSaved, setIsSaved] = useState(false);
 
     useEffect(() => {
         if (currentUser && userProfile && postId) {
-            setIsSaved((userProfile.savedPosts || []).includes(postId));
+            setIsSaved((userProfile.savedPosts || []).map(String).includes(String(postId)));
         }
     }, [currentUser, userProfile, postId]);
 
@@ -248,18 +249,10 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
             return;
         }
 
-        const shouldSave = !isSaved;
-        setIsSaved(shouldSave); // Optimistic update
-
         try {
-            await userController.toggleSavedPost(currentUser.uid, postId, shouldSave);
-            // Refresh profile to keep global state in sync
-            // Assuming refreshProfile is available in context or we manually update local userProfile if needed
-            // But for now, optimistic UI is enough for this modal. 
-            // Ideally we should call refreshProfile() from AuthContext if we want to sync perfectly.
+            await toggleSave(postId);
         } catch (error) {
             console.error("Error toggling save:", error);
-            setIsSaved(!shouldSave); // Revert
         }
     };
 

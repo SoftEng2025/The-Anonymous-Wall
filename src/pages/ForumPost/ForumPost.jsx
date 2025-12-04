@@ -15,7 +15,7 @@ import './ForumPost.css';
 const ForumPost = () => {
     const { postId } = useParams();
     const navigate = useNavigate();
-    const { currentUser } = useAuth();
+    const { currentUser, toggleSave, userProfile } = useAuth();
     const [post, setPost] = useState(null);
     const [replyContent, setReplyContent] = useState('');
     const [likes, setLikes] = useState(0);
@@ -45,14 +45,6 @@ const ForumPost = () => {
                         setIsLiked(false);
                     }
 
-                    // Check if saved
-                    if (currentUser) {
-                        const userProfile = await userController.getUserProfile(currentUser.uid);
-                        if (userProfile && userProfile.savedPosts) {
-                            setIsSaved(userProfile.savedPosts.includes(postId));
-                        }
-                    }
-
                     const fetchedReplies = await replyController.getReplies(postId);
                     const processedReplies = fetchedReplies.map(reply => ({
                         ...reply,
@@ -71,6 +63,13 @@ const ForumPost = () => {
             fetchPostAndReplies();
         }
     }, [postId, currentUser]);
+
+    // Sync isSaved with userProfile
+    useEffect(() => {
+        if (currentUser && userProfile && postId) {
+            setIsSaved((userProfile.savedPosts || []).map(String).includes(String(postId)));
+        }
+    }, [currentUser, userProfile, postId]);
 
     const handleLike = async () => {
         if (!currentUser) {
@@ -101,14 +100,10 @@ const ForumPost = () => {
             return;
         }
 
-        const newIsSaved = !isSaved;
-        setIsSaved(newIsSaved);
-
         try {
-            await userController.toggleSavedPost(currentUser.uid, postId, newIsSaved);
+            await toggleSave(postId);
         } catch (error) {
             console.error("Error toggling save:", error);
-            setIsSaved(!newIsSaved);
         }
     };
 

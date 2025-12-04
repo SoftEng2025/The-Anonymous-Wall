@@ -72,7 +72,7 @@ function Profile() {
         if (!loading) {
             fetchPosts();
         }
-    }, [currentUser, activeTab, loading]);
+    }, [currentUser, activeTab, loading, userProfile]);
 
     const handleSave = async () => {
         setSaving(true);
