@@ -1,8 +1,10 @@
 import { db } from '../config/firebase';
-import { collection, addDoc, getDocs, query, orderBy, doc, getDoc, deleteDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, orderBy, doc, getDoc, deleteDoc, where, documentId } from 'firebase/firestore';
 import { createMessageModel } from '../models/MessageModel';
+import { COLLECTIONS } from '../../utils/firebaseCollections';
 
-const MESSAGES_COLLECTION = 'messages';
+const MESSAGES_COLLECTION = COLLECTIONS.MESSAGES;
+const FIRESTORE_IN_QUERY_LIMIT = 30;
 
 export const messageController = {
     /**
@@ -60,12 +62,54 @@ export const messageController = {
     },
 
     /**
+     * Retrieves multiple messages by their IDs.
+     * Handles chunking to respect Firestore's 'in' query limit of 30.
+     * @param {Array<string>} ids 
+     * @returns {Promise<Array>} List of messages.
+     */
+    getMessagesByIds: async (ids) => {
+        try {
+            if (!ids || ids.length === 0) return [];
+
+            // Filter out invalid IDs
+            ids = ids.filter(id => typeof id === 'string' && id.trim().length > 0);
+
+            if (ids.length === 0) return [];
+
+            const chunks = [];
+            const chunkSize = FIRESTORE_IN_QUERY_LIMIT;
+
+            for (let i = 0; i < ids.length; i += chunkSize) {
+                chunks.push(ids.slice(i, i + chunkSize));
+            }
+
+            const promises = chunks.map(async (chunk) => {
+                const q = query(
+                    collection(db, MESSAGES_COLLECTION),
+                    where(documentId(), 'in', chunk)
+                );
+                const querySnapshot = await getDocs(q);
+                return querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+            });
+
+            const results = await Promise.all(promises);
+            return results.flat();
+        } catch (error) {
+            console.error("Error fetching messages by IDs:", error);
+            throw error;
+        }
+    },
+
+    /**
      * Deletes a message by ID.
      * @param {string} id - The ID of the message to delete.
      */
     deleteMessage: async (id) => {
         try {
-            const docRef = doc(db, MESSAGES_COLLECTION, id);
+            const docRef = doc(db, MESSAGES_COLLECTION, String(id));
             await deleteDoc(docRef);
         } catch (error) {
             console.error("Error deleting message:", error);

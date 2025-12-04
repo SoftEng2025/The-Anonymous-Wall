@@ -1,7 +1,8 @@
 import { db } from '../config/firebase';
 import { collection, addDoc, getDocs, query, where, doc, updateDoc, orderBy, serverTimestamp } from 'firebase/firestore';
+import { COLLECTIONS } from '../../utils/firebaseCollections';
 
-const REPORTS_COLLECTION = 'reports';
+const REPORTS_COLLECTION = COLLECTIONS.REPORTS;
 
 export const reportController = {
     /**

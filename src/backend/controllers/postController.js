@@ -2,8 +2,11 @@ import { db } from '../config/firebase';
 import { collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy, increment, where, writeBatch, arrayUnion, arrayRemove, startAfter, limit, documentId } from 'firebase/firestore';
 import { createPostModel } from '../models/PostModel';
 
-const POSTS_COLLECTION = 'posts';
+import { COLLECTIONS } from '../../utils/firebaseCollections';
+
+const POSTS_COLLECTION = COLLECTIONS.POSTS;
 const FIRESTORE_IN_QUERY_LIMIT = 30;
+const FIRESTORE_BATCH_LIMIT = 500;
 
 export const postController = {
     /**
@@ -13,6 +16,9 @@ export const postController = {
      */
     createPost: async (postData) => {
         try {
+            if (!postData) throw new Error("Post data is required");
+            if (!postData.uid) throw new Error("User ID is required");
+
             const model = createPostModel(postData);
             const docRef = await addDoc(collection(db, POSTS_COLLECTION), model);
             return docRef.id;
@@ -110,6 +116,11 @@ export const postController = {
         try {
             if (!postIds || postIds.length === 0) return [];
 
+            // Filter out invalid IDs
+            postIds = postIds.filter(id => typeof id === 'string' && id.trim().length > 0);
+
+            if (postIds.length === 0) return [];
+
             const chunks = [];
             const chunkSize = FIRESTORE_IN_QUERY_LIMIT;
 
@@ -159,6 +170,7 @@ export const postController = {
 
     /**
      * Updates the author name for all posts by a specific user.
+     * Handles batch limits by chunking updates.
      * @param {string} uid 
      * @param {string} newName 
      */
@@ -167,12 +179,22 @@ export const postController = {
             const q = query(collection(db, POSTS_COLLECTION), where('uid', '==', uid));
             const querySnapshot = await getDocs(q);
 
-            const batch = writeBatch(db);
-            querySnapshot.forEach((doc) => {
-                batch.update(doc.ref, { author: newName });
-            });
+            if (querySnapshot.empty) return;
 
-            await batch.commit();
+            const docs = querySnapshot.docs;
+            const chunks = [];
+
+            for (let i = 0; i < docs.length; i += FIRESTORE_BATCH_LIMIT) {
+                chunks.push(docs.slice(i, i + FIRESTORE_BATCH_LIMIT));
+            }
+
+            for (const chunk of chunks) {
+                const batch = writeBatch(db);
+                chunk.forEach((doc) => {
+                    batch.update(doc.ref, { author: newName });
+                });
+                await batch.commit();
+            }
         } catch (error) {
             console.error("Error updating posts author:", error);
             throw error;
@@ -181,6 +203,7 @@ export const postController = {
 
     /**
      * Updates the avatar seed for all posts by a specific user.
+     * Handles batch limits by chunking updates.
      * @param {string} uid 
      * @param {string} newSeed 
      */
@@ -189,12 +212,22 @@ export const postController = {
             const q = query(collection(db, POSTS_COLLECTION), where('uid', '==', uid));
             const querySnapshot = await getDocs(q);
 
-            const batch = writeBatch(db);
-            querySnapshot.forEach((doc) => {
-                batch.update(doc.ref, { avatarSeed: newSeed });
-            });
+            if (querySnapshot.empty) return;
 
-            await batch.commit();
+            const docs = querySnapshot.docs;
+            const chunks = [];
+
+            for (let i = 0; i < docs.length; i += FIRESTORE_BATCH_LIMIT) {
+                chunks.push(docs.slice(i, i + FIRESTORE_BATCH_LIMIT));
+            }
+
+            for (const chunk of chunks) {
+                const batch = writeBatch(db);
+                chunk.forEach((doc) => {
+                    batch.update(doc.ref, { avatarSeed: newSeed });
+                });
+                await batch.commit();
+            }
         } catch (error) {
             console.error("Error updating posts avatar:", error);
             throw error;
@@ -252,7 +285,7 @@ export const postController = {
      */
     deletePost: async (postId) => {
         try {
-            const docRef = doc(db, POSTS_COLLECTION, postId);
+            const docRef = doc(db, POSTS_COLLECTION, String(postId));
             await deleteDoc(docRef);
         } catch (error) {
             console.error("Error deleting post:", error);
