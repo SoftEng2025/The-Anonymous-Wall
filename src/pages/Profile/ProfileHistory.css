@@ -1,70 +1,83 @@
-/* Post History Styles */
-.history-posts {
-    margin-top: 1.5rem;
-    max-height: 180px;
-    overflow-y: auto;
-    scrollbar-width: thick;
-    scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+/* Post History & Grid Styles */
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
 }
 
-.no-posts {
-    text-align: center;
-    color: rgba(255, 255, 255, 0.5);
-    padding: 2rem;
-    font-style: italic;
-    font-size: 0.9rem;
+@media (max-width: 600px) {
+    .posts-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
 }
 
 .history-post-card {
-    background: rgba(50, 60, 110, 0.4);
-    border-radius: 10px;
-    padding: 1.25rem;
-    margin-bottom: 1rem;
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(12px);
+    border: var(--glass-border);
+    border-radius: 20px;
+    padding: 1.5rem;
     cursor: pointer;
-    transition: all 0.2s;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.history-post-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+    transform: translateX(-100%);
+    transition: 0.5s;
 }
 
 .history-post-card:hover {
-    background: rgba(60, 70, 120, 0.5);
-    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow:
+        0 15px 35px rgba(0, 0, 0, 0.3),
+        0 0 20px rgba(6, 182, 212, 0.2);
+}
+
+.history-post-card:hover::before {
+    transform: translateX(100%);
 }
 
 .history-post-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.75rem;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.history-post-info {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    margin-bottom: 1rem;
 }
 
 .history-time {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 0.8rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
 }
 
 .history-post-title {
-    font-size: 1rem;
-    font-weight: 600;
-    margin: 0 0 0.5rem 0;
-    color: var(--text-light);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
 }
 
 .history-post-content {
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 0.85rem;
-    line-height: 1.5;
-    margin: 0 0 1rem 0;
+    color: #cbd5e1;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -72,34 +85,31 @@
 .history-post-stats {
     display: flex;
     gap: 1.5rem;
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 0.8rem;
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .history-post-stats span {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-}
-
-.history-post-stats i {
+    gap: 0.5rem;
+    color: var(--text-secondary);
     font-size: 0.9rem;
+    transition: color 0.2s;
 }
 
-.history-posts::-webkit-scrollbar {
-    display: block;
-    width: 8px;
+.history-post-card:hover .history-post-stats span {
+    color: var(--neon-accent);
 }
 
-.history-posts::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.history-posts::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-}
-
-.history-posts::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
+.no-posts,
+.loading-posts {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 3rem;
+    background: var(--glass-surface);
+    border-radius: var(--card-radius);
+    border: var(--glass-border);
 }
