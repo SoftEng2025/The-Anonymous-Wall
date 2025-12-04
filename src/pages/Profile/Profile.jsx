@@ -33,20 +33,13 @@ function Profile() {
             setUsername(userProfile.username || '');
             setIsAdmin(userProfile.role === 'admin');
             setLoading(false);
-        } else if (currentUser) {
-            // Fallback if userProfile is not yet loaded in context (though it should be)
-            // But ideally we rely on context. If context is loading, we wait.
-            // If context loaded and userProfile is null (new user?), we might need to create it?
-            // AuthContext handles creation on login usually.
-            // Let's just wait for userProfile from context.
-            if (!loading) {
-                // If context says not loading but no profile, maybe we should fetch?
-                // But AuthContext fetches it.
-                // Let's just set loading to false if context loading is false.
-                setLoading(false);
-            }
+        } else if (currentUser === null) {
+            // No logged-in user, so stop loading.
+            setLoading(false);
         }
-    }, [currentUser, userProfile, loading]);
+        // If currentUser exists but userProfile is null, we wait for AuthContext.
+        // We do NOT depend on 'loading' here to avoid loops.
+    }, [currentUser, userProfile]);
 
     // Fetch posts based on active tab
     useEffect(() => {

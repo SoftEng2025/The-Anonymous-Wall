@@ -3,6 +3,7 @@ import { collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, 
 import { createPostModel } from '../models/PostModel';
 
 const POSTS_COLLECTION = 'posts';
+const FIRESTORE_IN_QUERY_LIMIT = 30;
 
 export const postController = {
     /**
@@ -110,7 +111,7 @@ export const postController = {
             if (!postIds || postIds.length === 0) return [];
 
             const chunks = [];
-            const chunkSize = 30;
+            const chunkSize = FIRESTORE_IN_QUERY_LIMIT;
 
             for (let i = 0; i < postIds.length; i += chunkSize) {
                 chunks.push(postIds.slice(i, i + chunkSize));
