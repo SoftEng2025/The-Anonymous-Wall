@@ -217,7 +217,8 @@ const Forum = () => {
             return;
         }
 
-        const isCurrentlySaved = savedPosts.includes(post.id);
+        const postId = String(post.id);
+        const isCurrentlySaved = savedPosts.map(String).includes(postId);
         const shouldSave = !isCurrentlySaved;
 
         // Capture previous state for rollback
@@ -226,20 +227,20 @@ const Forum = () => {
 
         // Optimistic update
         if (shouldSave) {
-            setSavedPosts([...savedPosts, post.id]);
+            setSavedPosts([...savedPosts, postId]);
         } else {
-            setSavedPosts(savedPosts.filter(id => id !== post.id));
+            setSavedPosts(savedPosts.filter(id => String(id) !== postId));
         }
 
         setPosts(prevPosts.map(p => {
-            if (p.id === post.id) {
+            if (String(p.id) === postId) {
                 return { ...p, isSavedByCurrentUser: shouldSave };
             }
             return p;
         }));
 
         try {
-            await userController.toggleSavedPost(currentUser.uid, post.id, shouldSave);
+            await userController.toggleSavedPost(currentUser.uid, postId, shouldSave);
         } catch (error) {
             console.error("Error saving post:", error);
             // Revert on error
@@ -309,7 +310,7 @@ const Forum = () => {
             setIsCreatePostOpen(false);
         } catch (error) {
             console.error("Failed to create post:", error);
-            setError("Failed to create post. Please try again.");
+            setError(`Failed to create post: ${error.message || "Unknown error"}`);
         } finally {
             setIsSubmitting(false);
         }
