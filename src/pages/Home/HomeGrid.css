@@ -1,0 +1,18 @@
+/* Cards Grid Container */
+.home-cards-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 42px 44px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Responsive Grid */
+@media (max-width: 960px) {
+    .home-cards-grid {
+        gap: 24px;
+    }
+}

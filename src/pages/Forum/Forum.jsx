@@ -21,7 +21,7 @@ import ForumFeed from './components/ForumFeed';
 import './Forum.css';
 
 const Forum = () => {
-    const { currentUser } = useAuth();
+    const { currentUser, userProfile, toggleSave } = useAuth();
     const navigate = useNavigate();
 
     // UI State
@@ -33,7 +33,6 @@ const Forum = () => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [username, setUsername] = useState('');
-    const [savedPosts, setSavedPosts] = useState([]); // Local state for saved posts IDs
 
     // Pagination State
     const [lastDoc, setLastDoc] = useState(null);
@@ -61,7 +60,7 @@ const Forum = () => {
     const [selectedPostId, setSelectedPostId] = useState(null);
     const [focusCommentInput, setFocusCommentInput] = useState(false);
 
-    // Fetch Username and Saved Posts
+    // Fetch Username
     useEffect(() => {
         const fetchUserData = async () => {
             if (currentUser) {
@@ -69,11 +68,9 @@ const Forum = () => {
                     const profile = await userController.getUserProfile(currentUser.uid);
                     if (profile) {
                         setUsername(profile.username || 'Anonymous');
-                        setSavedPosts(profile.savedPosts || []);
                     } else {
                         const newProfile = await userController.createUserProfile(currentUser.uid, {});
                         setUsername(newProfile.username);
-                        setSavedPosts([]);
                     }
                 } catch (error) {
                     console.error("Error fetching user data:", error);
@@ -83,6 +80,16 @@ const Forum = () => {
         };
         fetchUserData();
     }, [currentUser]);
+
+    // Sync posts with savedPosts from userProfile (Context)
+    useEffect(() => {
+        if (userProfile && userProfile.savedPosts) {
+            setPosts(prevPosts => prevPosts.map(post => ({
+                ...post,
+                isSavedByCurrentUser: userProfile.savedPosts.map(String).includes(String(post.id))
+            })));
+        }
+    }, [userProfile]);
 
     // Fetch Posts (Pagination)
     const fetchPosts = async (isLoadMore = false) => {
@@ -105,7 +112,9 @@ const Forum = () => {
                 ...post,
                 timeAgo: formatTimeAgo(post.timestamp),
                 isLikedByCurrentUser: currentUser ? (post.likedBy || []).includes(currentUser.uid) : false,
-                isSavedByCurrentUser: savedPosts.includes(post.id)
+                isSavedByCurrentUser: userProfile && userProfile.savedPosts
+                    ? userProfile.savedPosts.map(String).includes(String(post.id))
+                    : false
             }));
 
             if (isLoadMore) {
@@ -217,35 +226,10 @@ const Forum = () => {
             return;
         }
 
-        const postId = String(post.id);
-        const isCurrentlySaved = savedPosts.map(String).includes(postId);
-        const shouldSave = !isCurrentlySaved;
-
-        // Capture previous state for rollback
-        const prevSavedPosts = [...savedPosts];
-        const prevPosts = [...posts];
-
-        // Optimistic update
-        if (shouldSave) {
-            setSavedPosts([...savedPosts, postId]);
-        } else {
-            setSavedPosts(savedPosts.filter(id => String(id) !== postId));
-        }
-
-        setPosts(prevPosts.map(p => {
-            if (String(p.id) === postId) {
-                return { ...p, isSavedByCurrentUser: shouldSave };
-            }
-            return p;
-        }));
-
         try {
-            await userController.toggleSavedPost(currentUser.uid, postId, shouldSave);
+            await toggleSave(post.id);
         } catch (error) {
             console.error("Error saving post:", error);
-            // Revert on error
-            setSavedPosts(prevSavedPosts);
-            setPosts(prevPosts);
         }
     };
 

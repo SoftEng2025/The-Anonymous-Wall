@@ -81,6 +81,37 @@ export function AuthProvider({ children }) {
         return signOut(auth);
     };
 
+    const toggleSave = async (postId) => {
+        if (!currentUser || !userProfile) return;
+
+        const strPostId = String(postId);
+        const isSaved = (userProfile.savedPosts || []).map(String).includes(strPostId);
+        const shouldSave = !isSaved;
+
+        // Optimistic update
+        const prevSavedPosts = userProfile.savedPosts || [];
+        const newSavedPosts = shouldSave
+            ? [...prevSavedPosts, strPostId]
+            : prevSavedPosts.filter(id => String(id) !== strPostId);
+
+        setUserProfile(prev => ({
+            ...prev,
+            savedPosts: newSavedPosts
+        }));
+
+        try {
+            await userController.toggleSavedPost(currentUser.uid, strPostId, shouldSave);
+        } catch (error) {
+            console.error("Error toggling save in context:", error);
+            // Revert
+            setUserProfile(prev => ({
+                ...prev,
+                savedPosts: prevSavedPosts
+            }));
+            throw error;
+        }
+    };
+
     const value = {
         currentUser,
         userProfile,
@@ -88,7 +119,8 @@ export function AuthProvider({ children }) {
         login,
         loginAnonymous,
         logout,
-        loading
+        loading,
+        toggleSave
     };
 
     return (

@@ -1,15 +1,20 @@
 /* Message Card Styles */
-.card {
+.home-message-card {
     flex: 0 1 300px;
     background: var(--card-body);
-    border-radius: 12px;
+    border-radius: 16px;
     display: flex;
     flex-direction: column;
-    min-height: 360px;
     overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.card-header {
+.home-message-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+}
+
+.home-message-card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -21,16 +26,17 @@
     padding: 18px 22px;
 }
 
-.card-body {
+.home-message-card-body {
     flex: 1;
     display: flex;
-    align-items: flex-end;
-    justify-content: flex-start;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-start;
     padding: 24px 22px 26px;
     background: var(--card-body);
 }
 
-.card-message {
+.home-message-card-text {
     background: var(--mint);
     color: #253353;
     padding: 16px 18px;
@@ -43,18 +49,20 @@
     margin: 0;
     word-wrap: break-word;
     overflow-wrap: break-word;
+    position: relative;
+    z-index: 1;
 }
 
-.card-message.peach {
+.home-message-card-text.peach {
     background: var(--peach);
 }
 
-.card-message.coral {
+.home-message-card-text.coral {
     background: var(--coral);
     color: #fff7f1;
 }
 
-.card-footer {
+.home-message-card-footer {
     background: var(--card-top);
     padding: 18px 22px;
     display: flex;

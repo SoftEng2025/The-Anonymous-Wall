@@ -21,14 +21,14 @@ const MessageCard = ({ to, tone, lines }) => {
         timerRef.current = window.setTimeout(() => setIsSent(false), 400)
     }
 
-    const className = ['card-message', tone].filter(Boolean).join(' ')
+    const className = ['home-message-card-text', tone].filter(Boolean).join(' ')
 
     return (
-        <article className="card">
-            <header className="card-header">
+        <article className="home-message-card">
+            <header className="home-message-card-header">
                 <span className="card-to">to: {to}</span>
             </header>
-            <div className="card-body">
+            <div className="home-message-card-body">
                 <p className={className}>
                     {lines.map((line, index) => (
                         <span key={`${to}-${index}`}>
@@ -38,7 +38,7 @@ const MessageCard = ({ to, tone, lines }) => {
                     ))}
                 </p>
             </div>
-            <footer className="card-footer">
+            <footer className="home-message-card-footer">
                 <div className="input-shell">
                     <span className="input-placeholder">Aa</span>
                 </div>
