@@ -54,25 +54,27 @@ function AppContent() {
                 onClose={handleCloseLoginModal}
             />
 
-            <ErrorBoundary>
-                <Suspense fallback={<LoadingIndicator />}>
-                    <Routes>
-                        <Route path="/" element={<Home />} />
-                        <Route path="/about" element={<About />} />
-                        <Route path="/browse" element={<Browse />} />
-                        <Route path="/freedom-wall" element={<Browse />} />
-                        <Route path="/forum" element={<Forum />} />
-                        <Route path="/forum/:postId" element={<ForumPost />} />
-                        <Route path="/profile" element={<Profile />} />
-                        <Route path="/admin" element={<AdminDashboard />} />
-                        <Route path="/terms" element={<TermsOfService />} />
-                        <Route path="/privacy" element={<PrivacyPolicy />} />
-                        <Route path="/security" element={<SecurityPolicy />} />
-                        <Route path="/contact" element={<Contact />} />
-                        <Route path="*" element={<NotFound />} />
-                    </Routes>
-                </Suspense>
-            </ErrorBoundary>
+            <main className="main-content">
+                <ErrorBoundary>
+                    <Suspense fallback={<LoadingIndicator />}>
+                        <Routes>
+                            <Route path="/" element={<Home />} />
+                            <Route path="/about" element={<About />} />
+                            <Route path="/browse" element={<Browse />} />
+                            <Route path="/freedom-wall" element={<Browse />} />
+                            <Route path="/forum" element={<Forum />} />
+                            <Route path="/forum/:postId" element={<ForumPost />} />
+                            <Route path="/profile" element={<Profile />} />
+                            <Route path="/admin" element={<AdminDashboard />} />
+                            <Route path="/terms" element={<TermsOfService />} />
+                            <Route path="/privacy" element={<PrivacyPolicy />} />
+                            <Route path="/security" element={<SecurityPolicy />} />
+                            <Route path="/contact" element={<Contact />} />
+                            <Route path="*" element={<NotFound />} />
+                        </Routes>
+                    </Suspense>
+                </ErrorBoundary>
+            </main>
 
             <BackToTop />
             <Footer location={location} />
