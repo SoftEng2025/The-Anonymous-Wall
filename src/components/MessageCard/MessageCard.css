@@ -2,11 +2,16 @@
 .card {
     flex: 0 1 300px;
     background: var(--card-body);
-    border-radius: 12px;
+    border-radius: 16px;
     display: flex;
     flex-direction: column;
-    min-height: 360px;
     overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
 }
 
 .card-header {
@@ -24,8 +29,9 @@
 .card-body {
     flex: 1;
     display: flex;
-    align-items: flex-end;
-    justify-content: flex-start;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-start;
     padding: 24px 22px 26px;
     background: var(--card-body);
 }
@@ -43,6 +49,8 @@
     margin: 0;
     word-wrap: break-word;
     overflow-wrap: break-word;
+    position: relative;
+    z-index: 1;
 }
 
 .card-message.peach {
