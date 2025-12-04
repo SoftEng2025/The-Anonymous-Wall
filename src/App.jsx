@@ -8,6 +8,8 @@ import { useState, useEffect, Suspense, lazy } from 'react';
 import LoginModal from './components/LoginModal';
 import Footer from './components/Footer';
 import BackToTop from './components/BackToTop';
+import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
+import LoadingIndicator from './components/LoadingIndicator/LoadingIndicator';
 
 // Lazy load pages
 const Home = lazy(() => import('./pages/Home'));
@@ -52,23 +54,25 @@ function AppContent() {
                 onClose={handleCloseLoginModal}
             />
 
-            <Suspense fallback={<div className="loading-screen">Loading...</div>}>
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="/browse" element={<Browse />} />
-                    <Route path="/freedom-wall" element={<Browse />} />
-                    <Route path="/forum" element={<Forum />} />
-                    <Route path="/forum/:postId" element={<ForumPost />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path="/admin" element={<AdminDashboard />} />
-                    <Route path="/terms" element={<TermsOfService />} />
-                    <Route path="/privacy" element={<PrivacyPolicy />} />
-                    <Route path="/security" element={<SecurityPolicy />} />
-                    <Route path="/contact" element={<Contact />} />
-                    <Route path="*" element={<NotFound />} />
-                </Routes>
-            </Suspense>
+            <ErrorBoundary>
+                <Suspense fallback={<LoadingIndicator />}>
+                    <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/about" element={<About />} />
+                        <Route path="/browse" element={<Browse />} />
+                        <Route path="/freedom-wall" element={<Browse />} />
+                        <Route path="/forum" element={<Forum />} />
+                        <Route path="/forum/:postId" element={<ForumPost />} />
+                        <Route path="/profile" element={<Profile />} />
+                        <Route path="/admin" element={<AdminDashboard />} />
+                        <Route path="/terms" element={<TermsOfService />} />
+                        <Route path="/privacy" element={<PrivacyPolicy />} />
+                        <Route path="/security" element={<SecurityPolicy />} />
+                        <Route path="/contact" element={<Contact />} />
+                        <Route path="*" element={<NotFound />} />
+                    </Routes>
+                </Suspense>
+            </ErrorBoundary>
 
             <BackToTop />
             <Footer location={location} />
