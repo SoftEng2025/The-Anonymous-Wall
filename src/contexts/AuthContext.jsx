@@ -20,18 +20,37 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
     const [currentUser, setCurrentUser] = useState(null);
+    const [userProfile, setUserProfile] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    const fetchUserProfile = async (uid) => {
+        try {
+            const profile = await userController.getUserProfile(uid);
+            setUserProfile(profile);
+        } catch (error) {
+            console.error("Error fetching user profile in context:", error);
+        }
+    };
+
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setCurrentUser(user);
+            if (user) {
+                await fetchUserProfile(user.uid);
+            } else {
+                setUserProfile(null);
+            }
             setLoading(false);
         });
 
         return unsubscribe;
     }, []);
 
-
+    const refreshProfile = async () => {
+        if (currentUser) {
+            await fetchUserProfile(currentUser.uid);
+        }
+    };
 
     const login = async () => {
         try {
@@ -44,6 +63,8 @@ export function AuthProvider({ children }) {
                 displayName: user.displayName,
                 photoURL: user.photoURL
             });
+
+            await fetchUserProfile(user.uid); // Fetch immediately after login
 
             return result;
         } catch (error) {
@@ -62,6 +83,8 @@ export function AuthProvider({ children }) {
 
     const value = {
         currentUser,
+        userProfile,
+        refreshProfile,
         login,
         loginAnonymous,
         logout,
