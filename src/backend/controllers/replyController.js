@@ -1,9 +1,11 @@
 import { db } from '../config/firebase';
 import { collection, addDoc, getDocs, getDoc, query, orderBy, doc, updateDoc, increment, collectionGroup, where, writeBatch } from 'firebase/firestore';
 import { createReplyModel } from '../models/ReplyModel';
+import { COLLECTIONS } from '../../utils/firebaseCollections';
 
-const POSTS_COLLECTION = 'posts';
-const REPLIES_SUBCOLLECTION = 'replies';
+const POSTS_COLLECTION = COLLECTIONS.POSTS;
+const REPLIES_SUBCOLLECTION = COLLECTIONS.REPLIES;
+const FIRESTORE_BATCH_LIMIT = 500;
 
 export const replyController = {
     /**
@@ -53,6 +55,7 @@ export const replyController = {
 
     /**
      * Updates the author name for all replies by a specific user.
+     * Handles batch limits by chunking updates.
      * @param {string} uid 
      * @param {string} newName 
      */
@@ -62,12 +65,22 @@ export const replyController = {
             const q = query(collectionGroup(db, REPLIES_SUBCOLLECTION), where('uid', '==', uid));
             const querySnapshot = await getDocs(q);
 
-            const batch = writeBatch(db);
-            querySnapshot.forEach((doc) => {
-                batch.update(doc.ref, { author: newName });
-            });
+            if (querySnapshot.empty) return;
 
-            await batch.commit();
+            const docs = querySnapshot.docs;
+            const chunks = [];
+
+            for (let i = 0; i < docs.length; i += FIRESTORE_BATCH_LIMIT) {
+                chunks.push(docs.slice(i, i + FIRESTORE_BATCH_LIMIT));
+            }
+
+            for (const chunk of chunks) {
+                const batch = writeBatch(db);
+                chunk.forEach((doc) => {
+                    batch.update(doc.ref, { author: newName });
+                });
+                await batch.commit();
+            }
         } catch (error) {
             console.error("Error updating replies author:", error);
             if (error.code === 'failed-precondition' && error.message.includes('index')) {
@@ -79,6 +92,7 @@ export const replyController = {
 
     /**
      * Updates the avatar seed for all replies by a specific user.
+     * Handles batch limits by chunking updates.
      * @param {string} uid 
      * @param {string} newSeed 
      */
@@ -87,12 +101,22 @@ export const replyController = {
             const q = query(collectionGroup(db, REPLIES_SUBCOLLECTION), where('uid', '==', uid));
             const querySnapshot = await getDocs(q);
 
-            const batch = writeBatch(db);
-            querySnapshot.forEach((doc) => {
-                batch.update(doc.ref, { avatarSeed: newSeed });
-            });
+            if (querySnapshot.empty) return;
 
-            await batch.commit();
+            const docs = querySnapshot.docs;
+            const chunks = [];
+
+            for (let i = 0; i < docs.length; i += FIRESTORE_BATCH_LIMIT) {
+                chunks.push(docs.slice(i, i + FIRESTORE_BATCH_LIMIT));
+            }
+
+            for (const chunk of chunks) {
+                const batch = writeBatch(db);
+                chunk.forEach((doc) => {
+                    batch.update(doc.ref, { avatarSeed: newSeed });
+                });
+                await batch.commit();
+            }
         } catch (error) {
             console.error("Error updating replies avatar:", error);
             throw error;

@@ -1,7 +1,8 @@
 import { db } from '../config/firebase';
 import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { COLLECTIONS } from '../../utils/firebaseCollections';
 
-const USERS_COLLECTION = 'users';
+const USERS_COLLECTION = COLLECTIONS.USERS;
 
 // Get admin emails from environment variable
 const ADMIN_EMAILS = import.meta.env.VITE_ADMIN_EMAILS

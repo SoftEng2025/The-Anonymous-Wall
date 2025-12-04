@@ -1,7 +1,8 @@
 import { db } from '../config/firebase';
 import { collection, addDoc, getDocs, query, orderBy, serverTimestamp } from 'firebase/firestore';
+import { COLLECTIONS } from '../../utils/firebaseCollections';
 
-const MODERATION_LOGS_COLLECTION = 'moderation_logs';
+const MODERATION_LOGS_COLLECTION = COLLECTIONS.MODERATION_LOGS;
 
 export const moderationController = {
     /**
