@@ -141,6 +141,28 @@ export const postController = {
     },
 
     /**
+     * Updates the avatar seed for all posts by a specific user.
+     * @param {string} uid 
+     * @param {string} newSeed 
+     */
+    updatePostsAvatar: async (uid, newSeed) => {
+        try {
+            const q = query(collection(db, POSTS_COLLECTION), where('uid', '==', uid));
+            const querySnapshot = await getDocs(q);
+
+            const batch = writeBatch(db);
+            querySnapshot.forEach((doc) => {
+                batch.update(doc.ref, { avatarSeed: newSeed });
+            });
+
+            await batch.commit();
+        } catch (error) {
+            console.error("Error updating posts avatar:", error);
+            throw error;
+        }
+    },
+
+    /**
      * Retrieves all posts created by a specific user, ordered by timestamp descending.
      * @param {string} uid 
      * @returns {Promise<Array>} List of user's posts.

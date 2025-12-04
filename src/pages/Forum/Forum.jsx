@@ -33,6 +33,7 @@ const Forum = () => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [username, setUsername] = useState('');
+    const [savedPosts, setSavedPosts] = useState([]); // Local state for saved posts IDs
 
     // Pagination State
     const [lastDoc, setLastDoc] = useState(null);
@@ -60,25 +61,27 @@ const Forum = () => {
     const [selectedPostId, setSelectedPostId] = useState(null);
     const [focusCommentInput, setFocusCommentInput] = useState(false);
 
-    // Fetch Username
+    // Fetch Username and Saved Posts
     useEffect(() => {
-        const fetchUsername = async () => {
+        const fetchUserData = async () => {
             if (currentUser) {
                 try {
                     const profile = await userController.getUserProfile(currentUser.uid);
-                    if (profile && profile.username) {
-                        setUsername(profile.username);
+                    if (profile) {
+                        setUsername(profile.username || 'Anonymous');
+                        setSavedPosts(profile.savedPosts || []);
                     } else {
                         const newProfile = await userController.createUserProfile(currentUser.uid, {});
                         setUsername(newProfile.username);
+                        setSavedPosts([]);
                     }
                 } catch (error) {
-                    console.error("Error fetching username:", error);
+                    console.error("Error fetching user data:", error);
                     setUsername('Anonymous');
                 }
             }
         };
-        fetchUsername();
+        fetchUserData();
     }, [currentUser]);
 
     // Fetch Posts (Pagination)
@@ -101,7 +104,8 @@ const Forum = () => {
             const processedPosts = newPosts.map(post => ({
                 ...post,
                 timeAgo: formatTimeAgo(post.timestamp),
-                isLikedByCurrentUser: currentUser ? (post.likedBy || []).includes(currentUser.uid) : false
+                isLikedByCurrentUser: currentUser ? (post.likedBy || []).includes(currentUser.uid) : false,
+                isSavedByCurrentUser: savedPosts.includes(post.id)
             }));
 
             if (isLoadMore) {
@@ -201,6 +205,51 @@ const Forum = () => {
             await postController.toggleLikePost(post.id, currentUser.uid, shouldLike);
         } catch (error) {
             console.error("Error liking post:", error);
+        }
+
+    };
+
+    const handleSavePost = async (e, post) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!currentUser) {
+            setIsLoginModalOpen(true);
+            return;
+        }
+
+        const isCurrentlySaved = savedPosts.includes(post.id);
+        const shouldSave = !isCurrentlySaved;
+
+        // Optimistic update
+        if (shouldSave) {
+            setSavedPosts([...savedPosts, post.id]);
+        } else {
+            setSavedPosts(savedPosts.filter(id => id !== post.id));
+        }
+
+        setPosts(prevPosts => prevPosts.map(p => {
+            if (p.id === post.id) {
+                return { ...p, isSavedByCurrentUser: shouldSave };
+            }
+            return p;
+        }));
+
+        try {
+            await userController.toggleSavedPost(currentUser.uid, post.id, shouldSave);
+        } catch (error) {
+            console.error("Error saving post:", error);
+            // Revert on error
+            if (shouldSave) {
+                setSavedPosts(savedPosts.filter(id => id !== post.id));
+            } else {
+                setSavedPosts([...savedPosts, post.id]);
+            }
+            setPosts(prevPosts => prevPosts.map(p => {
+                if (p.id === post.id) {
+                    return { ...p, isSavedByCurrentUser: !shouldSave };
+                }
+                return p;
+            }));
         }
     };
 
@@ -392,6 +441,13 @@ const Forum = () => {
                                                         <button className="action-btn" onClick={(e) => handleCommentClick(e, post.id)}>
                                                             <i className="fa-regular fa-comment"></i> {post.comments}
                                                         </button>
+                                                        <button
+                                                            className={`action-btn ${post.isSavedByCurrentUser ? 'saved' : ''}`}
+                                                            onClick={(e) => handleSavePost(e, post)}
+                                                            title={post.isSavedByCurrentUser ? "Unsave" : "Save"}
+                                                        >
+                                                            <i className={`fa-${post.isSavedByCurrentUser ? 'solid' : 'regular'} fa-bookmark`}></i>
+                                                        </button>
                                                         <button className="action-btn report-btn" onClick={(e) => { e.stopPropagation(); handleReportClick(post); }}>
                                                             <i className="fa-regular fa-flag"></i> Report
                                                         </button>
@@ -432,6 +488,7 @@ const Forum = () => {
                         onLike={handleLikePost}
                         onComment={handleCommentClick}
                         onReport={handleReportClick}
+                        onSave={handleSavePost}
                         onPostClick={(id) => setSelectedPostId(id)}
                         hasMore={hasMore}
                         onLoadMore={handleLoadMore}

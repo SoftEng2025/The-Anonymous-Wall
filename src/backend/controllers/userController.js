@@ -1,5 +1,5 @@
 import { db } from '../config/firebase';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 
 const USERS_COLLECTION = 'users';
 
@@ -108,6 +108,25 @@ export const userController = {
             await updateDoc(docRef, data);
         } catch (error) {
             console.error("Error updating user profile:", error);
+            throw error;
+        }
+    },
+
+
+    /**
+     * Toggles a saved post for a user.
+     * @param {string} uid 
+     * @param {string} postId 
+     * @param {boolean} shouldSave 
+     */
+    toggleSavedPost: async (uid, postId, shouldSave) => {
+        try {
+            const docRef = doc(db, USERS_COLLECTION, uid);
+            await updateDoc(docRef, {
+                savedPosts: shouldSave ? arrayUnion(postId) : arrayRemove(postId)
+            });
+        } catch (error) {
+            console.error("Error toggling saved post:", error);
             throw error;
         }
     }

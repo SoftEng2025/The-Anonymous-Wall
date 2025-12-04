@@ -20,6 +20,7 @@ const ForumPost = () => {
     const [replyContent, setReplyContent] = useState('');
     const [likes, setLikes] = useState(0);
     const [isLiked, setIsLiked] = useState(false);
+    const [isSaved, setIsSaved] = useState(false);
     const [replies, setReplies] = useState([]);
     const [loading, setLoading] = useState(true);
     const [replyingTo, setReplyingTo] = useState(null);
@@ -42,6 +43,14 @@ const ForumPost = () => {
                         setIsLiked(fetchedPost.likedBy.includes(currentUser.uid));
                     } else {
                         setIsLiked(false);
+                    }
+
+                    // Check if saved
+                    if (currentUser) {
+                        const userProfile = await userController.getUserProfile(currentUser.uid);
+                        if (userProfile && userProfile.savedPosts) {
+                            setIsSaved(userProfile.savedPosts.includes(postId));
+                        }
                     }
 
                     const fetchedReplies = await replyController.getReplies(postId);
@@ -83,6 +92,23 @@ const ForumPost = () => {
             // Revert on error
             setIsLiked(!newIsLiked);
             setLikes(likes);
+        }
+    };
+
+    const handleSave = async () => {
+        if (!currentUser) {
+            setIsLoginModalOpen(true);
+            return;
+        }
+
+        const newIsSaved = !isSaved;
+        setIsSaved(newIsSaved);
+
+        try {
+            await userController.toggleSavedPost(currentUser.uid, postId, newIsSaved);
+        } catch (error) {
+            console.error("Error toggling save:", error);
+            setIsSaved(!newIsSaved);
         }
     };
 
@@ -201,6 +227,13 @@ const ForumPost = () => {
                             <div className="stat-item">
                                 <i className="fa-regular fa-comment"></i> {replies.length}
                             </div>
+                            <button
+                                className={`stat-item action-btn ${isSaved ? 'saved' : ''}`}
+                                onClick={handleSave}
+                                title={isSaved ? "Unsave Post" : "Save Post"}
+                            >
+                                <i className={`fa-${isSaved ? 'solid' : 'regular'} fa-bookmark`}></i> {isSaved ? 'Saved' : 'Save'}
+                            </button>
                             <button className="stat-item action-btn report-btn" onClick={handleReportClick}>
                                 <i className="fa-regular fa-flag"></i> Report
                             </button>
