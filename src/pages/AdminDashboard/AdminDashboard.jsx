@@ -45,17 +45,36 @@ const AdminDashboard = () => {
     const fetchReports = async () => {
         try {
             const pendingReports = await reportController.getPendingReports();
-            // Fetch post details for each report
-            const reportsWithPosts = await Promise.all(pendingReports.map(async (report) => {
+
+            // Separate reports by type
+            const postReports = pendingReports.filter(r => !r.type || r.type === 'post');
+            const messageReports = pendingReports.filter(r => r.type === 'message');
+
+            // Collect IDs
+            const postIds = [...new Set(postReports.map(r => r.postId).filter(id => typeof id === 'string' && id.trim().length > 0))];
+            const messageIds = [...new Set(messageReports.map(r => r.postId).filter(id => typeof id === 'string' && id.trim().length > 0))];
+
+            // Batch fetch content
+            const [posts, messages] = await Promise.all([
+                postController.getPostsByIds(postIds),
+                messageController.getMessagesByIds(messageIds)
+            ]);
+
+            // Create maps for O(1) lookup
+            const postsMap = new Map(posts.map(p => [p.id, p]));
+            const messagesMap = new Map(messages.map(m => [m.id, m]));
+
+            // Attach content to reports
+            const reportsWithPosts = pendingReports.map(report => {
                 let content = null;
                 if (report.type === 'message') {
-                    content = await messageController.getMessageById(report.postId);
+                    content = messagesMap.get(report.postId);
                 } else {
-                    // Default to post
-                    content = await postController.getPostById(report.postId);
+                    content = postsMap.get(report.postId);
                 }
                 return { ...report, content };
-            }));
+            });
+
             setReports(reportsWithPosts);
         } catch (error) {
             console.error("Error fetching reports:", error);
@@ -76,9 +95,9 @@ const AdminDashboard = () => {
             if (action === 'DELETE') {
                 if (window.confirm("Are you sure you want to delete this content?")) {
                     if (report.type === 'message') {
-                        await messageController.deleteMessage(report.postId);
+                        await messageController.deleteMessage(String(report.postId));
                     } else {
-                        await postController.deletePost(report.postId);
+                        await postController.deletePost(String(report.postId));
                     }
                     await reportController.resolveReport(report.id, 'resolved', currentUser.uid);
                     await moderationController.logAction(currentUser.uid, 'DELETE_CONTENT', report.postId, `Reason: ${report.reason} (Type: ${report.type || 'post'})`);
