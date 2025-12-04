@@ -220,6 +220,10 @@ const Forum = () => {
         const isCurrentlySaved = savedPosts.includes(post.id);
         const shouldSave = !isCurrentlySaved;
 
+        // Capture previous state for rollback
+        const prevSavedPosts = [...savedPosts];
+        const prevPosts = [...posts];
+
         // Optimistic update
         if (shouldSave) {
             setSavedPosts([...savedPosts, post.id]);
@@ -227,7 +231,7 @@ const Forum = () => {
             setSavedPosts(savedPosts.filter(id => id !== post.id));
         }
 
-        setPosts(prevPosts => prevPosts.map(p => {
+        setPosts(prevPosts.map(p => {
             if (p.id === post.id) {
                 return { ...p, isSavedByCurrentUser: shouldSave };
             }
@@ -239,17 +243,8 @@ const Forum = () => {
         } catch (error) {
             console.error("Error saving post:", error);
             // Revert on error
-            if (shouldSave) {
-                setSavedPosts(savedPosts.filter(id => id !== post.id));
-            } else {
-                setSavedPosts([...savedPosts, post.id]);
-            }
-            setPosts(prevPosts => prevPosts.map(p => {
-                if (p.id === post.id) {
-                    return { ...p, isSavedByCurrentUser: !shouldSave };
-                }
-                return p;
-            }));
+            setSavedPosts(prevSavedPosts);
+            setPosts(prevPosts);
         }
     };
 
