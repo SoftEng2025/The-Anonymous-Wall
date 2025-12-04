@@ -1,5 +1,5 @@
 import { db } from '../config/firebase';
-import { collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy, increment, where, writeBatch, arrayUnion, arrayRemove, startAfter, limit } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy, increment, where, writeBatch, arrayUnion, arrayRemove, startAfter, limit, documentId } from 'firebase/firestore';
 import { createPostModel } from '../models/PostModel';
 
 const POSTS_COLLECTION = 'posts';
@@ -95,6 +95,44 @@ export const postController = {
             }
         } catch (error) {
             console.error("Error fetching post:", error);
+            throw error;
+        }
+    },
+
+    /**
+     * Retrieves multiple posts by their IDs.
+     * Handles chunking to respect Firestore's 'in' query limit of 30.
+     * @param {Array<string>} postIds 
+     * @returns {Promise<Array>} List of posts.
+     */
+    getPostsByIds: async (postIds) => {
+        try {
+            if (!postIds || postIds.length === 0) return [];
+
+            const chunks = [];
+            const chunkSize = 30;
+
+            for (let i = 0; i < postIds.length; i += chunkSize) {
+                chunks.push(postIds.slice(i, i + chunkSize));
+            }
+
+            const promises = chunks.map(async (chunk) => {
+                const q = query(
+                    collection(db, POSTS_COLLECTION),
+                    where(documentId(), 'in', chunk)
+                );
+                const querySnapshot = await getDocs(q);
+                return querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+            });
+
+            const results = await Promise.all(promises);
+            // Flatten the array of arrays
+            return results.flat();
+        } catch (error) {
+            console.error("Error fetching posts by IDs:", error);
             throw error;
         }
     },

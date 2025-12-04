@@ -29,37 +29,24 @@ function Profile() {
     const [isProfileCollapsed, setIsProfileCollapsed] = useState(false);
 
     useEffect(() => {
-        const fetchProfile = async () => {
-            if (currentUser) {
-                try {
-                    // Use userProfile from context if available, otherwise fetch
-                    if (userProfile) {
-                        setUsername(userProfile.username || '');
-                        setIsAdmin(userProfile.role === 'admin');
-                        setLoading(false);
-                    } else {
-                        const profile = await userController.getUserProfile(currentUser.uid);
-                        if (profile) {
-                            setUsername(profile.username || '');
-                            setIsAdmin(profile.role === 'admin');
-                        } else {
-                            // Initialize profile if it doesn't exist
-                            const newProfile = await userController.createUserProfile(currentUser.uid, {});
-                            setUsername(newProfile.username);
-                            setIsAdmin(newProfile.role === 'admin');
-                        }
-                        setLoading(false);
-                    }
-                } catch (error) {
-                    console.error("Error fetching profile:", error);
-                    setMessage({ type: 'error', text: 'Failed to load profile.' });
-                    setLoading(false);
-                }
+        if (userProfile) {
+            setUsername(userProfile.username || '');
+            setIsAdmin(userProfile.role === 'admin');
+            setLoading(false);
+        } else if (currentUser) {
+            // Fallback if userProfile is not yet loaded in context (though it should be)
+            // But ideally we rely on context. If context is loading, we wait.
+            // If context loaded and userProfile is null (new user?), we might need to create it?
+            // AuthContext handles creation on login usually.
+            // Let's just wait for userProfile from context.
+            if (!loading) {
+                // If context says not loading but no profile, maybe we should fetch?
+                // But AuthContext fetches it.
+                // Let's just set loading to false if context loading is false.
+                setLoading(false);
             }
-        };
-
-        fetchProfile();
-    }, [currentUser, userProfile]);
+        }
+    }, [currentUser, userProfile, loading]);
 
     // Fetch posts based on active tab
     useEffect(() => {
@@ -72,13 +59,11 @@ function Profile() {
                     const posts = await postController.getPostsByUserId(currentUser.uid);
                     setHistoryPosts(posts);
                 } else if (activeTab === 'saved-posts') {
-                    const profile = await userController.getUserProfile(currentUser.uid);
-                    if (profile && profile.savedPosts && profile.savedPosts.length > 0) {
-                        // Fetch all saved posts
-                        const postsPromises = profile.savedPosts.map(id => postController.getPostById(id));
-                        const posts = await Promise.all(postsPromises);
-                        // Filter out nulls (deleted posts)
-                        setSavedPosts(posts.filter(p => p !== null));
+                    // Use userProfile directly from context
+                    if (userProfile && userProfile.savedPosts && userProfile.savedPosts.length > 0) {
+                        // Fetch all saved posts using optimized batch fetch
+                        const posts = await postController.getPostsByIds(userProfile.savedPosts);
+                        setSavedPosts(posts);
                     } else {
                         setSavedPosts([]);
                     }
