@@ -1,3 +1,133 @@
 @import './ProfileLayout.css';
-@import './ProfileForm.css';
 @import './ProfileHistory.css';
+@import './ProfileForm.css';
+
+/* Variables scoped to profile page */
+.profile-page-container {
+    /* Colors */
+    --glass-surface: rgba(255, 255, 255, 0.03);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+    --neon-accent: #06b6d4;
+    /* Cyan */
+    --neon-secondary: #8b5cf6;
+    /* Violet */
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+
+    /* Spacing */
+    --spacing-lg: 40px;
+    --card-radius: 24px;
+}
+
+/* Profile Card (Sidebar Component) */
+.profile-card {
+    background: var(--glass-surface);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: var(--glass-border);
+    border-radius: var(--card-radius);
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.profile-avatar-container {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.profile-avatar-large {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--neon-accent);
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+    /* Neon glow */
+}
+
+.profile-info {
+    width: 100%;
+    margin-bottom: 2rem;
+}
+
+.profile-username {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(to right, #fff, #cbd5e1);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+}
+
+.username-display-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.profile-handle {
+    color: var(--neon-accent);
+    font-size: 0.95rem;
+    font-family: monospace;
+    margin-bottom: 1.5rem;
+    opacity: 0.9;
+}
+
+.profile-email {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.admin-badge {
+    display: inline-block;
+    background: rgba(255, 59, 48, 0.1);
+    color: #ff3b30;
+    font-size: 0.7rem;
+    padding: 4px 12px;
+    border-radius: 12px;
+    margin-top: 0.5rem;
+    font-weight: 700;
+    border: 1px solid rgba(255, 59, 48, 0.2);
+    box-shadow: 0 0 10px rgba(255, 59, 48, 0.1);
+    letter-spacing: 1px;
+}
+
+.profile-stats-summary {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    width: 100%;
+    margin-bottom: 2rem;
+}
+
+.stat-pill {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 80px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: white;
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+}
