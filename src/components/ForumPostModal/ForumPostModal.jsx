@@ -8,7 +8,7 @@ import { formatTimeAgo } from '../../utils/timeUtils';
 import './ForumPostModal.css';
 
 const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) => {
-    const { currentUser } = useAuth();
+    const { currentUser, userProfile } = useAuth();
     const [post, setPost] = useState(null);
     const [replyContent, setReplyContent] = useState('');
     const [likes, setLikes] = useState(0);
@@ -234,7 +234,36 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
         setIsEditingPost(true);
     };
 
-    const handleSavePost = async () => {
+    const [isSaved, setIsSaved] = useState(false);
+
+    useEffect(() => {
+        if (currentUser && userProfile && postId) {
+            setIsSaved((userProfile.savedPosts || []).includes(postId));
+        }
+    }, [currentUser, userProfile, postId]);
+
+    const handleToggleSave = async () => {
+        if (!currentUser) {
+            alert("Please login to save posts.");
+            return;
+        }
+
+        const shouldSave = !isSaved;
+        setIsSaved(shouldSave); // Optimistic update
+
+        try {
+            await userController.toggleSavedPost(currentUser.uid, postId, shouldSave);
+            // Refresh profile to keep global state in sync
+            // Assuming refreshProfile is available in context or we manually update local userProfile if needed
+            // But for now, optimistic UI is enough for this modal. 
+            // Ideally we should call refreshProfile() from AuthContext if we want to sync perfectly.
+        } catch (error) {
+            console.error("Error toggling save:", error);
+            setIsSaved(!shouldSave); // Revert
+        }
+    };
+
+    const handleSavePostContent = async () => {
         if (!editPostContent.trim()) return;
         try {
             const editedTimestamp = Date.now();
@@ -339,7 +368,7 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
                                 {editError && <div className="modal-error-message">{editError}</div>}
                                 <div className="modal-edit-actions">
                                     <button className="modal-edit-btn-cancel" onClick={() => setIsEditingPost(false)}>Cancel</button>
-                                    <button className="modal-edit-btn-save" onClick={handleSavePost}>Save</button>
+                                    <button className="modal-edit-btn-save" onClick={handleSavePostContent}>Save</button>
                                 </div>
                             </div>
                         ) : (
@@ -351,6 +380,7 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
                                     <button
                                         className={`modal-stat-btn ${isLiked ? 'liked' : ''}`}
                                         onClick={handleLike}
+                                        title={isLiked ? "Unlike" : "Like"}
                                     >
                                         <i className={`fa-${isLiked ? 'solid' : 'regular'} fa-heart`}></i>
                                         <span>{likes}</span>
@@ -358,9 +388,18 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
                                     <button
                                         className="modal-stat-btn"
                                         onClick={() => replyInputRef.current?.focus()}
+                                        title="Comment"
                                     >
                                         <i className="fa-regular fa-comment"></i>
                                         <span>{replies.length}</span>
+                                    </button>
+                                    <button
+                                        className={`modal-stat-btn ${isSaved ? 'saved' : ''}`}
+                                        onClick={handleToggleSave}
+                                        title={isSaved ? "Unsave" : "Save"}
+                                    >
+                                        <i className={`fa-${isSaved ? 'solid' : 'regular'} fa-bookmark`}></i>
+                                        <span>{isSaved ? 'Saved' : 'Save'}</span>
                                     </button>
                                     {currentUser && !currentUser.isAnonymous && post.uid === currentUser.uid && (
                                         <button className="modal-stat-btn" onClick={handleEditPostClick}>
