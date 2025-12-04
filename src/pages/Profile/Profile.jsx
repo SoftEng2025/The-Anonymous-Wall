@@ -11,7 +11,7 @@ import ForumPostModal from '../../components/ForumPostModal';
 import './Profile.css';
 
 function Profile() {
-    const { currentUser, logout } = useAuth();
+    const { currentUser, logout, refreshProfile, userProfile } = useAuth();
     const navigate = useNavigate();
     const [username, setUsername] = useState('');
     const [tempUsername, setTempUsername] = useState('');
@@ -20,37 +20,81 @@ function Profile() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState(null);
-    const [showHistory, setShowHistory] = useState(false);
+    const [activeTab, setActiveTab] = useState('my-posts'); // 'my-posts' or 'saved-posts'
+    const [savedPosts, setSavedPosts] = useState([]);
     const [historyPosts, setHistoryPosts] = useState([]);
-    const [loadingHistory, setLoadingHistory] = useState(false);
+    const [loadingPosts, setLoadingPosts] = useState(false);
     const [selectedPostId, setSelectedPostId] = useState(null);
+    const [regenerating, setRegenerating] = useState(false);
+    const [isProfileCollapsed, setIsProfileCollapsed] = useState(false);
 
     useEffect(() => {
         const fetchProfile = async () => {
             if (currentUser) {
                 try {
-                    const profile = await userController.getUserProfile(currentUser.uid);
-                    if (profile) {
-                        setUsername(profile.username || '');
-                        setIsAdmin(profile.role === 'admin');
+                    // Use userProfile from context if available, otherwise fetch
+                    if (userProfile) {
+                        setUsername(userProfile.username || '');
+                        setIsAdmin(userProfile.role === 'admin');
+                        setLoading(false);
                     } else {
-                        // Initialize profile if it doesn't exist
-                        // userController will generate a random name
-                        const newProfile = await userController.createUserProfile(currentUser.uid, {});
-                        setUsername(newProfile.username);
-                        setIsAdmin(newProfile.role === 'admin');
+                        const profile = await userController.getUserProfile(currentUser.uid);
+                        if (profile) {
+                            setUsername(profile.username || '');
+                            setIsAdmin(profile.role === 'admin');
+                        } else {
+                            // Initialize profile if it doesn't exist
+                            const newProfile = await userController.createUserProfile(currentUser.uid, {});
+                            setUsername(newProfile.username);
+                            setIsAdmin(newProfile.role === 'admin');
+                        }
+                        setLoading(false);
                     }
                 } catch (error) {
                     console.error("Error fetching profile:", error);
                     setMessage({ type: 'error', text: 'Failed to load profile.' });
-                } finally {
                     setLoading(false);
                 }
             }
         };
 
         fetchProfile();
-    }, [currentUser]);
+    }, [currentUser, userProfile]);
+
+    // Fetch posts based on active tab
+    useEffect(() => {
+        const fetchPosts = async () => {
+            if (!currentUser) return;
+
+            setLoadingPosts(true);
+            try {
+                if (activeTab === 'my-posts') {
+                    const posts = await postController.getPostsByUserId(currentUser.uid);
+                    setHistoryPosts(posts);
+                } else if (activeTab === 'saved-posts') {
+                    const profile = await userController.getUserProfile(currentUser.uid);
+                    if (profile && profile.savedPosts && profile.savedPosts.length > 0) {
+                        // Fetch all saved posts
+                        const postsPromises = profile.savedPosts.map(id => postController.getPostById(id));
+                        const posts = await Promise.all(postsPromises);
+                        // Filter out nulls (deleted posts)
+                        setSavedPosts(posts.filter(p => p !== null));
+                    } else {
+                        setSavedPosts([]);
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching posts:", error);
+                setMessage({ type: 'error', text: 'Failed to load posts.' });
+            } finally {
+                setLoadingPosts(false);
+            }
+        };
+
+        if (!loading) {
+            fetchPosts();
+        }
+    }, [currentUser, activeTab, loading]);
 
     const handleSave = async () => {
         setSaving(true);
@@ -95,21 +139,30 @@ function Profile() {
         setIsEditing(false);
     };
 
-    const handleViewHistory = async () => {
-        if (!showHistory) {
-            // Fetch history when opening
-            setLoadingHistory(true);
-            try {
-                const posts = await postController.getPostsByUserId(currentUser.uid);
-                setHistoryPosts(posts);
-            } catch (error) {
-                console.error("Error fetching post history:", error);
-                setMessage({ type: 'error', text: 'Failed to load post history.' });
-            } finally {
-                setLoadingHistory(false);
-            }
+    const handleRegenerateIdentity = async () => {
+        setRegenerating(true);
+        try {
+            const newSeed = Math.random().toString(36).substring(7);
+
+            // 1. Update User Profile
+            await userController.updateUserProfile(currentUser.uid, { avatarSeed: newSeed });
+
+            // 2. Retroactive Update: Update all past posts and replies
+            await Promise.all([
+                postController.updatePostsAvatar(currentUser.uid, newSeed),
+                replyController.updateRepliesAvatar(currentUser.uid, newSeed)
+            ]);
+
+            // Refresh global profile to update header and this page
+            await refreshProfile();
+
+            setMessage({ type: 'success', text: 'Identity regenerated successfully!' });
+        } catch (error) {
+            console.error("Error regenerating identity:", error);
+            setMessage({ type: 'error', text: 'Failed to regenerate identity.' });
+        } finally {
+            setRegenerating(false);
         }
-        setShowHistory(!showHistory);
     };
 
     const handleLogout = async () => {
@@ -139,109 +192,141 @@ function Profile() {
         return <div className="profile-container">Loading...</div>;
     }
 
-    return (
-        <div className="profile-container">
-            <div className="profile-header">
-                <img
-                    src={getAvatarUrl(currentUser?.uid)}
-                    alt="Profile"
-                    className="profile-avatar"
-                />
-                <h1 className="profile-title">Profile Settings</h1>
-                <div className="user-identity">
-                    <p className="user-email">{currentUser?.email}</p>
-                    {isAdmin && <span className="admin-badge">ADMIN</span>}
-                </div>
-            </div>
-
-            {message && (
-                <div className={`message ${message.type}`}>
-                    {message.text}
-                </div>
-            )}
-
-            <div className="profile-section">
-                <h2 className="section-title">Username</h2>
-                <div className="section-content">
-                    {isEditing ? (
-                        <>
-                            <input
-                                type="text"
-                                className="username-input"
-                                value={tempUsername}
-                                onChange={(e) => setTempUsername(e.target.value)}
-                                placeholder="Enter new username"
-                            />
-                            <div className="edit-buttons">
-                                <button className="cancel-button" onClick={handleCancelEdit}>
-                                    Cancel
-                                </button>
-                                <button className="save-button-filled" onClick={handleSave} disabled={saving}>
-                                    {saving ? 'Saving...' : 'Save'}
-                                </button>
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            <div className="username-display">{username}</div>
-                            <button className="save-button" onClick={handleEditClick}>
-                                Update username
-                            </button>
-                        </>
+    // Helper to render post list
+    const renderPostList = (posts) => {
+        if (loadingPosts) {
+            return <div className="loading-posts">Loading posts...</div>;
+        }
+        if (posts.length === 0) {
+            return <div className="no-posts">No posts found.</div>;
+        }
+        return posts.map(post => (
+            <div
+                key={post.id}
+                className="history-post-card"
+                onClick={() => setSelectedPostId(post.id)}
+            >
+                <div className="history-post-header">
+                    <div className="history-post-info">
+                        <span className="history-time">{formatTimeAgo(post.timestamp)}</span>
+                    </div>
+                    {post.board && (
+                        <div className="history-post-board">
+                            <BoardBadge board={getBoardById(post.board)} />
+                        </div>
                     )}
                 </div>
+                <h3 className="history-post-title">{post.title}</h3>
+                <p className="history-post-content">{post.content}</p>
+                <div className="history-post-stats">
+                    <span><i className="fa-regular fa-heart"></i> {post.likes || 0}</span>
+                    <span><i className="fa-regular fa-comment"></i> {post.comments || 0}</span>
+                </div>
+            </div>
+        ));
+    };
+
+    return (
+        <div className="profile-page-container">
+            <div className="profile-sidebar">
+                <div className="profile-card">
+                    <div className="profile-avatar-container">
+                        <img
+                            src={getAvatarUrl(userProfile?.avatarSeed || currentUser?.uid)}
+                            alt="Profile"
+                            className="profile-avatar-large"
+                        />
+                        <button
+                            className="regenerate-btn"
+                            onClick={handleRegenerateIdentity}
+                            disabled={regenerating}
+                            title="Regenerate Identity"
+                        >
+                            <i className={`fa-solid fa-arrows-rotate ${regenerating ? 'fa-spin' : ''}`}></i>
+                        </button>
+                    </div>
+
+                    <div className="profile-info">
+                        {isEditing ? (
+                            <div className="edit-username-container">
+                                <input
+                                    type="text"
+                                    className="username-input"
+                                    value={tempUsername}
+                                    onChange={(e) => setTempUsername(e.target.value)}
+                                    placeholder="Enter new username"
+                                />
+                                <div className="edit-buttons-row">
+                                    <button className="cancel-button-small" onClick={handleCancelEdit}>
+                                        <i className="fa-solid fa-xmark"></i>
+                                    </button>
+                                    <button className="save-button-small" onClick={handleSave} disabled={saving}>
+                                        <i className="fa-solid fa-check"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="username-display-container">
+                                <h2 className="profile-username">{username}</h2>
+                                <button className="edit-icon-btn" onClick={handleEditClick}>
+                                    <i className="fa-solid fa-pen"></i>
+                                </button>
+                            </div>
+                        )}
+                        <p className="profile-handle">@{currentUser?.email?.split('@')[0] || 'anonymous'}</p>
+                        {isAdmin && <span className="admin-badge">ADMIN</span>}
+                    </div>
+
+                    <div className="profile-stats-summary">
+                        <div className="stat-pill">
+                            <span className="stat-value">{historyPosts.length}</span>
+                            <span className="stat-label">Posts</span>
+                        </div>
+                        <div className="stat-pill">
+                            <span className="stat-value">{savedPosts.length}</span>
+                            <span className="stat-label">Saved</span>
+                        </div>
+                    </div>
+
+                    <button className="logout-button-full" onClick={handleLogout}>
+                        <i className="fa-solid fa-right-from-bracket"></i> Logout
+                    </button>
+                </div>
             </div>
 
-            <div className="profile-section">
-                <h2 className="section-title">Post History</h2>
-                <div className="section-content-center">
+            <div className="profile-main-content">
+                {message && (
+                    <div className={`message ${message.type}`}>
+                        {message.text}
+                    </div>
+                )}
+
+                <div className="profile-tabs">
                     <button
-                        className="view-history-button"
-                        onClick={handleViewHistory}
-                        disabled={loadingHistory}
+                        className={`tab-btn ${activeTab === 'my-posts' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('my-posts')}
                     >
-                        {loadingHistory ? 'Loading...' : showHistory ? 'Hide History' : 'View History'}
+                        My Posts
+                    </button>
+                    <button
+                        className={`tab-btn ${activeTab === 'saved-posts' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('saved-posts')}
+                    >
+                        Saved Posts
                     </button>
                 </div>
 
-                {showHistory && (
-                    <div className="history-posts">
-                        {historyPosts.length === 0 ? (
-                            <p className="no-posts">You haven't created any posts yet.</p>
-                        ) : (
-                            historyPosts.map(post => (
-                                <div
-                                    key={post.id}
-                                    className="history-post-card"
-                                    onClick={() => setSelectedPostId(post.id)}
-                                >
-                                    <div className="history-post-header">
-                                        <div className="history-post-info">
-                                            <span className="history-time">{formatTimeAgo(post.timestamp)}</span>
-                                        </div>
-                                        {post.board && (
-                                            <div className="history-post-board">
-                                                <BoardBadge board={getBoardById(post.board)} />
-                                            </div>
-                                        )}
-                                    </div>
-                                    <h3 className="history-post-title">{post.title}</h3>
-                                    <p className="history-post-content">{post.content}</p>
-                                    <div className="history-post-stats">
-                                        <span><i className="fa-regular fa-heart"></i> {post.likes || 0}</span>
-                                        <span><i className="fa-regular fa-comment"></i> {post.comments || 0}</span>
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                )}
-            </div>
-
-            <div className="logout-section">
-                <button className="logout-button-large" onClick={handleLogout}>
-                    Logout
-                </button>
+                <div className="profile-content-area">
+                    {activeTab === 'my-posts' ? (
+                        <div className="posts-grid">
+                            {renderPostList(historyPosts)}
+                        </div>
+                    ) : (
+                        <div className="posts-grid">
+                            {renderPostList(savedPosts)}
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* ForumPostModal */}
