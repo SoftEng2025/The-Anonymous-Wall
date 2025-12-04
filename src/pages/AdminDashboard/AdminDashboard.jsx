@@ -10,6 +10,8 @@ import { getBoardById } from '../../data/boardConfig';
 import BoardBadge from '../../components/BoardBadge';
 import './AdminDashboard.css';
 
+import DeleteConfirmationModal from '../../components/DeleteConfirmationModal/DeleteConfirmationModal';
+
 const AdminDashboard = () => {
     const { currentUser } = useAuth();
     const navigate = useNavigate();
@@ -18,6 +20,12 @@ const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('reports'); // reports, logs
     const [reports, setReports] = useState([]);
     const [logs, setLogs] = useState([]);
+
+    // Delete Modal State
+    const [deleteModal, setDeleteModal] = useState({
+        isOpen: false,
+        report: null
+    });
 
     useEffect(() => {
         const checkAdmin = async () => {
@@ -93,26 +101,42 @@ const AdminDashboard = () => {
     const handleAction = async (report, action) => {
         try {
             if (action === 'DELETE') {
-                if (window.confirm("Are you sure you want to delete this content?")) {
-                    if (report.type === 'message') {
-                        await messageController.deleteMessage(String(report.postId));
-                    } else {
-                        await postController.deletePost(String(report.postId));
-                    }
-                    await reportController.resolveReport(report.id, 'resolved', currentUser.uid);
-                    await moderationController.logAction(currentUser.uid, 'DELETE_CONTENT', report.postId, `Reason: ${report.reason} (Type: ${report.type || 'post'})`);
-                }
+                setDeleteModal({
+                    isOpen: true,
+                    report: report
+                });
             } else if (action === 'KEEP') {
                 await reportController.resolveReport(report.id, 'dismissed', currentUser.uid);
                 await moderationController.logAction(currentUser.uid, 'KEEP_CONTENT', report.postId, `Dismissed report: ${report.reason}`);
+                fetchReports();
+                fetchLogs();
             }
-
-            // Refresh data
-            fetchReports();
-            fetchLogs();
         } catch (error) {
             console.error("Error performing action:", error);
             alert("Failed to perform action.");
+        }
+    };
+
+    const confirmDelete = async () => {
+        const { report } = deleteModal;
+        if (!report) return;
+
+        try {
+            if (report.type === 'message') {
+                await messageController.deleteMessage(String(report.postId));
+            } else {
+                await postController.deletePost(String(report.postId));
+            }
+            await reportController.resolveReport(report.id, 'resolved', currentUser.uid);
+            await moderationController.logAction(currentUser.uid, 'DELETE_CONTENT', report.postId, `Reason: ${report.reason} (Type: ${report.type || 'post'})`);
+
+            // Close modal and refresh
+            setDeleteModal({ isOpen: false, report: null });
+            fetchReports();
+            fetchLogs();
+        } catch (error) {
+            console.error("Error deleting content:", error);
+            alert("Failed to delete content.");
         }
     };
 
@@ -221,6 +245,13 @@ const AdminDashboard = () => {
                     </div>
                 )}
             </div>
+
+            <DeleteConfirmationModal
+                isOpen={deleteModal.isOpen}
+                onClose={() => setDeleteModal({ isOpen: false, report: null })}
+                onConfirm={confirmDelete}
+                itemType={deleteModal.report?.type || 'post'}
+            />
         </div>
     );
 };
