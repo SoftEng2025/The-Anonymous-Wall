@@ -8,6 +8,7 @@ const ForumFeed = ({
     loading,
     onLike,
     onComment,
+    onSave,
     onReport,
     onPostClick,
     hasMore,
@@ -59,6 +60,13 @@ const ForumFeed = ({
                                 </button>
                                 <button className="action-btn" onClick={(e) => onComment(e, post.id)}>
                                     <i className="fa-regular fa-comment"></i> {post.comments}
+                                </button>
+                                <button
+                                    className={`action-btn ${post.isSavedByCurrentUser ? 'saved' : ''}`}
+                                    onClick={(e) => onSave(e, post)}
+                                    title={post.isSavedByCurrentUser ? "Unsave" : "Save"}
+                                >
+                                    <i className={`fa-${post.isSavedByCurrentUser ? 'solid' : 'regular'} fa-bookmark`}></i>
                                 </button>
                                 <button className="action-btn report-btn" onClick={(e) => { e.stopPropagation(); onReport(post); }}>
                                     <i className="fa-regular fa-flag"></i> Report
