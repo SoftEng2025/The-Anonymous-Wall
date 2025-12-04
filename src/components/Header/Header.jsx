@@ -6,7 +6,7 @@ import { userController } from '../../backend/controllers/userController';
 import './Header.css';
 
 export default function Header({ onLoginClick }) {
-    const { currentUser } = useAuth();
+    const { currentUser, userProfile } = useAuth();
     const location = useLocation();
     const [isAdmin, setIsAdmin] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -17,16 +17,12 @@ export default function Header({ onLoginClick }) {
     }, [location.pathname]);
 
     useEffect(() => {
-        const checkAdmin = async () => {
-            if (currentUser) {
-                const adminStatus = await userController.isAdmin(currentUser.uid);
-                setIsAdmin(adminStatus);
-            } else {
-                setIsAdmin(false);
-            }
-        };
-        checkAdmin();
-    }, [currentUser]);
+        if (userProfile) {
+            setIsAdmin(userProfile.role === 'admin');
+        } else {
+            setIsAdmin(false);
+        }
+    }, [userProfile]);
 
     const toggleMobileMenu = () => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -73,7 +69,7 @@ export default function Header({ onLoginClick }) {
                             <div className="user-menu">
                                 <Link to="/profile">
                                     <img
-                                        src={getAvatarUrl(currentUser.uid)}
+                                        src={getAvatarUrl(userProfile?.avatarSeed || currentUser.uid)}
                                         alt={currentUser.displayName || 'User'}
                                         className="user-avatar"
                                         title="Go to Profile"
