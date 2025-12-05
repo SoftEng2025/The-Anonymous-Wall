@@ -3,7 +3,7 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 42px 44px;
     width: 100%;
     max-width: 1200px;
