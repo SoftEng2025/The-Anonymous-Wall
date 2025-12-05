@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { formatTimeAgo } from '../../utils/timeUtils';
 import GuestRestrictionModal from '../GuestRestrictionModal';
 import ReportModal from '../ReportModal/ReportModal';
+import DeleteConfirmationModal from '../DeleteConfirmationModal/DeleteConfirmationModal';
 import './ForumPostModal.css';
 
 // Sub-components
@@ -40,6 +41,10 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
     const [replyToReport, setReplyToReport] = useState(null);
     const [isReportSuccessModalOpen, setIsReportSuccessModalOpen] = useState(false);
+
+    // Delete Modal State
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [replyToDelete, setReplyToDelete] = useState(null);
 
     useEffect(() => {
         if (userProfile) {
@@ -239,13 +244,21 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
         setIsEditingPost(true);
     };
 
-    const handleDeleteReply = async (replyId) => {
-        if (!window.confirm("Are you sure you want to delete this comment?")) return;
+    const handleDeleteReply = (replyId) => {
+        setReplyToDelete(replyId);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDeleteReply = async () => {
+        if (!replyToDelete) return;
+
         try {
-            await replyController.deleteReply(postId, replyId);
+            await replyController.deleteReply(postId, replyToDelete);
             setReplies(prev => prev.map(r =>
-                r.id === replyId ? { ...r, content: "[Deleted by Moderator]", isDeleted: true } : r
+                r.id === replyToDelete ? { ...r, content: "[Deleted by Moderator]", isDeleted: true } : r
             ));
+            setIsDeleteModalOpen(false);
+            setReplyToDelete(null);
         } catch (error) {
             console.error("Failed to delete reply:", error);
             alert("Failed to delete comment.");
@@ -441,6 +454,16 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
                 actionLabel="Close"
                 icon="fa-check-circle"
                 showCancel={false}
+            />
+
+            <DeleteConfirmationModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => {
+                    setIsDeleteModalOpen(false);
+                    setReplyToDelete(null);
+                }}
+                onConfirm={confirmDeleteReply}
+                itemType="comment"
             />
         </div>
     );
