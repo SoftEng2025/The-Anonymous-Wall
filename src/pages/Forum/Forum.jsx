@@ -13,6 +13,7 @@ import LoginModal from '../../components/LoginModal';
 import ReportModal from '../../components/ReportModal';
 import ReportSuccessModal from '../../components/ReportSuccessModal/ReportSuccessModal';
 import ForumPostModal from '../../components/ForumPostModal';
+import GuestRestrictionModal from '../../components/GuestRestrictionModal';
 import BoardBadge from '../../components/BoardBadge'; // Used in Grid View
 import ForumHeader from './components/ForumHeader';
 import ForumFilters from './components/ForumFilters';
@@ -28,6 +29,14 @@ const Forum = () => {
     const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
     const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
+    const [isGuestRestrictionModalOpen, setIsGuestRestrictionModalOpen] = useState(false);
+    const [guestModalConfig, setGuestModalConfig] = useState({
+        title: "Guest Restriction",
+        message: "Guests cannot create new discussion threads.",
+        subMessage: "To start your own topic, please log in to a permanent account.",
+        actionLabel: "Login to Post",
+        icon: "fa-user-lock"
+    });
 
     // Data State
     const [posts, setPosts] = useState([]);
@@ -151,14 +160,27 @@ const Forum = () => {
 
     // Handlers
     const handleCreatePostClick = () => {
-        if (currentUser) {
-            if (selectedBoard) {
-                setNewPostBoard(selectedBoard);
-            }
-            setIsCreatePostOpen(true);
-        } else {
+        if (!currentUser) {
             setIsLoginModalOpen(true);
+            return;
         }
+
+        if (currentUser.isAnonymous) {
+            setGuestModalConfig({
+                title: "Guest Restriction",
+                message: "Guests cannot create new discussion threads.",
+                subMessage: "To start your own topic, please log in to a permanent account.",
+                actionLabel: "Login to Post",
+                icon: "fa-user-lock"
+            });
+            setIsGuestRestrictionModalOpen(true);
+            return;
+        }
+
+        if (selectedBoard) {
+            setNewPostBoard(selectedBoard);
+        }
+        setIsCreatePostOpen(true);
     };
 
     const handleReportClick = (post) => {
@@ -223,6 +245,18 @@ const Forum = () => {
         e.stopPropagation();
         if (!currentUser) {
             setIsLoginModalOpen(true);
+            return;
+        }
+
+        if (currentUser.isAnonymous) {
+            setGuestModalConfig({
+                title: "Guest Restriction",
+                message: "Guests cannot save posts.",
+                subMessage: "To save posts to your profile, please log in to a permanent account.",
+                actionLabel: "Login to Save",
+                icon: "fa-bookmark"
+            });
+            setIsGuestRestrictionModalOpen(true);
             return;
         }
 
@@ -578,6 +612,18 @@ const Forum = () => {
                     focusCommentInput={focusCommentInput}
                 />
             )}
+
+            {/* Guest Restriction Modal */}
+            <GuestRestrictionModal
+                isOpen={isGuestRestrictionModalOpen}
+                onClose={() => setIsGuestRestrictionModalOpen(false)}
+                onLogin={() => setIsLoginModalOpen(true)}
+                title={guestModalConfig.title}
+                message={guestModalConfig.message}
+                subMessage={guestModalConfig.subMessage}
+                actionLabel={guestModalConfig.actionLabel}
+                icon={guestModalConfig.icon}
+            />
         </div >
     );
 };

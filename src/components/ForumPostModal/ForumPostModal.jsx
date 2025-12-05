@@ -5,6 +5,7 @@ import { replyController } from '../../backend/controllers/replyController';
 import { userController } from '../../backend/controllers/userController';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatTimeAgo } from '../../utils/timeUtils';
+import GuestRestrictionModal from '../GuestRestrictionModal';
 import './ForumPostModal.css';
 
 const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) => {
@@ -236,6 +237,8 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
 
     const { toggleSave } = useAuth();
     const [isSaved, setIsSaved] = useState(false);
+    const [isGuestRestrictionModalOpen, setIsGuestRestrictionModalOpen] = useState(false);
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false); // Local login modal state if needed, or trigger parent
 
     useEffect(() => {
         if (currentUser && userProfile && postId) {
@@ -246,6 +249,11 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
     const handleToggleSave = async () => {
         if (!currentUser) {
             alert("Please login to save posts.");
+            return;
+        }
+
+        if (currentUser.isAnonymous) {
+            setIsGuestRestrictionModalOpen(true);
             return;
         }
 
@@ -524,6 +532,26 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
                     </button>
                 </div>
             </div>
+
+            <GuestRestrictionModal
+                isOpen={isGuestRestrictionModalOpen}
+                onClose={() => setIsGuestRestrictionModalOpen(false)}
+                onLogin={() => {
+                    // Since ForumPostModal is often used inside Forum which has its own LoginModal, 
+                    // we might need to handle this carefully. For now, we'll just alert or rely on parent.
+                    // Ideally, we should pass an onLogin prop to ForumPostModal or use a global login context.
+                    // For this specific implementation, let's assume we can't easily open the main login modal 
+                    // without prop drilling, so we'll just close this modal. 
+                    // A better approach would be to have a global LoginModal context.
+                    setIsGuestRestrictionModalOpen(false);
+                    alert("Please use the main login button to sign in.");
+                }}
+                title="Guest Restriction"
+                message="Guests cannot save posts."
+                subMessage="To save posts to your profile, please log in to a permanent account."
+                actionLabel="Login to Save"
+                icon="fa-bookmark"
+            />
         </div>
 
     );
