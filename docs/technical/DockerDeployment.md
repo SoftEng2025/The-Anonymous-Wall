@@ -71,7 +71,48 @@ The application relies on environment variables for configuration (Firebase, reC
 *   **`.env` File**: The `Dockerfile` is configured to copy your local `.env` file into the build container.
 *   **Important**: Ensure your `.env` file exists in the root directory **before** running the build command. If you change environment variables, you must rebuild the container:
     ```bash
+    ```
+
+### Development Workflow
+Since this Docker setup builds a **static production image**, the code is copied into the container at build time.
+
+**If you make changes to your code:**
+1.  You must **rebuild** the container to see the changes:
+    ```bash
     docker-compose up --build -d
+    ```
+2.  For rapid development, it is recommended to use `npm run dev` locally instead of Docker, and only use Docker to verify the final build before deployment.
+
+## Docker Swarm Deployment
+
+If you want to use **Docker Swarm** for high availability and scaling (running multiple copies of the app):
+
+1.  **Initialize Swarm** (if not already done):
+    ```bash
+    docker swarm init
+    ```
+
+2.  **Build the Image**:
+    Swarm cannot build images on the fly. You must build it first:
+    ```bash
+    docker build -t anonywall-web:latest .
+    ```
+
+3.  **Deploy the Stack**:
+    Use the provided `docker-stack.yml` file which is configured for Swarm (3 replicas):
+    ```bash
+    docker stack deploy -c docker-stack.yml anonywall_stack
+    ```
+
+4.  **Verify**:
+    ```bash
+    docker service ls
+    ```
+    You should see 3 replicas of the web service running.
+
+5.  **Remove Stack**:
+    ```bash
+    docker stack rm anonywall_stack
     ```
 
 ## Troubleshooting
@@ -79,3 +120,28 @@ The application relies on environment variables for configuration (Firebase, reC
 *   **Port Conflicts**: If port `8080` is already in use, modify `docker-compose.yml` and change the port mapping (e.g., `"3000:80"`).
 *   **Build Errors**: If the build fails due to Node.js version issues, ensure the `Dockerfile` is using a compatible Node version (e.g., `node:22-alpine`).
 *   **Missing Features**: If features like Firebase or reCAPTCHA don't work, verify that your `.env` file was present during the build and contains the correct keys.
+
+## CI/CD: Automated Builds with GitHub Actions
+
+A workflow file has been created at `.github/workflows/docker-build.yml`. This will automatically build and push your Docker image to Docker Hub whenever you push to the `main` branch.
+
+### Setup Required
+
+For this to work, you must add the following **Secrets** to your GitHub Repository settings (`Settings` > `Secrets and variables` > `Actions`):
+
+**Docker Hub Credentials:**
+*   `DOCKER_USERNAME`: Your Docker Hub username.
+*   `DOCKER_PASSWORD`: Your Docker Hub password (or access token).
+
+**Environment Variables (App Config):**
+*   `VITE_FIREBASE_API_KEY`
+*   `VITE_FIREBASE_AUTH_DOMAIN`
+*   `VITE_FIREBASE_PROJECT_ID`
+*   `VITE_FIREBASE_STORAGE_BUCKET`
+*   `VITE_FIREBASE_MESSAGING_SENDER_ID`
+*   `VITE_FIREBASE_APP_ID`
+*   `VITE_ADMIN_EMAILS`
+*   `VITE_CONTACT_EMAIL`
+*   `VITE_RECAPTCHA_SITE_KEY`
+
+*Note: You can copy these values from your local `.env` file.*
