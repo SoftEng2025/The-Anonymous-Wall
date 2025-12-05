@@ -8,6 +8,22 @@ class ErrorBoundary extends React.Component {
     }
 
     static getDerivedStateFromError(error) {
+        // Check for chunk load error
+        if (error.message && (
+            error.message.includes('Failed to fetch dynamically imported module') ||
+            error.message.includes('Importing a module script failed')
+        )) {
+            // Prevent infinite reload loop
+            const lastReload = sessionStorage.getItem('chunk_reload_ts');
+            const now = Date.now();
+
+            if (!lastReload || now - parseInt(lastReload) > 10000) {
+                sessionStorage.setItem('chunk_reload_ts', String(now));
+                window.location.reload();
+                return { hasError: false }; // Don't show error UI yet, just reload
+            }
+        }
+
         // Update state so the next render will show the fallback UI.
         return { hasError: true, error };
     }
