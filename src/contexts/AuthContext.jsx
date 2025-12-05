@@ -36,7 +36,22 @@ export function AuthProvider({ children }) {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setCurrentUser(user);
             if (user) {
-                await fetchUserProfile(user.uid);
+                try {
+                    let profile = await userController.getUserProfile(user.uid);
+
+                    if (!profile) {
+                        // Create profile if it doesn't exist (e.g. Guest login)
+                        await userController.createUserProfile(user.uid, {
+                            email: user.email,
+                            displayName: user.displayName,
+                            photoURL: user.photoURL
+                        });
+                        profile = await userController.getUserProfile(user.uid);
+                    }
+                    setUserProfile(profile);
+                } catch (error) {
+                    console.error("Error initializing user profile:", error);
+                }
             } else {
                 setUserProfile(null);
             }
