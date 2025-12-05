@@ -9,7 +9,8 @@ const GuestRestrictionModal = ({
     message = "Guests cannot create new discussion threads.",
     subMessage = "To start your own topic, please log in to a permanent account.",
     actionLabel = "Login to Post",
-    icon = "fa-user-lock"
+    icon = "fa-user-lock",
+    showCancel = true
 }) => {
     if (!isOpen) return null;
 
@@ -40,7 +41,7 @@ const GuestRestrictionModal = ({
                 </div>
 
                 <div className="guest-restriction-modal-footer">
-                    <button className="btn-cancel" onClick={onClose}>Cancel</button>
+                    {showCancel && <button className="btn-cancel" onClick={onClose}>Cancel</button>}
                     <button className="btn-login" onClick={() => { onClose(); onLogin(); }}>
                         {actionLabel}
                     </button>

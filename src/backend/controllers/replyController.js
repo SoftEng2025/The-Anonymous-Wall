@@ -170,5 +170,48 @@ export const replyController = {
             console.error("Error updating reply:", error);
             throw error;
         }
+    },
+
+    /**
+     * Soft deletes a reply by replacing content and marking as deleted.
+     * @param {string} postId 
+     * @param {string} replyId 
+     */
+    deleteReply: async (postId, replyId) => {
+        try {
+            const replyRef = doc(db, POSTS_COLLECTION, postId, REPLIES_SUBCOLLECTION, replyId);
+            await updateDoc(replyRef, {
+                content: "[Deleted by Moderator]",
+                isDeleted: true
+            });
+        } catch (error) {
+            console.error("Error deleting reply:", error);
+            throw error;
+        }
+    },
+
+    /**
+     * Reports a reply.
+     * @param {string} postId 
+     * @param {string} replyId 
+     * @param {string} reason 
+     * @param {string} userId 
+     */
+    reportReply: async (postId, replyId, reason, userId) => {
+        try {
+            // In a real app, this would add to a 'reports' collection.
+            // For now, we'll just log it or update a 'reports' field on the reply if needed.
+            // Let's assume we have a reports collection or just log it for this MVP.
+            console.log(`Reply ${replyId} reported by ${userId} for: ${reason}`);
+
+            // Optional: Add to a reports subcollection or field
+            // const reportRef = collection(db, 'reports');
+            // await addDoc(reportRef, { type: 'reply', postId, replyId, reason, userId, timestamp: Date.now() });
+
+            return true;
+        } catch (error) {
+            console.error("Error reporting reply:", error);
+            throw error;
+        }
     }
 };

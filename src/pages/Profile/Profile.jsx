@@ -153,6 +153,21 @@ function Profile() {
 
     const handleConfirmLogout = async () => {
         try {
+            if (currentUser?.isAnonymous) {
+                // Rename guest to "Deleted User" before logout
+                await userController.updateUserProfile(currentUser.uid, {
+                    username: 'Deleted User',
+                    isDeleted: true,
+                    avatarSeed: 'deleted' // Optional: set a specific avatar for deleted users
+                });
+
+                // Propagate name change to posts and replies
+                await Promise.all([
+                    postController.updatePostsAuthor(currentUser.uid, 'Deleted User'),
+                    replyController.updateRepliesAuthor(currentUser.uid, 'Deleted User')
+                ]);
+            }
+
             await logout();
             navigate('/');
         } catch (error) {
