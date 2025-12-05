@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import ReCAPTCHA from "react-google-recaptcha";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { getAvatarUrl } from '../../backend/api/avatar';
@@ -59,6 +60,8 @@ const Forum = () => {
     const [newPostBoard, setNewPostBoard] = useState('');
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [captchaToken, setCaptchaToken] = useState(null);
+    const recaptchaRef = useRef(null);
 
     // Report State
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -286,6 +289,11 @@ const Forum = () => {
             return;
         }
 
+        if (!captchaToken) {
+            setError("Please complete the captcha verification.");
+            return;
+        }
+
         if (!currentUser) {
             setError("You must be logged in to create a post.");
             return;
@@ -324,6 +332,7 @@ const Forum = () => {
             setNewPostTitle('');
             setNewPostContent('');
             setNewPostBoard('');
+            setCaptchaToken(null);
             setError('');
             setIsCreatePostOpen(false);
         } catch (error) {
@@ -563,6 +572,15 @@ const Forum = () => {
                                     value={newPostContent}
                                     onChange={e => setNewPostContent(e.target.value)}
                                 ></textarea>
+
+                                <div className="captcha-container" style={{ marginTop: '1rem', display: 'flex', justifyContent: 'center' }}>
+                                    <ReCAPTCHA
+                                        ref={recaptchaRef}
+                                        sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                                        onChange={(token) => setCaptchaToken(token)}
+                                        theme="dark"
+                                    />
+                                </div>
                             </div>
                             <div className="modal-footer">
                                 <button className="btn-cancel" onClick={() => setIsCreatePostOpen(false)}>
