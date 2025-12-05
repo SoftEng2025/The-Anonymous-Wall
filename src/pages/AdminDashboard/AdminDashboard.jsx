@@ -6,6 +6,7 @@ import { reportController } from '../../backend/controllers/reportController';
 import { moderationController } from '../../backend/controllers/moderationController';
 import { postController } from '../../backend/controllers/postController';
 import { messageController } from '../../backend/controllers/messageController';
+import { replyController } from '../../backend/controllers/replyController';
 import { getBoardById } from '../../data/boardConfig';
 import BoardBadge from '../../components/BoardBadge';
 import './AdminDashboard.css';
@@ -57,26 +58,40 @@ const AdminDashboard = () => {
             // Separate reports by type
             const postReports = pendingReports.filter(r => !r.type || r.type === 'post');
             const messageReports = pendingReports.filter(r => r.type === 'message');
+            const replyReports = pendingReports.filter(r => r.type === 'reply');
 
             // Collect IDs
             const postIds = [...new Set(postReports.map(r => r.postId).filter(id => typeof id === 'string' && id.trim().length > 0))];
             const messageIds = [...new Set(messageReports.map(r => r.postId).filter(id => typeof id === 'string' && id.trim().length > 0))];
 
-            // Batch fetch content
+            // Fetch content
             const [posts, messages] = await Promise.all([
                 postController.getPostsByIds(postIds),
                 messageController.getMessagesByIds(messageIds)
             ]);
 
+            // Fetch replies individually (since they are subcollections)
+            const repliesPromises = replyReports.map(async (r) => {
+                if (r.parentPostId && r.postId) {
+                    const reply = await replyController.getReply(r.parentPostId, r.postId);
+                    return reply;
+                }
+                return null;
+            });
+            const replies = (await Promise.all(repliesPromises)).filter(r => r !== null);
+
             // Create maps for O(1) lookup
             const postsMap = new Map(posts.map(p => [p.id, p]));
             const messagesMap = new Map(messages.map(m => [m.id, m]));
+            const repliesMap = new Map(replies.map(r => [r.id, r]));
 
             // Attach content to reports
             const reportsWithPosts = pendingReports.map(report => {
                 let content = null;
                 if (report.type === 'message') {
                     content = messagesMap.get(report.postId);
+                } else if (report.type === 'reply') {
+                    content = repliesMap.get(report.postId);
                 } else {
                     content = postsMap.get(report.postId);
                 }
@@ -124,6 +139,8 @@ const AdminDashboard = () => {
         try {
             if (report.type === 'message') {
                 await messageController.deleteMessage(String(report.postId));
+            } else if (report.type === 'reply') {
+                await replyController.deleteReply(report.parentPostId, String(report.postId));
             } else {
                 await postController.deletePost(String(report.postId));
             }
@@ -198,6 +215,16 @@ const AdminDashboard = () => {
                                                     </div>
                                                     <h3>{report.content.title}</h3>
                                                     <p>{report.content.content}</p>
+                                                </>
+                                            )}
+                                            {report.type === 'reply' && (
+                                                <>
+                                                    <div className="post-preview-header">
+                                                        <span className="post-author">Comment by: {report.content.author}</span>
+                                                    </div>
+                                                    <p className="message-content" style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '5px', fontStyle: 'italic' }}>
+                                                        "{report.content.content}"
+                                                    </p>
                                                 </>
                                             )}
                                         </div>

@@ -1,5 +1,5 @@
 import { db } from '../config/firebase';
-import { collection, addDoc, getDocs, getDoc, query, orderBy, doc, updateDoc, increment, collectionGroup, where, writeBatch } from 'firebase/firestore';
+import { collection, addDoc, getDocs, getDoc, query, orderBy, doc, updateDoc, increment, collectionGroup, where, writeBatch, serverTimestamp } from 'firebase/firestore';
 import { createReplyModel } from '../models/ReplyModel';
 import { COLLECTIONS } from '../../utils/firebaseCollections';
 
@@ -191,6 +191,26 @@ export const replyController = {
     },
 
     /**
+     * Gets a single reply by ID.
+     * @param {string} postId 
+     * @param {string} replyId 
+     * @returns {Promise<Object>}
+     */
+    getReply: async (postId, replyId) => {
+        try {
+            const replyRef = doc(db, POSTS_COLLECTION, postId, REPLIES_SUBCOLLECTION, replyId);
+            const replySnap = await getDoc(replyRef);
+            if (replySnap.exists()) {
+                return { id: replySnap.id, ...replySnap.data() };
+            }
+            return null;
+        } catch (error) {
+            console.error("Error fetching reply:", error);
+            throw error;
+        }
+    },
+
+    /**
      * Reports a reply.
      * @param {string} postId 
      * @param {string} replyId 
@@ -199,15 +219,17 @@ export const replyController = {
      */
     reportReply: async (postId, replyId, reason, userId) => {
         try {
-            // In a real app, this would add to a 'reports' collection.
-            // For now, we'll just log it or update a 'reports' field on the reply if needed.
-            // Let's assume we have a reports collection or just log it for this MVP.
-            console.log(`Reply ${replyId} reported by ${userId} for: ${reason}`);
-
-            // Optional: Add to a reports subcollection or field
-            // const reportRef = collection(db, 'reports');
-            // await addDoc(reportRef, { type: 'reply', postId, replyId, reason, userId, timestamp: Date.now() });
-
+            const reportsRef = collection(db, COLLECTIONS.REPORTS);
+            await addDoc(reportsRef, {
+                postId: replyId, // Using postId field as the generic target ID to match existing schema
+                parentPostId: postId, // Needed to locate the reply
+                reason,
+                reporterId: userId,
+                type: 'reply',
+                status: 'pending',
+                timestamp: serverTimestamp(),
+                createdAt: new Date().toISOString()
+            });
             return true;
         } catch (error) {
             console.error("Error reporting reply:", error);
