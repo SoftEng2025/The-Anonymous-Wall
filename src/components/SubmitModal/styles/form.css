@@ -1,0 +1,121 @@
+/* Inputs */
+.submit-input {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #d6d9e6;
+    background: #f8fafc;
+    font-family: var(--font-primary, sans-serif);
+    font-size: 1rem;
+    color: #273455;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.submit-input::placeholder {
+    color: #a1a9bb;
+    font-weight: 600;
+}
+
+.submit-input:focus,
+.submit-textarea:focus {
+    outline: 2px solid #8ea2ff;
+    border-color: #8ea2ff;
+}
+
+.recipient-input {
+    width: 100%;
+}
+
+/* Textarea */
+.message-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.submit-textarea {
+    width: 100%;
+    height: 150px;
+    padding: 1rem;
+    padding-bottom: 2.5rem;
+    border-radius: 8px;
+    border: 1px solid #d6d9e6;
+    font-family: var(--font-primary, sans-serif);
+    font-size: 1rem;
+    color: #273455;
+    font-weight: 600;
+    background: #ffffff;
+    resize: none;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.submit-textarea::placeholder {
+    color: rgba(37, 51, 83, 0.55);
+}
+
+/* Character Counter */
+.char-counter {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgba(37, 51, 83, 0.5);
+    pointer-events: none;
+}
+
+.char-counter.warning {
+    color: #ff9800;
+}
+
+.char-counter.error {
+    color: #f44336;
+}
+
+/* Error Message */
+.submit-error-message {
+    background: rgba(220, 53, 69, 0.15);
+    border: 1px solid rgba(220, 53, 69, 0.5);
+    color: #ff6b6b;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.submit-error-message::before {
+    content: '⚠';
+    font-size: 1.1em;
+}
+
+/* Buttons */
+.submit-send-button {
+    margin-top: 1rem;
+    background: linear-gradient(135deg, var(--accent-blue, #3b82f6) 0%, #39a4f4 100%);
+    color: var(--text-light, #fff);
+    padding: 0.8rem;
+    border-radius: 8px;
+    border: none;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: transform 0.2s;
+    width: 150px;
+    align-self: center;
+}
+
+.submit-send-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+}
+
+.submit-send-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
