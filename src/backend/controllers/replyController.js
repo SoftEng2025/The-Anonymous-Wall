@@ -1,5 +1,5 @@
 import { db } from '../config/firebase';
-import { collection, addDoc, getDocs, getDoc, query, orderBy, doc, updateDoc, increment, collectionGroup, where, writeBatch } from 'firebase/firestore';
+import { collection, addDoc, getDocs, getDoc, query, orderBy, doc, updateDoc, increment, collectionGroup, where, writeBatch, serverTimestamp } from 'firebase/firestore';
 import { createReplyModel } from '../models/ReplyModel';
 import { COLLECTIONS } from '../../utils/firebaseCollections';
 
@@ -168,6 +168,71 @@ export const replyController = {
             await updateDoc(replyRef, updateData);
         } catch (error) {
             console.error("Error updating reply:", error);
+            throw error;
+        }
+    },
+
+    /**
+     * Soft deletes a reply by replacing content and marking as deleted.
+     * @param {string} postId 
+     * @param {string} replyId 
+     */
+    deleteReply: async (postId, replyId) => {
+        try {
+            const replyRef = doc(db, POSTS_COLLECTION, postId, REPLIES_SUBCOLLECTION, replyId);
+            await updateDoc(replyRef, {
+                content: "[Deleted by Moderator]",
+                isDeleted: true
+            });
+        } catch (error) {
+            console.error("Error deleting reply:", error);
+            throw error;
+        }
+    },
+
+    /**
+     * Gets a single reply by ID.
+     * @param {string} postId 
+     * @param {string} replyId 
+     * @returns {Promise<Object>}
+     */
+    getReply: async (postId, replyId) => {
+        try {
+            const replyRef = doc(db, POSTS_COLLECTION, postId, REPLIES_SUBCOLLECTION, replyId);
+            const replySnap = await getDoc(replyRef);
+            if (replySnap.exists()) {
+                return { id: replySnap.id, ...replySnap.data() };
+            }
+            return null;
+        } catch (error) {
+            console.error("Error fetching reply:", error);
+            throw error;
+        }
+    },
+
+    /**
+     * Reports a reply.
+     * @param {string} postId 
+     * @param {string} replyId 
+     * @param {string} reason 
+     * @param {string} userId 
+     */
+    reportReply: async (postId, replyId, reason, userId) => {
+        try {
+            const reportsRef = collection(db, COLLECTIONS.REPORTS);
+            await addDoc(reportsRef, {
+                postId: replyId, // Using postId field as the generic target ID to match existing schema
+                parentPostId: postId, // Needed to locate the reply
+                reason,
+                reporterId: userId,
+                type: 'reply',
+                status: 'pending',
+                timestamp: serverTimestamp(),
+                createdAt: new Date().toISOString()
+            });
+            return true;
+        } catch (error) {
+            console.error("Error reporting reply:", error);
             throw error;
         }
     }

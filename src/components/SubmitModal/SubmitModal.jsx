@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
+import ReCAPTCHA from "react-google-recaptcha";
 import { useMessages } from '../../contexts/MessageContext'
 import { messageController } from '../../backend/controllers/messageController'
 import './SubmitModal.css'
@@ -30,6 +31,8 @@ export default function SubmitModal({ isOpen, onClose }) {
     const [selectedMood, setSelectedMood] = useState(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [submitError, setSubmitError] = useState('')
+    const [captchaToken, setCaptchaToken] = useState(null)
+    const recaptchaRef = useRef(null)
 
     const { addMessage } = useMessages()
 
@@ -55,6 +58,11 @@ export default function SubmitModal({ isOpen, onClose }) {
 
         if (message.length > MAX_MESSAGE_LENGTH) {
             setSubmitError(`Message is too long. Please keep it under ${MAX_MESSAGE_LENGTH} characters.`)
+            return
+        }
+
+        if (!captchaToken) {
+            setSubmitError("Please complete the captcha verification.")
             return
         }
 
@@ -84,6 +92,7 @@ export default function SubmitModal({ isOpen, onClose }) {
             setMessage('')
             setSelectedTheme(THEMES[2])
             setSelectedMood(null)
+            setCaptchaToken(null)
         } catch (error) {
             console.error("Failed to submit message:", error)
             setSubmitError("Failed to send message. Please try again.")
@@ -164,6 +173,15 @@ export default function SubmitModal({ isOpen, onClose }) {
                                 </button>
                             ))}
                         </div>
+                    </div>
+
+                    <div className="captcha-container" style={{ marginTop: '1rem', display: 'flex', justifyContent: 'center' }}>
+                        <ReCAPTCHA
+                            ref={recaptchaRef}
+                            sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                            onChange={(token) => setCaptchaToken(token)}
+                            theme="dark"
+                        />
                     </div>
 
                     <button

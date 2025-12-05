@@ -131,3 +131,70 @@
     letter-spacing: 1px;
     color: var(--text-secondary);
 }
+
+/* Guest Restriction Styles */
+.guest-restriction-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem 1rem;
+    width: 100%;
+}
+
+.guest-restriction-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 2.5rem;
+    text-align: center;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.guest-restriction-icon {
+    width: 64px;
+    height: 64px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+}
+
+.guest-restriction-icon i {
+    font-size: 2rem;
+    color: var(--text-muted);
+}
+
+.guest-restriction-card h3 {
+    margin: 0;
+    color: var(--text-light);
+    font-size: 1.25rem;
+}
+
+.guest-restriction-card p {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.btn-login-profile {
+    margin-top: 1rem;
+    padding: 0.75rem 2rem;
+    background: var(--accent-blue);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-login-profile:hover {
+    background: var(--accent-blue-dark);
+    transform: translateY(-2px);
+}
