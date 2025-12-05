@@ -2,7 +2,9 @@ import React, { useState, useRef } from 'react'
 import ReCAPTCHA from "react-google-recaptcha";
 import { useMessages } from '../../contexts/MessageContext'
 import { messageController } from '../../backend/controllers/messageController'
-import './SubmitModal.css'
+import './styles/layout.css'
+import './styles/form.css'
+import './styles/selectors.css'
 
 const THEMES = [
     { id: 'coral', color: 'var(--coral)' },
