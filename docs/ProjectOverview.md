@@ -29,6 +29,7 @@ This folder contains detailed documentation for every aspect of the project, pre
 - **[Testing Strategy](technical/TestingStrategy.md)**: Manual testing procedures and test cases.
 - **[Deployment & Configuration](technical/Deployment.md)**: Guide to building, configuring, and deploying the application.
 - **[Build Artifacts](BuildArtifactsReference.md)**: Explanation of the production build output (`dist/assets`).
+- **[QA Checklist](QAChecklist.md)**: Pre-defense verification list.
 
 ### 🔮 Future
 - **[Future Roadmap](FutureRoadmap.md)**: Planned features and improvements for the next phases.
