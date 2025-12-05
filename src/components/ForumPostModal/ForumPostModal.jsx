@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getAvatarUrl } from '../../backend/api/avatar';
 import { postController } from '../../backend/controllers/postController';
 import { replyController } from '../../backend/controllers/replyController';
 import { userController } from '../../backend/controllers/userController';
@@ -8,6 +7,12 @@ import { formatTimeAgo } from '../../utils/timeUtils';
 import GuestRestrictionModal from '../GuestRestrictionModal';
 import ReportModal from '../ReportModal/ReportModal';
 import './ForumPostModal.css';
+
+// Sub-components
+import ForumPostHeader from './components/ForumPostHeader';
+import ForumPostMain from './components/ForumPostMain';
+import ForumReplyList from './components/ForumReplyList';
+import ForumReplyInput from './components/ForumReplyInput';
 
 const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) => {
     const { currentUser, userProfile, toggleSave } = useAuth();
@@ -30,6 +35,11 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
     const [isSaved, setIsSaved] = useState(false);
     const [isGuestRestrictionModalOpen, setIsGuestRestrictionModalOpen] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
+
+    // Report State
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const [replyToReport, setReplyToReport] = useState(null);
+    const [isReportSuccessModalOpen, setIsReportSuccessModalOpen] = useState(false);
 
     useEffect(() => {
         if (userProfile) {
@@ -242,10 +252,6 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
         }
     };
 
-    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-    const [replyToReport, setReplyToReport] = useState(null);
-    const [isReportSuccessModalOpen, setIsReportSuccessModalOpen] = useState(false);
-
     const handleReportReply = (reply) => {
         setReplyToReport(reply);
         setIsReportModalOpen(true);
@@ -348,234 +354,58 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
     return (
         <div className="forum-post-modal-overlay" onClick={handleOverlayClick}>
             <div className="forum-post-modal" onClick={e => e.stopPropagation()}>
-                {/* Modal Header */}
-                <div className="modal-header-bar">
-                    <h2 className="modal-header-title">{post.author}'s Post</h2>
-                    <button className="modal-close-btn" onClick={onClose}>
-                        <i className="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
+                <ForumPostHeader
+                    authorName={post.author}
+                    onClose={onClose}
+                />
 
-                {/* Modal Content */}
                 <div className="modal-body-content">
-                    {/* Main Post */}
-                    <div className="modal-main-post">
-                        <div className="modal-post-header">
-                            <img
-                                src={getAvatarUrl(post.avatarSeed)}
-                                alt={post.author}
-                                className="modal-user-avatar"
-                            />
-                            <div className="modal-post-info">
-                                <span className="modal-username">{post.author}</span>
-                                <span className="modal-separator">•</span>
-                                <span className="modal-time">
-                                    {post.timeAgo || 'Recently'}
-                                    {post.editedAt && <span className="modal-edited-indicator"> (edited)</span>}
-                                </span>
-                            </div>
-                        </div>
-
-                        {isEditingPost ? (
-                            <div className="modal-edit-form">
-                                <h1 className="modal-post-title">{post.title}</h1>
-                                <textarea
-                                    className="modal-edit-textarea"
-                                    value={editPostContent}
-                                    onChange={(e) => setEditPostContent(e.target.value)}
-                                    placeholder="Post Content"
-                                />
-                                {editError && <div className="modal-error-message">{editError}</div>}
-                                <div className="modal-edit-actions">
-                                    <button className="modal-edit-btn-cancel" onClick={() => setIsEditingPost(false)}>Cancel</button>
-                                    <button className="modal-edit-btn-save" onClick={handleSavePostContent}>Save</button>
-                                </div>
-                            </div>
-                        ) : (
-                            <>
-                                <h1 className="modal-post-title">{post.title}</h1>
-                                <p className="modal-post-content">{post.content}</p>
-
-                                <div className="modal-post-stats">
-                                    <button
-                                        className={`modal-stat-btn ${isLiked ? 'liked' : ''}`}
-                                        onClick={handleLike}
-                                        title={isLiked ? "Unlike" : "Like"}
-                                    >
-                                        <i className={`fa-${isLiked ? 'solid' : 'regular'} fa-heart`}></i>
-                                        <span>{likes}</span>
-                                    </button>
-                                    <button
-                                        className="modal-stat-btn"
-                                        onClick={() => replyInputRef.current?.focus()}
-                                        title="Comment"
-                                    >
-                                        <i className="fa-regular fa-comment"></i>
-                                        <span>{replies.length}</span>
-                                    </button>
-                                    <button
-                                        className={`modal-stat-btn ${isSaved ? 'saved' : ''}`}
-                                        onClick={handleToggleSave}
-                                        title={isSaved ? "Unsave" : "Save"}
-                                    >
-                                        <i className={`fa-${isSaved ? 'solid' : 'regular'} fa-bookmark`}></i>
-                                        <span>{isSaved ? 'Saved' : 'Save'}</span>
-                                    </button>
-                                    {currentUser && !currentUser.isAnonymous && post.uid === currentUser.uid && (
-                                        <button className="modal-stat-btn" onClick={handleEditPostClick}>
-                                            <i className="fa-solid fa-pen-to-square"></i>
-                                            <span>Edit</span>
-                                        </button>
-                                    )}
-                                </div>
-                            </>
-                        )}
-                    </div>
-
-                    {/* Replies Section */}
-                    <div className="modal-replies-section">
-                        {replies.map(reply => (
-                            <div key={reply.id} className="modal-reply-card">
-                                <img
-                                    src={getAvatarUrl(reply.avatarSeed)}
-                                    alt={reply.author}
-                                    className="modal-reply-avatar"
-                                />
-                                <div className="modal-reply-content-wrapper">
-                                    <div className="modal-reply-bubble">
-                                        <div className="modal-reply-header">
-                                            <div className="comment-header">
-                                                <div className="comment-header-left">
-                                                    <span className="modal-reply-username" style={{ color: reply.isDeleted ? '#999' : 'inherit' }}>
-                                                        {reply.author}
-                                                    </span>
-                                                    {reply.replyTo && (
-                                                        <>
-                                                            <span className="modal-reply-arrow">▸</span>
-                                                            <span className="modal-reply-target">{reply.replyTo}</span>
-                                                        </>
-                                                    )}
-                                                    <span className="modal-separator">•</span>
-                                                    <span className="modal-reply-time">
-                                                        {reply.timeAgo || 'Recently'}
-                                                        {reply.editedAt && <span className="modal-edited-indicator"> (edited)</span>}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {editingReplyId === reply.id ? (
-                                            <div className="modal-edit-form">
-                                                <textarea
-                                                    className="modal-edit-textarea"
-                                                    value={editReplyContent}
-                                                    onChange={(e) => setEditReplyContent(e.target.value)}
-                                                    placeholder="Reply Content"
-                                                />
-                                                {editError && <div className="modal-error-message">{editError}</div>}
-                                                <div className="modal-edit-actions">
-                                                    <button className="modal-edit-btn-cancel" onClick={() => setEditingReplyId(null)}>Cancel</button>
-                                                    <button className="modal-edit-btn-save" onClick={() => handleSaveReply(reply.id)}>Save</button>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <p className="modal-reply-text" style={{ fontStyle: reply.isDeleted ? 'italic' : 'normal', color: reply.isDeleted ? '#aaa' : 'inherit' }}>
-                                                {reply.content}
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    {editingReplyId !== reply.id && (
-                                        <div className="modal-reply-actions">
-                                            <button
-                                                className={`modal-reply-action-btn ${reply.isLikedByCurrentUser ? 'liked' : ''}`}
-                                                onClick={() => handleReplyLike(reply.id, reply)}
-                                            >
-                                                <i className={`fa-${reply.isLikedByCurrentUser ? 'solid' : 'regular'} fa-heart`}></i>
-                                                <span>{reply.likes || 0}</span>
-                                            </button>
-                                            <button
-                                                className="modal-reply-action-btn"
-                                                onClick={() => handleReplyClick(reply)}
-                                            >
-                                                <i className="fa-solid fa-reply"></i>
-                                                <span>Reply</span>
-                                            </button>
-                                            {currentUser && !currentUser.isAnonymous && reply.uid === currentUser.uid && (
-                                                <button
-                                                    className="modal-reply-action-btn"
-                                                    onClick={() => handleEditReplyClick(reply)}
-                                                >
-                                                    <i className="fa-solid fa-pen-to-square"></i>
-                                                    <span>Edit</span>
-                                                </button>
-                                            )}
-                                            {isAdmin && !reply.isDeleted && (
-                                                <button
-                                                    className="modal-reply-action-btn delete-btn"
-                                                    onClick={() => handleDeleteReply(reply.id)}
-                                                    title="Delete Comment"
-                                                >
-                                                    <i className="fa-solid fa-trash"></i>
-                                                </button>
-                                            )}
-                                            {!reply.isDeleted && currentUser && currentUser.uid !== reply.uid && (
-                                                <button
-                                                    className="modal-reply-action-btn report-btn"
-                                                    onClick={() => handleReportReply(reply)}
-                                                    title="Report Comment"
-                                                >
-                                                    <i className="fa-regular fa-flag"></i>
-                                                </button>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                </div>
-
-                {/* Reply Input - Sticky at Bottom */}
-                <div className="modal-reply-input-section">
-                    <img
-                        src={currentUser ? getAvatarUrl(currentUser.uid) : getAvatarUrl(null)}
-                        alt="Your avatar"
-                        className="modal-input-avatar"
+                    <ForumPostMain
+                        post={post}
+                        currentUser={currentUser}
+                        isLiked={isLiked}
+                        likes={likes}
+                        commentsCount={replies.length}
+                        isSaved={isSaved}
+                        isEditing={isEditingPost}
+                        editContent={editPostContent}
+                        editError={editError}
+                        onEditClick={handleEditPostClick}
+                        onLike={handleLike}
+                        onSave={handleToggleSave}
+                        onEditCancel={() => setIsEditingPost(false)}
+                        onEditSave={handleSavePostContent}
+                        setEditContent={setEditPostContent}
+                        focusReplyInput={() => replyInputRef.current?.focus()}
                     />
-                    <div className="modal-input-wrapper">
-                        {replyingTo && (
-                            <div className="modal-replying-indicator">
-                                <span>Replying to <strong>{replyingTo.author}</strong></span>
-                                <button onClick={() => setReplyingTo(null)}>
-                                    <i className="fa-solid fa-xmark"></i>
-                                </button>
-                            </div>
-                        )}
-                        <input
-                            ref={replyInputRef}
-                            type="text"
-                            className="modal-reply-input"
-                            placeholder={currentUser ? (replyingTo ? `Reply to ${replyingTo.author}...` : "Add a reply") : "Login to reply"}
-                            value={replyContent}
-                            onChange={(e) => setReplyContent(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    handleReplySubmit();
-                                }
-                            }}
-                            disabled={!currentUser}
-                        />
-                    </div>
-                    <button
-                        className="modal-send-btn"
-                        onClick={handleReplySubmit}
-                        disabled={!currentUser || !replyContent.trim()}
-                    >
-                        <i className="fa-solid fa-paper-plane"></i>
-                    </button>
+
+                    <ForumReplyList
+                        replies={replies}
+                        currentUser={currentUser}
+                        isAdmin={isAdmin}
+                        editingReplyId={editingReplyId}
+                        editReplyContent={editReplyContent}
+                        editError={editError}
+                        onReplyLike={handleReplyLike}
+                        onReplyClick={handleReplyClick}
+                        onEditReplyClick={handleEditReplyClick}
+                        onDeleteReply={handleDeleteReply}
+                        onReportReply={handleReportReply}
+                        onEditReplyCancel={() => setEditingReplyId(null)}
+                        onEditReplySave={handleSaveReply}
+                        setEditReplyContent={setEditReplyContent}
+                    />
                 </div>
+
+                <ForumReplyInput
+                    currentUser={currentUser}
+                    replyingTo={replyingTo}
+                    replyContent={replyContent}
+                    inputRef={replyInputRef}
+                    onCancelReplyTo={() => setReplyingTo(null)}
+                    onChange={(e) => setReplyContent(e.target.value)}
+                    onSubmit={handleReplySubmit}
+                />
             </div>
 
             <GuestRestrictionModal
