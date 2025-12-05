@@ -29,6 +29,15 @@ A modern, secure, and interactive web application built with React and Vite that
 -   **Styling**: Vanilla CSS3 with CSS Variables for theming
 -   **Icons**: [FontAwesome](https://fontawesome.com/)
 
+## 📚 Documentation
+> **[View Full Documentation](./docs/ProjectOverview.md)**
+
+We have prepared comprehensive documentation for the project defense:
+- **[Features & User Guide](./docs/ProjectOverview.md#%F0%9F%93%9A-features--functionality)**
+- **[Technical Architecture](./docs/ProjectOverview.md#%E2%9A%99%EF%B8%8F-technical-architecture)**
+- **[Security & Privacy](./docs/features/SecurityAndPrivacy.md)**
+- **[Future Roadmap](./docs/FutureRoadmap.md)**
+
 ## 📋 Prerequisites
 
 Before you begin, ensure you have the following installed:
