@@ -5,10 +5,12 @@ import { replyController } from '../../backend/controllers/replyController';
 import { userController } from '../../backend/controllers/userController';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatTimeAgo } from '../../utils/timeUtils';
+import GuestRestrictionModal from '../GuestRestrictionModal';
+import ReportModal from '../ReportModal/ReportModal';
 import './ForumPostModal.css';
 
 const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) => {
-    const { currentUser, userProfile } = useAuth();
+    const { currentUser, userProfile, toggleSave } = useAuth();
     const [post, setPost] = useState(null);
     const [replyContent, setReplyContent] = useState('');
     const [likes, setLikes] = useState(0);
@@ -24,7 +26,16 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
     const [editingReplyId, setEditingReplyId] = useState(null);
     const [editReplyContent, setEditReplyContent] = useState('');
     const [editError, setEditError] = useState(null);
-    const [editingType, setEditingType] = useState(null); // 'post' or 'reply'
+
+    const [isSaved, setIsSaved] = useState(false);
+    const [isGuestRestrictionModalOpen, setIsGuestRestrictionModalOpen] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => {
+        if (userProfile) {
+            setIsAdmin(userProfile.role === 'admin');
+        }
+    }, [userProfile]);
 
     useEffect(() => {
         const fetchPostAndReplies = async () => {
@@ -71,10 +82,15 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
         }
     }, [postId, currentUser]);
 
+    useEffect(() => {
+        if (currentUser && userProfile && postId) {
+            setIsSaved((userProfile.savedPosts || []).map(String).includes(String(postId)));
+        }
+    }, [currentUser, userProfile, postId]);
+
     // Focus input when requested
     useEffect(() => {
         if (!loading && focusCommentInput && replyInputRef.current) {
-            // Small timeout to ensure modal transition is done or DOM is ready
             setTimeout(() => {
                 replyInputRef.current.focus();
             }, 100);
@@ -93,7 +109,6 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
         setIsLiked(newIsLiked);
         setLikes(newLikes);
 
-        // Notify parent immediately for UI sync
         if (onPostUpdate && post) {
             onPostUpdate({
                 id: postId,
@@ -109,17 +124,8 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
             await postController.toggleLikePost(postId, currentUser.uid, newIsLiked);
         } catch (error) {
             console.error("Error toggling like:", error);
-            // Revert on error
             setIsLiked(!newIsLiked);
             setLikes(likes);
-            if (onPostUpdate && post) {
-                onPostUpdate({
-                    id: postId,
-                    likes: likes,
-                    isLikedByCurrentUser: !newIsLiked,
-                    likedBy: post.likedBy // Revert to original
-                });
-            }
         }
     };
 
@@ -132,7 +138,6 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
         const isCurrentlyLiked = reply.isLikedByCurrentUser;
         const shouldLike = !isCurrentlyLiked;
 
-        // Optimistic update
         const updatedReplies = replies.map(r => {
             if (r.id === replyId) {
                 return {
@@ -153,14 +158,7 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
             await replyController.toggleLikeReply(postId, replyId, currentUser.uid, shouldLike);
         } catch (error) {
             console.error("Error liking comment:", error);
-            // Revert on error
-            const revertedReplies = replies.map(r => {
-                if (r.id === replyId) {
-                    return reply;
-                }
-                return r;
-            });
-            setReplies(revertedReplies);
+            setReplies(replies); // Revert
         }
     };
 
@@ -174,13 +172,11 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
 
         try {
             let profile = await userController.getUserProfile(currentUser.uid);
-
             if (!profile) {
                 profile = await userController.createUserProfile(currentUser.uid, {});
             }
 
             const authorName = profile.username;
-
             const replyData = {
                 author: authorName,
                 uid: currentUser.uid,
@@ -202,7 +198,6 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
             setReplyContent('');
             setReplyingTo(null);
 
-            // Notify parent about new comment count
             if (onPostUpdate) {
                 onPostUpdate({
                     id: postId,
@@ -234,18 +229,50 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
         setIsEditingPost(true);
     };
 
-    const { toggleSave } = useAuth();
-    const [isSaved, setIsSaved] = useState(false);
-
-    useEffect(() => {
-        if (currentUser && userProfile && postId) {
-            setIsSaved((userProfile.savedPosts || []).map(String).includes(String(postId)));
+    const handleDeleteReply = async (replyId) => {
+        if (!window.confirm("Are you sure you want to delete this comment?")) return;
+        try {
+            await replyController.deleteReply(postId, replyId);
+            setReplies(prev => prev.map(r =>
+                r.id === replyId ? { ...r, content: "[Deleted by Moderator]", isDeleted: true } : r
+            ));
+        } catch (error) {
+            console.error("Failed to delete reply:", error);
+            alert("Failed to delete comment.");
         }
-    }, [currentUser, userProfile, postId]);
+    };
+
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const [replyToReport, setReplyToReport] = useState(null);
+    const [isReportSuccessModalOpen, setIsReportSuccessModalOpen] = useState(false);
+
+    const handleReportReply = (reply) => {
+        setReplyToReport(reply);
+        setIsReportModalOpen(true);
+    };
+
+    const handleReportSubmit = async (reason) => {
+        if (!replyToReport) return;
+
+        try {
+            await replyController.reportReply(postId, replyToReport.id, reason, currentUser?.uid);
+            setIsReportModalOpen(false);
+            setReplyToReport(null);
+            setIsReportSuccessModalOpen(true);
+        } catch (error) {
+            console.error("Error reporting reply:", error);
+            alert("Failed to report comment.");
+        }
+    };
 
     const handleToggleSave = async () => {
         if (!currentUser) {
             alert("Please login to save posts.");
+            return;
+        }
+
+        if (currentUser.isAnonymous) {
+            setIsGuestRestrictionModalOpen(true);
             return;
         }
 
@@ -417,18 +444,24 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
                                 <div className="modal-reply-content-wrapper">
                                     <div className="modal-reply-bubble">
                                         <div className="modal-reply-header">
-                                            <span className="modal-reply-username">{reply.author}</span>
-                                            {reply.replyTo && (
-                                                <>
-                                                    <span className="modal-reply-arrow">▸</span>
-                                                    <span className="modal-reply-target">{reply.replyTo}</span>
-                                                </>
-                                            )}
-                                            <span className="modal-separator">•</span>
-                                            <span className="modal-reply-time">
-                                                {reply.timeAgo || 'Recently'}
-                                                {reply.editedAt && <span className="modal-edited-indicator"> (edited)</span>}
-                                            </span>
+                                            <div className="comment-header">
+                                                <div className="comment-header-left">
+                                                    <span className="modal-reply-username" style={{ color: reply.isDeleted ? '#999' : 'inherit' }}>
+                                                        {reply.author}
+                                                    </span>
+                                                    {reply.replyTo && (
+                                                        <>
+                                                            <span className="modal-reply-arrow">▸</span>
+                                                            <span className="modal-reply-target">{reply.replyTo}</span>
+                                                        </>
+                                                    )}
+                                                    <span className="modal-separator">•</span>
+                                                    <span className="modal-reply-time">
+                                                        {reply.timeAgo || 'Recently'}
+                                                        {reply.editedAt && <span className="modal-edited-indicator"> (edited)</span>}
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
 
                                         {editingReplyId === reply.id ? (
@@ -446,7 +479,9 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
                                                 </div>
                                             </div>
                                         ) : (
-                                            <p className="modal-reply-text">{reply.content}</p>
+                                            <p className="modal-reply-text" style={{ fontStyle: reply.isDeleted ? 'italic' : 'normal', color: reply.isDeleted ? '#aaa' : 'inherit' }}>
+                                                {reply.content}
+                                            </p>
                                         )}
                                     </div>
 
@@ -473,6 +508,24 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
                                                 >
                                                     <i className="fa-solid fa-pen-to-square"></i>
                                                     <span>Edit</span>
+                                                </button>
+                                            )}
+                                            {isAdmin && !reply.isDeleted && (
+                                                <button
+                                                    className="modal-reply-action-btn delete-btn"
+                                                    onClick={() => handleDeleteReply(reply.id)}
+                                                    title="Delete Comment"
+                                                >
+                                                    <i className="fa-solid fa-trash"></i>
+                                                </button>
+                                            )}
+                                            {!reply.isDeleted && currentUser && currentUser.uid !== reply.uid && (
+                                                <button
+                                                    className="modal-reply-action-btn report-btn"
+                                                    onClick={() => handleReportReply(reply)}
+                                                    title="Report Comment"
+                                                >
+                                                    <i className="fa-regular fa-flag"></i>
                                                 </button>
                                             )}
                                         </div>
@@ -524,8 +577,42 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
                     </button>
                 </div>
             </div>
-        </div>
 
+            <GuestRestrictionModal
+                isOpen={isGuestRestrictionModalOpen}
+                onClose={() => setIsGuestRestrictionModalOpen(false)}
+                onLogin={() => {
+                    setIsGuestRestrictionModalOpen(false);
+                    alert("Please use the main login button to sign in.");
+                }}
+                title="Guest Restriction"
+                message="Guests cannot save posts."
+                subMessage="To save posts to your profile, please log in to a permanent account."
+                actionLabel="Login to Save"
+                icon="fa-bookmark"
+            />
+
+            <ReportModal
+                isOpen={isReportModalOpen}
+                onClose={() => {
+                    setIsReportModalOpen(false);
+                    setReplyToReport(null);
+                }}
+                onSubmit={handleReportSubmit}
+            />
+
+            <GuestRestrictionModal
+                isOpen={isReportSuccessModalOpen}
+                onClose={() => setIsReportSuccessModalOpen(false)}
+                onLogin={() => setIsReportSuccessModalOpen(false)}
+                title="Report Submitted"
+                message="Thank you for your report."
+                subMessage="We will review the content shortly to ensure it adheres to our community guidelines."
+                actionLabel="Close"
+                icon="fa-check-circle"
+                showCancel={false}
+            />
+        </div>
     );
 };
 

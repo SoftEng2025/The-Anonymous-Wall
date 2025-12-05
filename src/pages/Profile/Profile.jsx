@@ -8,6 +8,8 @@ import { useNavigate } from 'react-router-dom';
 import { getBoardById, getBoardColor, getBoardName } from '../../data/boardConfig';
 import BoardBadge from '../../components/BoardBadge';
 import ForumPostModal from '../../components/ForumPostModal';
+import LogoutModal from '../../components/LogoutModal';
+import LoginModal from '../../components/LoginModal';
 import './Profile.css';
 
 function Profile() {
@@ -27,6 +29,8 @@ function Profile() {
     const [selectedPostId, setSelectedPostId] = useState(null);
     const [regenerating, setRegenerating] = useState(false);
     const [isProfileCollapsed, setIsProfileCollapsed] = useState(false);
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
     useEffect(() => {
         if (userProfile) {
@@ -143,8 +147,27 @@ function Profile() {
         }
     };
 
-    const handleLogout = async () => {
+    const handleLogoutClick = () => {
+        setIsLogoutModalOpen(true);
+    };
+
+    const handleConfirmLogout = async () => {
         try {
+            if (currentUser?.isAnonymous) {
+                // Rename guest to "Deleted User" before logout
+                await userController.updateUserProfile(currentUser.uid, {
+                    username: 'Deleted User',
+                    isDeleted: true,
+                    avatarSeed: 'deleted' // Optional: set a specific avatar for deleted users
+                });
+
+                // Propagate name change to posts and replies
+                await Promise.all([
+                    postController.updatePostsAuthor(currentUser.uid, 'Deleted User'),
+                    replyController.updateRepliesAuthor(currentUser.uid, 'Deleted User')
+                ]);
+            }
+
             await logout();
             navigate('/');
         } catch (error) {
@@ -266,7 +289,7 @@ function Profile() {
                         </div>
                     </div>
 
-                    <button className="logout-button-full" onClick={handleLogout}>
+                    <button className="logout-button-full" onClick={handleLogoutClick}>
                         <i className="fa-solid fa-right-from-bracket"></i> Logout
                     </button>
                 </div>
@@ -295,14 +318,33 @@ function Profile() {
                 </div>
 
                 <div className="profile-content-area">
-                    {activeTab === 'my-posts' ? (
-                        <div className="posts-grid">
-                            {renderPostList(historyPosts)}
+                    {currentUser?.isAnonymous ? (
+                        <div className="guest-restriction-container">
+                            <div className="guest-restriction-card">
+                                <div className="guest-restriction-icon">
+                                    <i className={`fa-solid ${activeTab === 'my-posts' ? 'fa-pen-to-square' : 'fa-bookmark'}`}></i>
+                                </div>
+                                <h3>{activeTab === 'my-posts' ? 'Posting Restricted' : 'Saving Restricted'}</h3>
+                                <p>
+                                    {activeTab === 'my-posts'
+                                        ? "Guest accounts cannot create posts. Create a permanent account to start sharing your thoughts!"
+                                        : "Guest accounts cannot save posts. Create a permanent account to build your personal collection!"}
+                                </p>
+                                <button className="btn-login-profile" onClick={() => setIsLoginModalOpen(true)}>
+                                    Login or Sign Up
+                                </button>
+                            </div>
                         </div>
                     ) : (
-                        <div className="posts-grid">
-                            {renderPostList(savedPosts)}
-                        </div>
+                        activeTab === 'my-posts' ? (
+                            <div className="posts-grid">
+                                {renderPostList(historyPosts)}
+                            </div>
+                        ) : (
+                            <div className="posts-grid">
+                                {renderPostList(savedPosts)}
+                            </div>
+                        )
                     )}
                 </div>
             </div>
@@ -314,6 +356,19 @@ function Profile() {
                     onClose={() => setSelectedPostId(null)}
                 />
             )}
+
+            {/* Logout Confirmation Modal */}
+            <LogoutModal
+                isOpen={isLogoutModalOpen}
+                onClose={() => setIsLogoutModalOpen(false)}
+                onConfirm={handleConfirmLogout}
+                isGuest={currentUser?.isAnonymous}
+            />
+
+            <LoginModal
+                isOpen={isLoginModalOpen}
+                onClose={() => setIsLoginModalOpen(false)}
+            />
         </div>
     );
 }

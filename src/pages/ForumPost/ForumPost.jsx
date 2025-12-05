@@ -8,6 +8,7 @@ import { reportController } from '../../backend/controllers/reportController';
 import ReportModal from '../../components/ReportModal';
 import ReportSuccessModal from '../../components/ReportSuccessModal/ReportSuccessModal';
 import LoginModal from '../../components/LoginModal';
+import GuestRestrictionModal from '../../components/GuestRestrictionModal';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatTimeAgo } from '../../utils/timeUtils';
 import './ForumPost.css';
@@ -29,6 +30,7 @@ const ForumPost = () => {
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
     const [isReportSuccessModalOpen, setIsReportSuccessModalOpen] = useState(false);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+    const [isGuestRestrictionModalOpen, setIsGuestRestrictionModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchPostAndReplies = async () => {
@@ -97,6 +99,11 @@ const ForumPost = () => {
     const handleSave = async () => {
         if (!currentUser) {
             setIsLoginModalOpen(true);
+            return;
+        }
+
+        if (currentUser.isAnonymous) {
+            setIsGuestRestrictionModalOpen(true);
             return;
         }
 
@@ -305,6 +312,17 @@ const ForumPost = () => {
             <LoginModal
                 isOpen={isLoginModalOpen}
                 onClose={() => setIsLoginModalOpen(false)}
+            />
+
+            <GuestRestrictionModal
+                isOpen={isGuestRestrictionModalOpen}
+                onClose={() => setIsGuestRestrictionModalOpen(false)}
+                onLogin={() => setIsLoginModalOpen(true)}
+                title="Guest Restriction"
+                message="Guests cannot save posts."
+                subMessage="To save posts to your profile, please log in to a permanent account."
+                actionLabel="Login to Save"
+                icon="fa-bookmark"
             />
         </div>
     );
