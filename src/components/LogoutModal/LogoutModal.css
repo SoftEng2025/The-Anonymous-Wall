@@ -14,7 +14,7 @@
 }
 
 .logout-modal-content {
-    background: #1e1e1e;
+    background: var(--card-body);
     border-radius: 16px;
     width: 90%;
     max-width: 450px;
@@ -26,7 +26,8 @@
 
 .logout-modal-header {
     padding: 1.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--card-header);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -36,13 +37,13 @@
     margin: 0;
     font-size: 1.25rem;
     font-weight: 600;
-    color: #fff;
+    color: var(--text-light);
 }
 
 .logout-modal-close {
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--text-muted);
     font-size: 1.25rem;
     cursor: pointer;
     padding: 0.5rem;
@@ -55,12 +56,12 @@
 
 .logout-modal-close:hover {
     background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    color: var(--text-light);
 }
 
 .logout-modal-body {
     padding: 1.5rem;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--text-light);
     font-size: 1rem;
     line-height: 1.5;
 }
@@ -89,7 +90,8 @@
 
 .logout-modal-footer {
     padding: 1.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--card-footer);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
     display: flex;
     justify-content: flex-end;
     gap: 1rem;
@@ -100,7 +102,7 @@
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     background: transparent;
-    color: #fff;
+    color: var(--text-light);
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
@@ -114,15 +116,15 @@
     padding: 0.75rem 1.5rem;
     border-radius: 8px;
     border: none;
-    background: #fff;
-    color: #000;
+    background: var(--accent-blue);
+    color: #fff;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .btn-confirm:hover {
-    background: #e0e0e0;
+    background: var(--accent-blue-dark);
     transform: translateY(-1px);
 }
 
