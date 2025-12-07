@@ -4,7 +4,7 @@ import { getAvatarUrl } from '../../backend/api/avatar';
 import { userController } from '../../backend/controllers/userController';
 import { postController } from '../../backend/controllers/postController';
 import { replyController } from '../../backend/controllers/replyController';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { getBoardById, getBoardColor, getBoardName } from '../../data/boardConfig';
 import BoardBadge from '../../components/BoardBadge';
 import ForumPostModal from '../../components/ForumPostModal';
@@ -15,6 +15,9 @@ import './Profile.css';
 function Profile() {
     const { currentUser, logout, refreshProfile, userProfile } = useAuth();
     const navigate = useNavigate();
+    const { userId } = useParams();
+    const isPublicView = userId && (!currentUser || currentUser.uid !== userId);
+    const [publicProfile, setPublicProfile] = useState(null);
     const [username, setUsername] = useState('');
     const [tempUsername, setTempUsername] = useState('');
     const [isEditing, setIsEditing] = useState(false);
@@ -22,8 +25,9 @@ function Profile() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState(null);
-    const [activeTab, setActiveTab] = useState('my-posts'); // 'my-posts' or 'saved-posts'
+    const [activeTab, setActiveTab] = useState('my-posts'); // 'my-posts', 'Saved-posts', or 'Pinned'
     const [savedPosts, setSavedPosts] = useState([]);
+    const [pinnedPosts, setPinnedPosts] = useState([]);
     const [historyPosts, setHistoryPosts] = useState([]);
     const [loadingPosts, setLoadingPosts] = useState(false);
     const [selectedPostId, setSelectedPostId] = useState(null);
@@ -33,7 +37,20 @@ function Profile() {
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
     useEffect(() => {
-        if (userProfile) {
+        if (isPublicView) {
+            setLoading(true);
+            userController.getUserProfile(userId).then(profile => {
+                setPublicProfile(profile);
+                if (profile) {
+                    setUsername(profile.username || '');
+                    setIsAdmin(profile.role === 'admin');
+                }
+                setLoading(false);
+            }).catch(err => {
+                console.error("Error fetching public profile:", err);
+                setLoading(false);
+            });
+        } else if (userProfile) {
             setUsername(userProfile.username || '');
             setIsAdmin(userProfile.role === 'admin');
             setLoading(false);
@@ -43,26 +60,58 @@ function Profile() {
         }
         // If currentUser exists but userProfile is null, we wait for AuthContext.
         // We do NOT depend on 'loading' here to avoid loops.
-    }, [currentUser, userProfile]);
+    }, [currentUser, userProfile, isPublicView, userId]);
 
     // Fetch posts based on active tab
     useEffect(() => {
         const fetchPosts = async () => {
-            if (!currentUser) return;
+            if (!isPublicView && !currentUser) return;
 
             setLoadingPosts(true);
             try {
                 if (activeTab === 'my-posts') {
-                    const posts = await postController.getPostsByUserId(currentUser.uid);
+                    const targetUid = isPublicView ? userId : currentUser.uid;
+                    const posts = await postController.getPostsByUserId(targetUid);
                     setHistoryPosts(posts);
                 } else if (activeTab === 'saved-posts') {
-                    // Use userProfile directly from context
-                    if (userProfile && userProfile.savedPosts && userProfile.savedPosts.length > 0) {
-                        // Fetch all saved posts using optimized batch fetch
-                        const posts = await postController.getPostsByIds(userProfile.savedPosts);
-                        setSavedPosts(posts);
+                    if (isPublicView) {
+                        // In public view, "Pinned" tab shows PINNED posts
+                        if (publicProfile && publicProfile.pinnedPosts && publicProfile.pinnedPosts.length > 0) {
+                            const posts = await postController.getPostsByIds(publicProfile.pinnedPosts);
+                            // Sort by latest pinned
+                            const sortedPosts = posts.sort((a, b) => {
+                                const indexA = publicProfile.pinnedPosts.indexOf(a.id);
+                                const indexB = publicProfile.pinnedPosts.indexOf(b.id);
+                                return indexB - indexA;
+                            });
+                            setPinnedPosts(sortedPosts);
+                        } else {
+                            setPinnedPosts([]);
+                        }
                     } else {
-                        setSavedPosts([]);
+                        // In private view, "Saved Posts" tab shows SAVED posts
+                        if (userProfile && userProfile.savedPosts && userProfile.savedPosts.length > 0) {
+                            const posts = await postController.getPostsByIds(userProfile.savedPosts);
+                            setSavedPosts(posts);
+                        } else {
+                            setSavedPosts([]);
+                        }
+                    }
+                } else if (activeTab === 'pinned-posts' && !isPublicView) {
+                    // Owner's "Pinned" tab (Pinned Posts)
+                    if (userProfile && userProfile.pinnedPosts && userProfile.pinnedPosts.length > 0) {
+                        const posts = await postController.getPostsByIds(userProfile.pinnedPosts);
+                        // Sort by latest pinned (reverse order of pinnedPosts array)
+                        // pinnedPosts is [oldest, ..., newest]
+                        // We want [newest, ..., oldest]
+                        const sortedPosts = posts.sort((a, b) => {
+                            const indexA = userProfile.pinnedPosts.indexOf(a.id);
+                            const indexB = userProfile.pinnedPosts.indexOf(b.id);
+                            return indexB - indexA;
+                        });
+                        setPinnedPosts(sortedPosts);
+                    } else {
+                        setPinnedPosts([]);
                     }
                 }
             } catch (error) {
@@ -76,7 +125,7 @@ function Profile() {
         if (!loading) {
             fetchPosts();
         }
-    }, [currentUser, activeTab, loading, userProfile]);
+    }, [currentUser, activeTab, loading, userProfile, isPublicView, userId, publicProfile]);
 
     const handleSave = async () => {
         setSaving(true);
@@ -189,6 +238,24 @@ function Profile() {
         return `${days}d ago`;
     };
 
+    const handleTogglePin = async (e, postId) => {
+        e.stopPropagation();
+        if (!currentUser) return;
+
+        const isPinned = (userProfile.pinnedPosts || []).includes(postId);
+        const newIsPinned = !isPinned;
+
+        try {
+            await userController.togglePinPost(currentUser.uid, postId, newIsPinned);
+            await refreshProfile(); 
+            
+            
+        } catch (error) {
+            console.error("Error toggling pin:", error);
+            setMessage({ type: 'error', text: 'Failed to update pin status.' });
+        }
+    };
+
     if (loading) {
         return <div className="profile-container">Loading...</div>;
     }
@@ -201,30 +268,37 @@ function Profile() {
         if (posts.length === 0) {
             return <div className="no-posts">No posts found.</div>;
         }
-        return posts.map(post => (
-            <div
-                key={post.id}
-                className="history-post-card"
-                onClick={() => setSelectedPostId(post.id)}
-            >
-                <div className="history-post-header">
-                    <div className="history-post-info">
-                        <span className="history-time">{formatTimeAgo(post.timestamp)}</span>
-                    </div>
-                    {post.board && (
-                        <div className="history-post-board">
-                            <BoardBadge board={getBoardById(post.board)} />
+        return posts.map(post => {
+            const isPinned = !isPublicView && userProfile?.pinnedPosts?.includes(post.id);
+            
+            return (
+                <div
+                    key={post.id}
+                    className="history-post-card"
+                    onClick={() => setSelectedPostId(post.id)}
+                >
+                    <div className="history-post-header">
+                        <div className="history-post-info">
+                            <span className="history-time">{formatTimeAgo(post.timestamp)}</span>
                         </div>
-                    )}
+                        <div className="history-header-right">
+
+                            {post.board && (
+                                <div className="history-post-board">
+                                    <BoardBadge board={getBoardById(post.board)} />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    <h3 className="history-post-title">{post.title}</h3>
+                    <p className="history-post-content">{post.content}</p>
+                    <div className="history-post-stats">
+                        <span><i className="fa-regular fa-heart"></i> {post.likes || 0}</span>
+                        <span><i className="fa-regular fa-comment"></i> {post.comments || 0}</span>
+                    </div>
                 </div>
-                <h3 className="history-post-title">{post.title}</h3>
-                <p className="history-post-content">{post.content}</p>
-                <div className="history-post-stats">
-                    <span><i className="fa-regular fa-heart"></i> {post.likes || 0}</span>
-                    <span><i className="fa-regular fa-comment"></i> {post.comments || 0}</span>
-                </div>
-            </div>
-        ));
+            );
+        });
     };
 
     return (
@@ -233,18 +307,20 @@ function Profile() {
                 <div className="profile-card">
                     <div className="profile-avatar-container">
                         <img
-                            src={getAvatarUrl(userProfile?.avatarSeed || currentUser?.uid)}
+                            src={getAvatarUrl((isPublicView ? publicProfile?.avatarSeed : userProfile?.avatarSeed) || (isPublicView ? userId : currentUser?.uid))}
                             alt="Profile"
                             className="profile-avatar-large"
                         />
-                        <button
-                            className="regenerate-btn"
-                            onClick={handleRegenerateIdentity}
-                            disabled={regenerating}
-                            title="Regenerate Identity"
-                        >
-                            <i className={`fa-solid fa-arrows-rotate ${regenerating ? 'fa-spin' : ''}`}></i>
-                        </button>
+                        {!isPublicView && (
+                            <button
+                                className="regenerate-btn"
+                                onClick={handleRegenerateIdentity}
+                                disabled={regenerating}
+                                title="Regenerate Identity"
+                            >
+                                <i className={`fa-solid fa-arrows-rotate ${regenerating ? 'fa-spin' : ''}`}></i>
+                            </button>
+                        )}
                     </div>
 
                     <div className="profile-info">
@@ -269,13 +345,17 @@ function Profile() {
                         ) : (
                             <div className="username-display-container">
                                 <h2 className="profile-username">{username}</h2>
-                                <button className="edit-icon-btn" onClick={handleEditClick}>
-                                    <i className="fa-solid fa-pen"></i>
-                                </button>
+                                {!isPublicView && (
+                                    <button className="edit-icon-btn" onClick={handleEditClick}>
+                                        <i className="fa-solid fa-pen"></i>
+                                    </button>
+                                )}
                             </div>
                         )}
-                        <p className="profile-handle">@{currentUser?.email?.split('@')[0] || 'anonymous'}</p>
-                        {isAdmin && <span className="admin-badge">ADMIN</span>}
+                        {!isPublicView && (
+                            <p className="profile-handle">@{currentUser?.email?.split('@')[0] || 'anonymous'}</p>
+                        )}
+                        {!isPublicView && isAdmin && <span className="admin-badge">ADMIN</span>}
                     </div>
 
                     <div className="profile-stats-summary">
@@ -284,14 +364,22 @@ function Profile() {
                             <span className="stat-label">Posts</span>
                         </div>
                         <div className="stat-pill">
-                            <span className="stat-value">{savedPosts.length}</span>
-                            <span className="stat-label">Saved</span>
+                            <span className="stat-value">{isPublicView ? (publicProfile?.pinnedPosts?.length || 0) : (userProfile?.savedPosts?.length || 0)}</span>
+                            <span className="stat-label">{isPublicView ? "Pinned" : "Saved"}</span>
                         </div>
+                        {!isPublicView && (
+                            <div className="stat-pill">
+                                <span className="stat-value">{userProfile?.pinnedPosts?.length || 0}</span>
+                                <span className="stat-label">Pinned</span>
+                            </div>
+                        )}
                     </div>
 
-                    <button className="logout-button-full" onClick={handleLogoutClick}>
-                        <i className="fa-solid fa-right-from-bracket"></i> Logout
-                    </button>
+                    {!isPublicView && (
+                        <button className="logout-button-full" onClick={handleLogoutClick}>
+                            <i className="fa-solid fa-right-from-bracket"></i> Logout
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -307,18 +395,26 @@ function Profile() {
                         className={`tab-btn ${activeTab === 'my-posts' ? 'active' : ''}`}
                         onClick={() => setActiveTab('my-posts')}
                     >
-                        My Posts
+                        {isPublicView ? "User's Posts" : "My Posts"}
                     </button>
                     <button
                         className={`tab-btn ${activeTab === 'saved-posts' ? 'active' : ''}`}
                         onClick={() => setActiveTab('saved-posts')}
                     >
-                        Saved Posts
+                        {isPublicView ? "Pinned" : "Saved Posts"}
                     </button>
+                    {!isPublicView && (
+                        <button
+                            className={`tab-btn ${activeTab === 'pinned-posts' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('pinned-posts')}
+                        >
+                            Pinned
+                        </button>
+                    )}
                 </div>
 
                 <div className="profile-content-area">
-                    {currentUser?.isAnonymous ? (
+                    {!isPublicView && currentUser?.isAnonymous ? (
                         <div className="guest-restriction-container">
                             <div className="guest-restriction-card">
                                 <div className="guest-restriction-icon">
@@ -340,9 +436,13 @@ function Profile() {
                             <div className="posts-grid">
                                 {renderPostList(historyPosts)}
                             </div>
+                        ) : activeTab === 'saved-posts' ? (
+                            <div className="posts-grid">
+                                {renderPostList(isPublicView ? pinnedPosts : savedPosts)}
+                            </div>
                         ) : (
                             <div className="posts-grid">
-                                {renderPostList(savedPosts)}
+                                {renderPostList(pinnedPosts)}
                             </div>
                         )
                     )}

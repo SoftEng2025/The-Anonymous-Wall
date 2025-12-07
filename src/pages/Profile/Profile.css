@@ -198,3 +198,35 @@
     background: var(--accent-blue-dark);
     transform: translateY(-2px);
 }
+
+.history-header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.pin-btn-small {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.pin-btn-small:hover {
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.pin-btn-small.pinned {
+    color: #e74c3c;
+}
+
+.pin-btn-small.pinned:hover {
+    color: #c0392b;
+    background: rgba(231, 76, 60, 0.1);
+}

@@ -15,21 +15,27 @@ const ForumReplyItem = ({
     onReport,
     onEditCancel,
     onEditSave,
-    setEditContent
+    setEditContent,
+    onUserClick
 }) => {
     return (
         <div className="modal-reply-card">
             <img
                 src={getAvatarUrl(reply.avatarSeed)}
                 alt={reply.author}
-                className="modal-reply-avatar"
+                className="modal-reply-avatar clickable-avatar"
+                onClick={(e) => onUserClick(e, reply.uid)}
             />
             <div className="modal-reply-content-wrapper">
                 <div className="modal-reply-bubble">
                     <div className="modal-reply-header">
                         <div className="comment-header">
                             <div className="comment-header-left">
-                                <span className="modal-reply-username" style={{ color: reply.isDeleted ? '#999' : 'inherit' }}>
+                                <span 
+                                    className="modal-reply-username clickable-username" 
+                                    style={{ color: reply.isDeleted ? '#999' : 'inherit' }}
+                                    onClick={(e) => !reply.isDeleted && onUserClick(e, reply.uid)}
+                                >
                                     {reply.author}
                                 </span>
                                 {reply.replyTo && (

@@ -120,6 +120,7 @@ export const userController = {
      * @param {string} postId 
      * @param {boolean} shouldSave 
      */
+
     toggleSavedPost: async (uid, postId, shouldSave) => {
         try {
             const docRef = doc(db, USERS_COLLECTION, uid);
@@ -128,6 +129,24 @@ export const userController = {
             });
         } catch (error) {
             console.error("Error toggling saved post:", error);
+            throw error;
+        }
+    },
+
+    /**
+     * Toggles a pinned post for a user.
+     * @param {string} uid 
+     * @param {string} postId 
+     * @param {boolean} shouldPin 
+     */
+    togglePinPost: async (uid, postId, shouldPin) => {
+        try {
+            const docRef = doc(db, USERS_COLLECTION, uid);
+            await updateDoc(docRef, {
+                pinnedPosts: shouldPin ? arrayUnion(postId) : arrayRemove(postId)
+            });
+        } catch (error) {
+            console.error("Error toggling pinned post:", error);
             throw error;
         }
     }

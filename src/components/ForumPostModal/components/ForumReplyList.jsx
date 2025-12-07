@@ -15,7 +15,8 @@ const ForumReplyList = ({
     onReportReply,
     onEditReplyCancel,
     onEditReplySave,
-    setEditReplyContent
+    setEditReplyContent,
+    onUserClick
 }) => {
     return (
         <div className="modal-replies-section">
@@ -36,6 +37,7 @@ const ForumReplyList = ({
                     onEditCancel={onEditReplyCancel}
                     onEditSave={onEditReplySave}
                     setEditContent={setEditReplyContent}
+                    onUserClick={onUserClick}
                 />
             ))}
         </div>
