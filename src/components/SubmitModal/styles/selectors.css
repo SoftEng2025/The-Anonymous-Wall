@@ -1,10 +1,9 @@
 /* Process Selectors */
-.selector-label {
-    display: block;
-    text-align: center;
-    font-weight: 700;
-    color: var(--text-light, #fff);
-    margin-bottom: 0.8rem;
+.theme-selector,
+.mood-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 /* Theme Options */
@@ -20,7 +19,7 @@
 
 .theme-option {
     width: 100%;
-    height: 40px;
+    height: 36px;
     border: none;
     cursor: pointer;
     transition: opacity 0.2s;
@@ -40,7 +39,8 @@
 .mood-options {
     display: flex;
     justify-content: space-between;
-    padding: 0 1rem;
+    padding: 0 0.5rem;
+    gap: 0.35rem;
 }
 
 .mood-option {
@@ -49,14 +49,14 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.35rem;
     cursor: pointer;
     color: var(--text-muted, #9ca3af);
     transition: transform 0.2s, color 0.2s;
 }
 
 .mood-icon {
-    font-size: 2rem;
+    font-size: 1.85rem;
     transition: color 0.2s;
 }
 
