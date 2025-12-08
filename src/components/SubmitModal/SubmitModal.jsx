@@ -25,7 +25,7 @@ const MOODS = [
 ]
 
 const MAX_MESSAGE_LENGTH = 95
-const RECAPTCHA_ENABLED = import.meta.env.PROD && !!import.meta.env.VITE_RECAPTCHA_SITE_KEY
+const RECAPTCHA_ENABLED = !import.meta.env.DEV && !!import.meta.env.VITE_RECAPTCHA_SITE_KEY
 
 export default function SubmitModal({ isOpen, onClose }) {
 
@@ -130,7 +130,7 @@ export default function SubmitModal({ isOpen, onClose }) {
                     <h2 className="submit-title">Send a Message to Someone</h2>
                 </div>
 
-                <div className="submit-body">
+                <div className="submit-body desktop-grid">
                     {submitError && (
                         <div className="submit-error-message">
                             <span>{submitError}</span>
@@ -155,6 +155,7 @@ export default function SubmitModal({ isOpen, onClose }) {
                             placeholder="Write your message here"
                             value={message}
                             onChange={handleMessageChange}
+                            aria-label="Message"
                             style={{ backgroundColor: selectedTheme.color }}
                         />
                         <div className={`char-counter ${remainingChars < 20 ? 'warning' : ''} ${isOverLimit ? 'error' : ''}`}>
@@ -163,20 +164,17 @@ export default function SubmitModal({ isOpen, onClose }) {
                     </div>
 
                     <div className="spotify-input">
-                        <label className="selector-label">Song (optional)</label>
                         <input
                             type="url"
                             className="submit-input"
-                            placeholder="Paste a Spotify track/album/playlist link"
+                            placeholder="Paste Spotify music link (optional)"
                             aria-label="Spotify link"
                             value={spotifyLink}
                             onChange={handleSpotifyLinkChange}
                         />
-                        <p className="spotify-helper">We’ll embed the song in your message if the link is valid.</p>
                     </div>
 
-                    <div className="theme-selector">
-                        <label className="selector-label">Theme</label>
+                    <div className="theme-selector" role="group" aria-label="Theme options">
                         <div className="theme-options">
                             {THEMES.map((theme) => (
                                 <button
@@ -190,8 +188,7 @@ export default function SubmitModal({ isOpen, onClose }) {
                         </div>
                     </div>
 
-                    <div className="mood-selector">
-                        <label className="selector-label">Mood</label>
+                    <div className="mood-selector" role="group" aria-label="Mood options">
                         <div className="mood-options">
                             {MOODS.map((mood) => (
                                 <button
