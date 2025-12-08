@@ -247,9 +247,7 @@ function Profile() {
 
         try {
             await userController.togglePinPost(currentUser.uid, postId, newIsPinned);
-            await refreshProfile(); 
-            
-            
+            await refreshProfile();
         } catch (error) {
             console.error("Error toggling pin:", error);
             setMessage({ type: 'error', text: 'Failed to update pin status.' });
@@ -282,7 +280,15 @@ function Profile() {
                             <span className="history-time">{formatTimeAgo(post.timestamp)}</span>
                         </div>
                         <div className="history-header-right">
-
+                            {!isPublicView && activeTab === 'my-posts' && (
+                                <button
+                                    className={`pin-btn-small ${isPinned ? 'pinned' : ''}`}
+                                    onClick={(e) => handleTogglePin(e, post.id)}
+                                    title={isPinned ? "Unpin Post" : "Pin Post"}
+                                >
+                                    <i className="fa-solid fa-thumbtack"></i>
+                                </button>
+                            )}
                             {post.board && (
                                 <div className="history-post-board">
                                     <BoardBadge board={getBoardById(post.board)} />

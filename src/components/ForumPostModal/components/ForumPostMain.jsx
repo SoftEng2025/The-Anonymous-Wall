@@ -101,7 +101,7 @@ const ForumPostMain = ({
                             <button 
                                 className={`modal-stat-btn ${isPinned ? 'pinned' : ''}`} 
                                 onClick={onTogglePin}
-                                title={isPinned ? "Unpin from Profile" : "Pin to Profile"}
+                                title={isPinned ? "Unpin Post" : "Pin Post"}
                             >
                                 <i className={`fa-solid fa-thumbtack`}></i>
                                 <span>{isPinned ? 'Pinned' : 'Pin'}</span>
