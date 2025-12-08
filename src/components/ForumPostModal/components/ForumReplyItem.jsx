@@ -7,6 +7,7 @@ const ForumReplyItem = ({
     isAdmin,
     isEditing,
     editContent,
+    editAttachment,
     editError,
     onLike,
     onReply,
@@ -15,8 +16,12 @@ const ForumReplyItem = ({
     onReport,
     onEditCancel,
     onEditSave,
-    setEditContent
+    setEditContent,
+    setEditAttachment
 }) => {
+    const attachments = reply.attachments || [];
+    const firstAttachment = attachments[0];
+
     return (
         <div className="modal-reply-card">
             <img
@@ -55,6 +60,13 @@ const ForumReplyItem = ({
                                 onChange={(e) => setEditContent(e.target.value)}
                                 placeholder="Reply Content"
                             />
+                            <input
+                                className="modal-attachment-input"
+                                type="text"
+                                value={editAttachment}
+                                onChange={(e) => setEditAttachment(e.target.value)}
+                                placeholder="Attachment image URL (optional)"
+                            />
                             {editError && <div className="modal-error-message">{editError}</div>}
                             <div className="modal-edit-actions">
                                 <button className="modal-edit-btn-cancel" onClick={onEditCancel}>Cancel</button>
@@ -62,9 +74,34 @@ const ForumReplyItem = ({
                             </div>
                         </div>
                     ) : (
-                        <p className="modal-reply-text" style={{ fontStyle: reply.isDeleted ? 'italic' : 'normal', color: reply.isDeleted ? '#aaa' : 'inherit' }}>
-                            {reply.content}
-                        </p>
+                        <div className="modal-reply-body">
+                            <p className="modal-reply-text" style={{ fontStyle: reply.isDeleted ? 'italic' : 'normal', color: reply.isDeleted ? '#aaa' : 'inherit' }}>
+                                {reply.content}
+                            </p>
+                            {!reply.isDeleted && attachments.length > 0 && firstAttachment?.url && (
+                                <div className="modal-reply-attachments">
+                                    {attachments.map((attachment, idx) => (
+                                        <a
+                                            key={idx}
+                                            className="modal-reply-attachment-link"
+                                            href={attachment.url}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                        >
+                                            {attachment.type === 'image' ? (
+                                                <img
+                                                    src={attachment.url}
+                                                    alt={attachment.name || 'attachment'}
+                                                    className="modal-reply-attachment-image"
+                                                />
+                                            ) : (
+                                                attachment.name || attachment.url
+                                            )}
+                                        </a>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     )}
                 </div>
 
