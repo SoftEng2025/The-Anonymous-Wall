@@ -4,6 +4,7 @@
  * @param {string} data.author - The username of the author.
  * @param {string} data.uid - The user ID of the author.
  * @param {string} data.content - The content of the reply.
+ * @param {Array<Object>} [data.attachments] - Optional attachments (e.g., image URLs).
  * @returns {Object} A structured Reply object.
  */
 export const createReplyModel = (data) => {
@@ -12,6 +13,7 @@ export const createReplyModel = (data) => {
         uid: data.uid,
         avatarSeed: data.uid,
         content: data.content,
+        attachments: data.attachments || [],
         likes: 0,
         likedBy: [],
         replyTo: data.replyTo || null,
