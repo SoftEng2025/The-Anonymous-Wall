@@ -4,10 +4,12 @@ import { useMessages } from '../../contexts/MessageContext'
 import { useAuth } from '../../contexts/AuthContext'
 import { messageController } from '../../backend/controllers/messageController'
 import { reportController } from '../../backend/controllers/reportController'
+import { getSpotifyEmbedUrl } from '../../utils/spotify'
 import ReportModal from '../../components/ReportModal'
 import ReportSuccessModal from '../../components/ReportSuccessModal/ReportSuccessModal'
 import LoginModal from '../../components/LoginModal'
 import SubmitModal from '../../components/SubmitModal/SubmitModal'
+import SpotifyPreview from '../../components/SpotifyPreview'
 import './Browse.css'
 
 const MOOD_ICONS = {
@@ -16,6 +18,14 @@ const MOOD_ICONS = {
     'in-love': 'fa-regular fa-face-grin-hearts',
     'angry': 'fa-regular fa-face-angry',
     'confused': 'fa-regular fa-face-flushed'
+}
+
+const MOOD_COLORS = {
+    'happy': '#ffd700',
+    'sad': '#4fc3f7',
+    'in-love': '#f187c8',
+    'angry': '#ff5252',
+    'confused': '#e040fb'
 }
 
 export default function Browse() {
@@ -114,53 +124,71 @@ export default function Browse() {
             </div>
 
             <div className="messages-grid">
-                {filteredMessages.map((msg) => (
-                    <article key={msg.id} className="card">
-                        <header className="card-header">
-                            <div className="header-content">
-                                <span className="card-to">to: {msg.recipient}</span>
-                                <span className="card-date">
-                                    {msg.timestamp ? new Date(msg.timestamp).toLocaleString('en-US', {
-                                        year: 'numeric',
-                                        month: 'short',
-                                        day: 'numeric',
-                                        hour: 'numeric',
-                                        minute: 'numeric',
-                                        hour12: true
-                                    }).replace(',', ' –') : ''}
-                                </span>
-                            </div>
-                            <div className="header-actions">
-                                <i className={`message-mood ${MOOD_ICONS[msg.mood] || 'fa-regular fa-face-smile'}`}></i>
-                                <button
-                                    className="report-icon-btn"
-                                    onClick={(e) => { e.stopPropagation(); handleReportClick(msg); }}
-                                    title="Report"
+                {filteredMessages.map((msg) => {
+                    const embedUrl = msg.spotifyEmbedUrl || getSpotifyEmbedUrl(msg.spotifyUrl || msg.spotifyLink || '')
+                    return (
+                        <article key={msg.id} className="card">
+                            <header className="card-header">
+                                <div className="header-content">
+                                    <span className="card-to">to: {msg.recipient}</span>
+                                    <span className="card-date">
+                                        {msg.timestamp ? new Date(msg.timestamp).toLocaleString('en-US', {
+                                            year: 'numeric',
+                                            month: 'short',
+                                            day: 'numeric',
+                                            hour: 'numeric',
+                                            minute: 'numeric',
+                                            hour12: true
+                                        }) : ''}
+                                    </span>
+                                </div>
+                                <div className="header-actions">
+                                    <i
+                                        className={`message-mood ${MOOD_ICONS[msg.mood] || 'fa-regular fa-face-smile'}`}
+                                        style={{ color: MOOD_COLORS[msg.mood] || '#fff' }}
+                                    ></i>
+                                    <button
+                                        className="report-icon-btn"
+                                        onClick={(e) => { e.stopPropagation(); handleReportClick(msg); }}
+                                        title="Report"
+                                    >
+                                        <i className="fa-regular fa-flag"></i>
+                                    </button>
+                                </div>
+                            </header>
+                            <div className="card-body">
+                                <p
+                                    className="card-message"
+                                    style={{ backgroundColor: `var(--${msg.theme})` }}
                                 >
-                                    <i className="fa-regular fa-flag"></i>
-                                </button>
+                                    {msg.message}
+                                </p>
                             </div>
-                        </header>
-                        <div className="card-body">
-                            <p
-                                className="card-message"
-                                style={{ backgroundColor: `var(--${msg.theme})` }}
-                            >
-                                {msg.message}
-                            </p>
-                        </div>
-                        <footer className="card-footer">
-                            <div className="input-shell">
-                                <input type="text" placeholder="Aa" className="reply-input-transparent" />
-                            </div>
-                            <button className="send-button">
-                                <span className="send-icon">
-                                    <i className="fa-solid fa-paper-plane"></i>
-                                </span>
-                            </button>
-                        </footer>
-                    </article>
-                ))}
+                            <footer className={`card-footer ${embedUrl ? 'has-spotify' : ''}`}>
+                                {embedUrl ? (
+                                    <SpotifyPreview embedUrl={embedUrl} />
+                                ) : (
+                                    <>
+                                        <div className="input-shell">
+                                            <input
+                                                type="text"
+                                                placeholder="Aa"
+                                                className="reply-input-transparent"
+                                                disabled
+                                                aria-disabled="true"
+                                            />
+                                        </div>
+                                        <button className="send-button" disabled aria-disabled="true" tabIndex="-1">
+                                            <span className="send-icon">
+                                                <i className="fa-solid fa-paper-plane"></i>
+                                            </span>
+                                        </button>
+                                    </>
+                                )}
+                            </footer>
+                        </article>
+                    )
+                })}
             </div>
 
             <ReportModal

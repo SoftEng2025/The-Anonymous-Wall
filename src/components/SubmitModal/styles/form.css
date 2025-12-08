@@ -54,6 +54,20 @@
     color: rgba(37, 51, 83, 0.55);
 }
 
+.spotify-input {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.spotify-helper {
+    margin: 0;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
 /* Character Counter */
 .char-counter {
     position: absolute;
