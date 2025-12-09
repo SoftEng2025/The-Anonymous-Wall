@@ -7,6 +7,7 @@ const ForumReplyList = ({
     isAdmin,
     editingReplyId,
     editReplyContent,
+    editReplyAttachment,
     editError,
     onReplyLike,
     onReplyClick,
@@ -16,7 +17,8 @@ const ForumReplyList = ({
     onEditReplyCancel,
     onEditReplySave,
     setEditReplyContent,
-    onUserClick
+    onUserClick,
+    setEditReplyAttachment
 }) => {
     return (
         <div className="modal-replies-section">
@@ -28,6 +30,7 @@ const ForumReplyList = ({
                     isAdmin={isAdmin}
                     isEditing={editingReplyId === reply.id}
                     editContent={editReplyContent}
+                    editAttachment={editReplyAttachment}
                     editError={editError}
                     onLike={onReplyLike}
                     onReply={onReplyClick}
@@ -38,6 +41,7 @@ const ForumReplyList = ({
                     onEditSave={onEditReplySave}
                     setEditContent={setEditReplyContent}
                     onUserClick={onUserClick}
+                    setEditAttachment={setEditReplyAttachment}
                 />
             ))}
         </div>

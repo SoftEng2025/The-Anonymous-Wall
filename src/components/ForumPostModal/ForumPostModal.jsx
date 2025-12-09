@@ -21,6 +21,7 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
     const navigate = useNavigate();
     const [post, setPost] = useState(null);
     const [replyContent, setReplyContent] = useState('');
+    const [replyAttachment, setReplyAttachment] = useState('');
     const [likes, setLikes] = useState(0);
     const [isLiked, setIsLiked] = useState(false);
     const [replies, setReplies] = useState([]);
@@ -33,6 +34,7 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
     const [editPostContent, setEditPostContent] = useState('');
     const [editingReplyId, setEditingReplyId] = useState(null);
     const [editReplyContent, setEditReplyContent] = useState('');
+    const [editReplyAttachment, setEditReplyAttachment] = useState('');
     const [editError, setEditError] = useState(null);
 
     const [isSaved, setIsSaved] = useState(false);
@@ -196,11 +198,15 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
             }
 
             const authorName = profile.username;
+            const attachmentUrl = replyAttachment.trim();
+            const attachments = attachmentUrl ? [{ url: attachmentUrl, type: 'image' }] : [];
+
             const replyData = {
                 author: authorName,
                 uid: currentUser.uid,
                 content: replyContent,
-                replyTo: replyingTo ? replyingTo.author : null
+                replyTo: replyingTo ? replyingTo.author : null,
+                attachments
             };
 
             const newReply = await replyController.addReply(postId, replyData);
@@ -215,6 +221,7 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
             const newReplies = [...replies, displayReply];
             setReplies(newReplies);
             setReplyContent('');
+            setReplyAttachment('');
             setReplyingTo(null);
 
             if (onPostUpdate) {
@@ -342,6 +349,7 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
 
     const handleEditReplyClick = (reply) => {
         setEditReplyContent(reply.content);
+        setEditReplyAttachment((reply.attachments && reply.attachments[0]?.url) || '');
         setEditingReplyId(reply.id);
     };
 
@@ -349,12 +357,17 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
         if (!editReplyContent.trim()) return;
         try {
             const editedTimestamp = Date.now();
+            const attachmentUrl = editReplyAttachment.trim();
+            const attachments = attachmentUrl ? [{ url: attachmentUrl, type: 'image' }] : [];
+
             await replyController.updateReply(postId, replyId, {
                 content: editReplyContent,
+                attachments,
                 editedAt: editedTimestamp
             });
-            setReplies(prev => prev.map(r => r.id === replyId ? { ...r, content: editReplyContent, editedAt: editedTimestamp } : r));
+            setReplies(prev => prev.map(r => r.id === replyId ? { ...r, content: editReplyContent, attachments, editedAt: editedTimestamp } : r));
             setEditingReplyId(null);
+            setEditReplyAttachment('');
             setEditError(null);
         } catch (error) {
             console.error("Failed to update reply:", error);
@@ -425,16 +438,18 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
                         isAdmin={isAdmin}
                         editingReplyId={editingReplyId}
                         editReplyContent={editReplyContent}
+                        editReplyAttachment={editReplyAttachment}
                         editError={editError}
                         onReplyLike={handleReplyLike}
                         onReplyClick={handleReplyClick}
                         onEditReplyClick={handleEditReplyClick}
                         onDeleteReply={handleDeleteReply}
                         onReportReply={handleReportReply}
-                        onEditReplyCancel={() => setEditingReplyId(null)}
+                        onEditReplyCancel={() => { setEditingReplyId(null); setEditReplyAttachment(''); }}
                         onEditReplySave={handleSaveReply}
                         setEditReplyContent={setEditReplyContent}
                         onUserClick={handleUserClick}
+                        setEditReplyAttachment={setEditReplyAttachment}
                     />
                 </div>
 
@@ -442,9 +457,12 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
                     currentUser={currentUser}
                     replyingTo={replyingTo}
                     replyContent={replyContent}
+                    replyAttachment={replyAttachment}
                     inputRef={replyInputRef}
                     onCancelReplyTo={() => setReplyingTo(null)}
                     onChange={(e) => setReplyContent(e.target.value)}
+                    onAttachmentChange={(value) => setReplyAttachment(value)}
+                    onEmojiAdd={(emoji) => setReplyContent(prev => `${prev}${emoji}`)}
                     onSubmit={handleReplySubmit}
                 />
             </div>

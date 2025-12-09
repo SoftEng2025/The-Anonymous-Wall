@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react'
 import ReCAPTCHA from "react-google-recaptcha";
 import { useMessages } from '../../contexts/MessageContext'
 import { messageController } from '../../backend/controllers/messageController'
+import { getSpotifyEmbedUrl } from '../../utils/spotify'
 import './styles/layout.css'
 import './styles/form.css'
 import './styles/selectors.css'
@@ -24,6 +25,7 @@ const MOODS = [
 ]
 
 const MAX_MESSAGE_LENGTH = 95
+const RECAPTCHA_ENABLED = !import.meta.env.DEV && !!import.meta.env.VITE_RECAPTCHA_SITE_KEY
 
 export default function SubmitModal({ isOpen, onClose }) {
 
@@ -31,6 +33,7 @@ export default function SubmitModal({ isOpen, onClose }) {
     const [message, setMessage] = useState('')
     const [selectedTheme, setSelectedTheme] = useState(THEMES[2]) // Default to mint
     const [selectedMood, setSelectedMood] = useState(null)
+    const [spotifyLink, setSpotifyLink] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [submitError, setSubmitError] = useState('')
     const [captchaToken, setCaptchaToken] = useState(null)
@@ -48,6 +51,10 @@ export default function SubmitModal({ isOpen, onClose }) {
         setMessage(e.target.value)
     }
 
+    const handleSpotifyLinkChange = (e) => {
+        setSpotifyLink(e.target.value)
+    }
+
     const remainingChars = MAX_MESSAGE_LENGTH - message.length
     const isOverLimit = message.length > MAX_MESSAGE_LENGTH
     const isRecipientMissing = recipient.trim().length === 0
@@ -63,8 +70,15 @@ export default function SubmitModal({ isOpen, onClose }) {
             return
         }
 
-        if (!captchaToken) {
+        if (RECAPTCHA_ENABLED && !captchaToken) {
             setSubmitError("Please complete the captcha verification.")
+            return
+        }
+
+        const trimmedSpotifyLink = spotifyLink.trim()
+        const spotifyEmbedUrl = trimmedSpotifyLink ? getSpotifyEmbedUrl(trimmedSpotifyLink) : ''
+        if (trimmedSpotifyLink && !spotifyEmbedUrl) {
+            setSubmitError("Please paste a valid Spotify link.")
             return
         }
 
@@ -78,7 +92,8 @@ export default function SubmitModal({ isOpen, onClose }) {
                 recipient: trimmedRecipient || 'Anonymous',
                 message,
                 theme: selectedTheme.id,
-                mood: selectedMood
+                mood: selectedMood,
+                spotifyEmbedUrl
             }
 
             // Save to Firebase
@@ -95,6 +110,7 @@ export default function SubmitModal({ isOpen, onClose }) {
             setSelectedTheme(THEMES[2])
             setSelectedMood(null)
             setCaptchaToken(null)
+            setSpotifyLink('')
         } catch (error) {
             console.error("Failed to submit message:", error)
             setSubmitError("Failed to send message. Please try again.")
@@ -114,7 +130,7 @@ export default function SubmitModal({ isOpen, onClose }) {
                     <h2 className="submit-title">Send a Message to Someone</h2>
                 </div>
 
-                <div className="submit-body">
+                <div className="submit-body desktop-grid">
                     {submitError && (
                         <div className="submit-error-message">
                             <span>{submitError}</span>
@@ -122,11 +138,11 @@ export default function SubmitModal({ isOpen, onClose }) {
                     )}
 
                     <div className="recipient-input">
-                        <label className="selector-label">Recipient</label>
                         <input
                             type="text"
                             className="submit-input"
                             placeholder="Who is this message for?"
+                            aria-label="Recipient"
                             value={recipient}
                             maxLength={40}
                             onChange={handleRecipientChange}
@@ -139,6 +155,7 @@ export default function SubmitModal({ isOpen, onClose }) {
                             placeholder="Write your message here"
                             value={message}
                             onChange={handleMessageChange}
+                            aria-label="Message"
                             style={{ backgroundColor: selectedTheme.color }}
                         />
                         <div className={`char-counter ${remainingChars < 20 ? 'warning' : ''} ${isOverLimit ? 'error' : ''}`}>
@@ -146,8 +163,18 @@ export default function SubmitModal({ isOpen, onClose }) {
                         </div>
                     </div>
 
-                    <div className="theme-selector">
-                        <label className="selector-label">Theme</label>
+                    <div className="spotify-input">
+                        <input
+                            type="url"
+                            className="submit-input"
+                            placeholder="Paste Spotify music link (optional)"
+                            aria-label="Spotify link"
+                            value={spotifyLink}
+                            onChange={handleSpotifyLinkChange}
+                        />
+                    </div>
+
+                    <div className="theme-selector" role="group" aria-label="Theme options">
                         <div className="theme-options">
                             {THEMES.map((theme) => (
                                 <button
@@ -161,8 +188,7 @@ export default function SubmitModal({ isOpen, onClose }) {
                         </div>
                     </div>
 
-                    <div className="mood-selector">
-                        <label className="selector-label">Mood</label>
+                    <div className="mood-selector" role="group" aria-label="Mood options">
                         <div className="mood-options">
                             {MOODS.map((mood) => (
                                 <button
@@ -177,14 +203,16 @@ export default function SubmitModal({ isOpen, onClose }) {
                         </div>
                     </div>
 
-                    <div className="captcha-container" style={{ marginTop: '1rem', display: 'flex', justifyContent: 'center' }}>
-                        <ReCAPTCHA
-                            ref={recaptchaRef}
-                            sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
-                            onChange={(token) => setCaptchaToken(token)}
-                            theme="dark"
-                        />
-                    </div>
+                    {RECAPTCHA_ENABLED && (
+                        <div className="captcha-container" style={{ marginTop: '1rem', display: 'flex', justifyContent: 'center' }}>
+                            <ReCAPTCHA
+                                ref={recaptchaRef}
+                                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                                onChange={(token) => setCaptchaToken(token)}
+                                theme="dark"
+                            />
+                        </div>
+                    )}
 
                     <button
                         className="submit-send-button"

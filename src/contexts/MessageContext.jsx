@@ -23,7 +23,8 @@ export function MessageProvider({ children }) {
             message: 'Thanks for being a great friend!',
             theme: 'peach',
             mood: 'happy',
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            spotifyEmbedUrl: 'https://open.spotify.com/embed/track/7lPN2DXiMsVn7XUKtOW1CS'
         },
         {
             id: 3,
@@ -76,7 +77,13 @@ export function MessageProvider({ children }) {
     ])
 
     const addMessage = (message) => {
-        setMessages(prev => [{ ...message, id: Date.now(), timestamp: Date.now() }, ...prev])
+        const timestamp = Date.now()
+        setMessages(prev => [{
+            ...message,
+            id: timestamp,
+            timestamp,
+            spotifyEmbedUrl: message.spotifyEmbedUrl || ''
+        }, ...prev])
     }
 
     const value = {

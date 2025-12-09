@@ -443,7 +443,7 @@ const Forum = () => {
                                                             src={getAvatarUrl(post.avatarSeed)}
                                                             alt={post.author}
                                                             className="user-avatar clickable-avatar"
-                                                            onClick={(e) => handleUserClick(e, post.uid)}
+                                                            onClick={(e) => handleUserClick(e, post.uid)}//Added Clickable Avatar & Username
                                                         />
                                                         <div className="header-content">
                                                             <div className="post-info">
@@ -525,7 +525,6 @@ const Forum = () => {
                         onSave={handleSavePost}
                         onPostClick={(id) => setSelectedPostId(id)}
                         hasMore={hasMore}
-                        onLoadMore={handleLoadMore}
                         onLoadMore={handleLoadMore}
                         loadingMore={loadingMore}
                         onUserClick={handleUserClick}

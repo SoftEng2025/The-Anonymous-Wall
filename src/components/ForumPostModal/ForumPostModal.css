@@ -333,7 +333,11 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.65rem;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 0.75rem;
 }
 
 .modal-replying-indicator {
@@ -363,10 +367,10 @@
 
 .modal-reply-input {
     width: 100%;
-    padding: 0.75rem 1rem;
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.05);
+    padding: 0.35rem 0.5rem 0.35rem 0.5rem;
+    border-radius: 12px;
+    border: none;
+    background: transparent;
     color: white;
     font-size: 0.95rem;
     outline: none;
@@ -374,8 +378,7 @@
 }
 
 .modal-reply-input:focus {
-    border-color: rgba(255, 255, 255, 0.4);
-    background: rgba(255, 255, 255, 0.08);
+    background: transparent;
 }
 
 .modal-reply-input::placeholder {
@@ -385,6 +388,151 @@
 .modal-reply-input:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.modal-input-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-top: 0.25rem;
+    position: relative;
+    gap: 0.35rem;
+}
+
+.modal-toolbar-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.8);
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.modal-toolbar-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+}
+
+.modal-toolbar-btn.active {
+    background: rgba(255, 255, 255, 0.18);
+    color: white;
+}
+
+.modal-toolbar-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.modal-emoji-picker {
+    position: absolute;
+    bottom: 42px;
+    left: 0;
+    background: #2f335a;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    padding: 0.35rem;
+    display: flex;
+    gap: 0.25rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    z-index: 20;
+}
+
+.modal-emoji-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    border-radius: 8px;
+    padding: 0.35rem 0.5rem;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.modal-emoji-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.modal-reply-attachment-inline {
+    flex: 1;
+    min-width: 0;
+    padding: 0.6rem 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+}
+
+.modal-reply-attachment-inline::placeholder {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.modal-reply-attachment-inline:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.modal-send-btn {
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.modal-reply-attachment-input,
+.modal-attachment-input {
+    width: 100%;
+    margin-top: 0.35rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 18px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.95rem;
+}
+
+.modal-reply-attachment-input::placeholder,
+.modal-attachment-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.modal-reply-attachment-input:disabled,
+.modal-attachment-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.modal-reply-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.modal-reply-attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.modal-reply-attachment-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    overflow: hidden;
+    max-width: 200px;
+}
+
+.modal-reply-attachment-image {
+    display: block;
+    max-width: 200px;
+    max-height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
 }
 
 .modal-send-btn {
