@@ -62,6 +62,7 @@ export const userController = {
                 username: username,
                 // isAnonymous is no longer needed as everyone has a pseudonym
                 role: role,
+                isPublic: false, // Default to private
                 ...data
             };
 

@@ -99,12 +99,12 @@ const ForumPostMain = ({
                         )}
                         {currentUser && !currentUser.isAnonymous && post.uid === currentUser.uid && (
                             <button 
-                                className={`modal-stat-btn ${isPinned ? 'pinned' : ''}`} 
+                                className={`modal-stat-btn ${isPinned ? 'feature' : ''}`} 
                                 onClick={onTogglePin}
-                                title={isPinned ? "Unpin Post" : "Pin Post"}
+                                title={isPinned ? "Unfeature Post" : "Feature Post"}
                             >
-                                <i className={`fa-solid fa-thumbtack`}></i>
-                                <span>{isPinned ? 'Pinned' : 'Pin'}</span>
+                                <i className={`fa-solid fa-star`}></i>
+                                <span className={isPinned ? 'feature-text' : ''}>{isPinned ? 'Featured' : 'Feature'}</span>
                             </button>
                         )}
                     </div>
