@@ -78,15 +78,17 @@ function Profile() {
 
     // Fetch posts based on active tab
     useEffect(() => {
+        let isMounted = true;
+
         const fetchPosts = async () => {
             if (!isPublicView && !currentUser) return;
 
-            setLoadingPosts(true);
+            if (isMounted) setLoadingPosts(true);
             try {
                 if (activeTab === 'my-posts') {
                     const targetUid = isPublicView ? userId : currentUser.uid;
                     const posts = await postController.getPostsByUserId(targetUid);
-                    setHistoryPosts(posts);
+                    if (isMounted) setHistoryPosts(posts);
                 } else if (activeTab === 'saved-posts') {
                     if (isPublicView) {
                         // In public view, "Pinned" tab shows PINNED posts
@@ -98,17 +100,28 @@ function Profile() {
                                 const indexB = publicProfile.pinnedPosts.indexOf(b.id);
                                 return indexB - indexA;
                             });
-                            setPinnedPosts(sortedPosts);
+                            if (isMounted) setPinnedPosts(sortedPosts);
                         } else {
-                            setPinnedPosts([]);
+                            if (isMounted) setPinnedPosts([]);
                         }
                     } else {
                         // In private view, "Saved Posts" tab shows SAVED posts
                         if (userProfile && userProfile.savedPosts && userProfile.savedPosts.length > 0) {
                             const posts = await postController.getPostsByIds(userProfile.savedPosts);
-                            setSavedPosts(posts);
+                            if (isMounted) setSavedPosts(posts);
+
+                            // Lazy Cleanup: If fetched posts count differs from saved IDs count,
+                            // some posts were likely deleted. Update profile to remove stale IDs.
+                            if (posts.length !== userProfile.savedPosts.length) {
+                                const validPostIds = posts.map(p => p.id);
+                                await userController.updateUserProfile(currentUser.uid, {
+                                    savedPosts: validPostIds
+                                });
+                                // Refresh profile to update the counts in the UI
+                                if (isMounted) await refreshProfile();
+                            }
                         } else {
-                            setSavedPosts([]);
+                            if (isMounted) setSavedPosts([]);
                         }
                     }
                 } else if (activeTab === 'featured-posts' && !isPublicView) {
@@ -123,22 +136,26 @@ function Profile() {
                             const indexB = userProfile.pinnedPosts.indexOf(b.id);
                             return indexB - indexA;
                         });
-                        setPinnedPosts(sortedPosts);
+                        if (isMounted) setPinnedPosts(sortedPosts);
                     } else {
-                        setPinnedPosts([]);
+                        if (isMounted) setPinnedPosts([]);
                     }
                 }
             } catch (error) {
                 console.error("Error fetching posts:", error);
-                setMessage({ type: 'error', text: 'Failed to load posts.' });
+                if (isMounted) setMessage({ type: 'error', text: 'Failed to load posts.' });
             } finally {
-                setLoadingPosts(false);
+                if (isMounted) setLoadingPosts(false);
             }
         };
 
         if (!loading) {
             fetchPosts();
         }
+
+        return () => {
+            isMounted = false;
+        };
     }, [currentUser, activeTab, loading, userProfile, isPublicView, userId, publicProfile]);
 
     const handleSave = async () => {
