@@ -107,6 +107,18 @@ function Profile() {
                         if (userProfile && userProfile.savedPosts && userProfile.savedPosts.length > 0) {
                             const posts = await postController.getPostsByIds(userProfile.savedPosts);
                             setSavedPosts(posts);
+
+                            // Lazy Cleanup: If fetched posts count differs from saved IDs count,
+                            // some posts were likely deleted. Update profile to remove stale IDs.
+                            if (posts.length !== userProfile.savedPosts.length) {
+                                console.log('Cleaning up stale saved posts...');
+                                const validPostIds = posts.map(p => p.id);
+                                await userController.updateUserProfile(currentUser.uid, {
+                                    savedPosts: validPostIds
+                                });
+                                // Refresh profile to update the counts in the UI
+                                await refreshProfile();
+                            }
                         } else {
                             setSavedPosts([]);
                         }
