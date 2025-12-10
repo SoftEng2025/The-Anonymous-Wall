@@ -22,6 +22,8 @@ function Profile() {
     const [publicProfile, setPublicProfile] = useState(null);
     const [username, setUsername] = useState('');
     const [tempUsername, setTempUsername] = useState('');
+    const [bio, setBio] = useState('');
+    const [tempBio, setTempBio] = useState('');
     const [isEditing, setIsEditing] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -48,6 +50,7 @@ function Profile() {
                 setPublicProfile(profile);
                 if (profile) {
                     setUsername(profile.username || '');
+                    setBio(profile.bio || '');
                     setIsAdmin(profile.role === 'admin');
                     // Check privacy
                     if (profile.isPublic !== true) { 
@@ -65,6 +68,7 @@ function Profile() {
             });
         } else if (userProfile) {
             setUsername(userProfile.username || '');
+            setBio(userProfile.bio || '');
             setIsAdmin(userProfile.role === 'admin');
             setIsPublic(userProfile.isPublic === true); // Default undefined/false -> private
             setLoading(false);
@@ -164,16 +168,20 @@ function Profile() {
         try {
             // 1. Update User Profile
             await userController.updateUserProfile(currentUser.uid, {
-                username: tempUsername
+                username: tempUsername,
+                bio: tempBio
             });
 
             // 2. Retroactive Update: Update all past posts and replies
-            await Promise.all([
-                postController.updatePostsAuthor(currentUser.uid, tempUsername),
-                replyController.updateRepliesAuthor(currentUser.uid, tempUsername)
-            ]);
+            if (tempUsername !== username) {
+                await Promise.all([
+                    postController.updatePostsAuthor(currentUser.uid, tempUsername),
+                    replyController.updateRepliesAuthor(currentUser.uid, tempUsername)
+                ]);
+            }
 
             setUsername(tempUsername);
+            setBio(tempBio);
             setIsEditing(false);
             setMessage({ type: 'success', text: 'Profile updated successfully!' });
         } catch (error) {
@@ -193,11 +201,13 @@ function Profile() {
 
     const handleEditClick = () => {
         setTempUsername(username);
+        setTempBio(bio || '');
         setIsEditing(true);
     };
 
     const handleCancelEdit = () => {
         setTempUsername('');
+        setTempBio('');
         setIsEditing(false);
     };
 
@@ -387,13 +397,22 @@ function Profile() {
 
                     <div className="profile-info">
                         {isEditing ? (
-                            <div className="edit-username-container">
+                            <div className="edit-profile-container">
                                 <input
                                     type="text"
                                     className="username-input"
                                     value={tempUsername}
                                     onChange={(e) => setTempUsername(e.target.value)}
                                     placeholder="Enter new username"
+                                    maxLength={20}
+                                />
+                                <textarea
+                                    className="bio-input"
+                                    value={tempBio}
+                                    onChange={(e) => setTempBio(e.target.value)}
+                                    placeholder="Write a short bio..."
+                                    rows={3}
+                                    maxLength={150}
                                 />
                                 <div className="edit-buttons-row">
                                     <button className="cancel-button-small" onClick={handleCancelEdit}>
@@ -405,13 +424,16 @@ function Profile() {
                                 </div>
                             </div>
                         ) : (
-                            <div className="username-display-container">
-                                <h2 className="profile-username">{username}</h2>
-                                {!isPublicView && (
-                                    <button className="edit-icon-btn" onClick={handleEditClick}>
-                                        <i className="fa-solid fa-pen"></i>
-                                    </button>
-                                )}
+                            <div className="profile-details-container">
+                                <div className="username-display-container">
+                                    <h2 className="profile-username">{username}</h2>
+                                    {!isPublicView && (
+                                        <button className="edit-icon-btn" onClick={handleEditClick}>
+                                            <i className="fa-solid fa-pen"></i>
+                                        </button>
+                                    )}
+                                </div>
+                                {bio && <p className="profile-bio">{bio}</p>}
                             </div>
                         )}
 
