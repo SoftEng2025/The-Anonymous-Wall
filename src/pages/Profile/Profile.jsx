@@ -434,6 +434,11 @@ function Profile() {
                                     )}
                                 </div>
                                 {bio && <p className="profile-bio">{bio}</p>}
+                                {!isPublicView && isAdmin && (
+                                    <span className="admin-badge">
+                                        <i className="fa-solid fa-shield-halved"></i> ADMIN
+                                    </span>
+                                )}
                             </div>
                         )}
 
