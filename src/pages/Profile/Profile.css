@@ -121,6 +121,9 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 0px; /* Reduced from 0.5rem */
+  word-break: break-word;
+  max-width: 100%;
+  text-align: center;
 }
 
 .username-display-container {
@@ -128,6 +131,8 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  max-width: 90%;
+  flex-wrap: wrap;
 }
 
 .profile-handle {
