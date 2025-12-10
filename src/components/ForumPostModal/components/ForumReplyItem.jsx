@@ -17,6 +17,7 @@ const ForumReplyItem = ({
     onEditCancel,
     onEditSave,
     setEditContent,
+    onUserClick,
     setEditAttachment
 }) => {
     const attachments = reply.attachments || [];
@@ -27,14 +28,19 @@ const ForumReplyItem = ({
             <img
                 src={getAvatarUrl(reply.avatarSeed)}
                 alt={reply.author}
-                className="modal-reply-avatar"
+                className={`modal-reply-avatar ${!reply.isDeleted ? 'clickable-avatar' : ''}`}
+                onClick={(e) => !reply.isDeleted && onUserClick(e, reply.uid)}
             />
             <div className="modal-reply-content-wrapper">
                 <div className="modal-reply-bubble">
                     <div className="modal-reply-header">
                         <div className="comment-header">
                             <div className="comment-header-left">
-                                <span className="modal-reply-username" style={{ color: reply.isDeleted ? '#999' : 'inherit' }}>
+                                <span 
+                                    className={`modal-reply-username ${!reply.isDeleted ? 'clickable-username' : ''}`}
+                                    style={{ color: reply.isDeleted ? '#999' : 'inherit' }}
+                                    onClick={(e) => !reply.isDeleted && onUserClick(e, reply.uid)}
+                                >
                                     {reply.author}
                                 </span>
                                 {reply.replyTo && (

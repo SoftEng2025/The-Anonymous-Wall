@@ -126,3 +126,22 @@
 .action-btn:hover {
     opacity: 1;
 }
+
+.clickable-avatar {
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.clickable-avatar:hover {
+    opacity: 0.8;
+}
+
+.clickable-username {
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.clickable-username:hover {
+    color: #fff;
+    text-decoration: underline;
+}

@@ -65,6 +65,7 @@ function AppContent() {
                             <Route path="/forum" element={<Forum />} />
                             <Route path="/forum/:postId" element={<ForumPost />} />
                             <Route path="/profile" element={<Profile />} />
+                            <Route path="/profile/:userId" element={<Profile />} />
                             <Route path="/admin" element={<AdminDashboard />} />
                             <Route path="/terms" element={<TermsOfService />} />
                             <Route path="/privacy" element={<PrivacyPolicy />} />

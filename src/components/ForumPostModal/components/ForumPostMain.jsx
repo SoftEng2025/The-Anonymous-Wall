@@ -17,7 +17,10 @@ const ForumPostMain = ({
     onEditCancel,
     onEditSave,
     setEditContent,
-    focusReplyInput
+    focusReplyInput,
+    onUserClick,
+    isPinned,
+    onTogglePin
 }) => {
     return (
         <div className="modal-main-post">
@@ -25,10 +28,16 @@ const ForumPostMain = ({
                 <img
                     src={getAvatarUrl(post.avatarSeed)}
                     alt={post.author}
-                    className="modal-user-avatar"
+                    className="modal-user-avatar clickable-avatar"
+                    onClick={(e) => onUserClick(e, post.uid)}
                 />
                 <div className="modal-post-info">
-                    <span className="modal-username">{post.author}</span>
+                    <span 
+                        className="modal-username clickable-username"
+                        onClick={(e) => onUserClick(e, post.uid)}
+                    >
+                        {post.author}
+                    </span>
                     <span className="modal-separator">•</span>
                     <span className="modal-time">
                         {post.timeAgo || 'Recently'}
@@ -86,6 +95,16 @@ const ForumPostMain = ({
                             <button className="modal-stat-btn" onClick={onEditClick}>
                                 <i className="fa-solid fa-pen-to-square"></i>
                                 <span>Edit</span>
+                            </button>
+                        )}
+                        {currentUser && !currentUser.isAnonymous && post.uid === currentUser.uid && (
+                            <button 
+                                className={`modal-stat-btn ${isPinned ? 'feature' : ''}`} 
+                                onClick={onTogglePin}
+                                title={isPinned ? "Unfeature Post" : "Feature Post"}
+                            >
+                                <i className={`fa-solid fa-star`}></i>
+                                <span className={isPinned ? 'feature-text' : ''}>{isPinned ? 'Featured' : 'Feature'}</span>
                             </button>
                         )}
                     </div>

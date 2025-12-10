@@ -13,7 +13,8 @@ const ForumFeed = ({
     onPostClick,
     hasMore,
     onLoadMore,
-    loadingMore
+    loadingMore,
+    onUserClick
 }) => {
     return (
         <div className="posts-feed">
@@ -34,11 +35,17 @@ const ForumFeed = ({
                                 <img
                                     src={getAvatarUrl(post.avatarSeed)}
                                     alt={post.author}
-                                    className="user-avatar"
+                                    className="user-avatar clickable-avatar"
+                                    onClick={(e) => onUserClick(e, post.uid)}
                                 />
                                 <div className="header-content">
                                     <div className="post-info">
-                                        <span className="username">{post.author}</span>
+                                        <span 
+                                            className="username clickable-username"
+                                            onClick={(e) => onUserClick(e, post.uid)}
+                                        >
+                                            {post.author}
+                                        </span>
                                         <span>•</span>
                                         <span className="time">{post.timeAgo}</span>
                                     </div>

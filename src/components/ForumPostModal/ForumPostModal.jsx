@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { postController } from '../../backend/controllers/postController';
 import { replyController } from '../../backend/controllers/replyController';
 import { userController } from '../../backend/controllers/userController';
@@ -16,7 +17,8 @@ import ForumReplyList from './components/ForumReplyList';
 import ForumReplyInput from './components/ForumReplyInput';
 
 const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) => {
-    const { currentUser, userProfile, toggleSave } = useAuth();
+    const { currentUser, userProfile, toggleSave, refreshProfile } = useAuth();
+    const navigate = useNavigate();
     const [post, setPost] = useState(null);
     const [replyContent, setReplyContent] = useState('');
     const [replyAttachment, setReplyAttachment] = useState('');
@@ -36,6 +38,7 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
     const [editError, setEditError] = useState(null);
 
     const [isSaved, setIsSaved] = useState(false);
+    const [isPinned, setIsPinned] = useState(false);
     const [isGuestRestrictionModalOpen, setIsGuestRestrictionModalOpen] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
 
@@ -102,6 +105,7 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
     useEffect(() => {
         if (currentUser && userProfile && postId) {
             setIsSaved((userProfile.savedPosts || []).map(String).includes(String(postId)));
+            setIsPinned((userProfile.pinnedPosts || []).map(String).includes(String(postId)));
         }
     }, [currentUser, userProfile, postId]);
 
@@ -233,6 +237,20 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
         }
     };
 
+    const handleTogglePin = async () => {
+        if (!currentUser) return;
+
+        try {
+            const newIsPinned = !isPinned;
+            setIsPinned(newIsPinned); // Optimistic update
+            await userController.togglePinPost(currentUser.uid, postId, newIsPinned);
+            await refreshProfile(); // Refresh profile to update pinned status globally
+        } catch (error) {
+            console.error("Error toggling pin:", error);
+            setIsPinned(!isPinned); // Revert on error
+        }
+    };
+
     const handleReplyClick = (reply) => {
         setReplyingTo(reply);
         if (replyInputRef.current) {
@@ -357,6 +375,12 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
         }
     };
 
+    const handleUserClick = (e, uid) => {
+        e.stopPropagation();
+        onClose(); // Close modal before navigating
+        navigate(`/profile/${uid}`);
+    };
+
     if (loading) {
         return (
             <div className="forum-post-modal-overlay" onClick={handleOverlayClick}>
@@ -399,10 +423,13 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
                         onEditClick={handleEditPostClick}
                         onLike={handleLike}
                         onSave={handleToggleSave}
+                        isPinned={isPinned}
+                        onTogglePin={handleTogglePin}
                         onEditCancel={() => setIsEditingPost(false)}
                         onEditSave={handleSavePostContent}
                         setEditContent={setEditPostContent}
                         focusReplyInput={() => replyInputRef.current?.focus()}
+                        onUserClick={handleUserClick}
                     />
 
                     <ForumReplyList
@@ -421,6 +448,7 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
                         onEditReplyCancel={() => { setEditingReplyId(null); setEditReplyAttachment(''); }}
                         onEditReplySave={handleSaveReply}
                         setEditReplyContent={setEditReplyContent}
+                        onUserClick={handleUserClick}
                         setEditReplyAttachment={setEditReplyAttachment}
                     />
                 </div>

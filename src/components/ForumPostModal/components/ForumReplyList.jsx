@@ -17,6 +17,7 @@ const ForumReplyList = ({
     onEditReplyCancel,
     onEditReplySave,
     setEditReplyContent,
+    onUserClick,
     setEditReplyAttachment
 }) => {
     return (
@@ -39,6 +40,7 @@ const ForumReplyList = ({
                     onEditCancel={onEditReplyCancel}
                     onEditSave={onEditReplySave}
                     setEditContent={setEditReplyContent}
+                    onUserClick={onUserClick}
                     setEditAttachment={setEditReplyAttachment}
                 />
             ))}

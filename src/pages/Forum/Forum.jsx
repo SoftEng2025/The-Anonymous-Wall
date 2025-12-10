@@ -277,6 +277,11 @@ const Forum = () => {
         setFocusCommentInput(true);
     };
 
+    const handleUserClick = (e, uid) => {
+        e.stopPropagation();
+        navigate(`/profile/${uid}`);
+    };
+
     const handlePostSubmit = async () => {
         setError('');
         if (!newPostTitle.trim() || !newPostContent.trim()) {
@@ -437,11 +442,17 @@ const Forum = () => {
                                                         <img
                                                             src={getAvatarUrl(post.avatarSeed)}
                                                             alt={post.author}
-                                                            className="user-avatar"
+                                                            className="user-avatar clickable-avatar"
+                                                            onClick={(e) => handleUserClick(e, post.uid)}//Added Clickable Avatar & Username
                                                         />
                                                         <div className="header-content">
                                                             <div className="post-info">
-                                                                <span className="username">{post.author}</span>
+                                                                <span 
+                                                                    className="username clickable-username" 
+                                                                    onClick={(e) => handleUserClick(e, post.uid)}
+                                                                >
+                                                                    {post.author}
+                                                                </span>
                                                                 <span>•</span>
                                                                 <span className="time">{post.timeAgo}</span>
                                                             </div>
@@ -516,6 +527,7 @@ const Forum = () => {
                         hasMore={hasMore}
                         onLoadMore={handleLoadMore}
                         loadingMore={loadingMore}
+                        onUserClick={handleUserClick}
                     />
                 </>
             )}
