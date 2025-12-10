@@ -22,6 +22,8 @@ function Profile() {
     const [publicProfile, setPublicProfile] = useState(null);
     const [username, setUsername] = useState('');
     const [tempUsername, setTempUsername] = useState('');
+    const [bio, setBio] = useState('');
+    const [tempBio, setTempBio] = useState('');
     const [isEditing, setIsEditing] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -48,6 +50,7 @@ function Profile() {
                 setPublicProfile(profile);
                 if (profile) {
                     setUsername(profile.username || '');
+                    setBio(profile.bio || '');
                     setIsAdmin(profile.role === 'admin');
                     // Check privacy
                     if (profile.isPublic !== true) { 
@@ -65,6 +68,7 @@ function Profile() {
             });
         } else if (userProfile) {
             setUsername(userProfile.username || '');
+            setBio(userProfile.bio || '');
             setIsAdmin(userProfile.role === 'admin');
             setIsPublic(userProfile.isPublic === true); // Default undefined/false -> private
             setLoading(false);
@@ -78,15 +82,17 @@ function Profile() {
 
     // Fetch posts based on active tab
     useEffect(() => {
+        let isMounted = true;
+
         const fetchPosts = async () => {
             if (!isPublicView && !currentUser) return;
 
-            setLoadingPosts(true);
+            if (isMounted) setLoadingPosts(true);
             try {
                 if (activeTab === 'my-posts') {
                     const targetUid = isPublicView ? userId : currentUser.uid;
                     const posts = await postController.getPostsByUserId(targetUid);
-                    setHistoryPosts(posts);
+                    if (isMounted) setHistoryPosts(posts);
                 } else if (activeTab === 'saved-posts') {
                     if (isPublicView) {
                         // In public view, "Pinned" tab shows PINNED posts
@@ -98,17 +104,28 @@ function Profile() {
                                 const indexB = publicProfile.pinnedPosts.indexOf(b.id);
                                 return indexB - indexA;
                             });
-                            setPinnedPosts(sortedPosts);
+                            if (isMounted) setPinnedPosts(sortedPosts);
                         } else {
-                            setPinnedPosts([]);
+                            if (isMounted) setPinnedPosts([]);
                         }
                     } else {
                         // In private view, "Saved Posts" tab shows SAVED posts
                         if (userProfile && userProfile.savedPosts && userProfile.savedPosts.length > 0) {
                             const posts = await postController.getPostsByIds(userProfile.savedPosts);
-                            setSavedPosts(posts);
+                            if (isMounted) setSavedPosts(posts);
+
+                            // Lazy Cleanup: If fetched posts count differs from saved IDs count,
+                            // some posts were likely deleted. Update profile to remove stale IDs.
+                            if (posts.length !== userProfile.savedPosts.length) {
+                                const validPostIds = posts.map(p => p.id);
+                                await userController.updateUserProfile(currentUser.uid, {
+                                    savedPosts: validPostIds
+                                });
+                                // Refresh profile to update the counts in the UI
+                                if (isMounted) await refreshProfile();
+                            }
                         } else {
-                            setSavedPosts([]);
+                            if (isMounted) setSavedPosts([]);
                         }
                     }
                 } else if (activeTab === 'featured-posts' && !isPublicView) {
@@ -123,22 +140,26 @@ function Profile() {
                             const indexB = userProfile.pinnedPosts.indexOf(b.id);
                             return indexB - indexA;
                         });
-                        setPinnedPosts(sortedPosts);
+                        if (isMounted) setPinnedPosts(sortedPosts);
                     } else {
-                        setPinnedPosts([]);
+                        if (isMounted) setPinnedPosts([]);
                     }
                 }
             } catch (error) {
                 console.error("Error fetching posts:", error);
-                setMessage({ type: 'error', text: 'Failed to load posts.' });
+                if (isMounted) setMessage({ type: 'error', text: 'Failed to load posts.' });
             } finally {
-                setLoadingPosts(false);
+                if (isMounted) setLoadingPosts(false);
             }
         };
 
         if (!loading) {
             fetchPosts();
         }
+
+        return () => {
+            isMounted = false;
+        };
     }, [currentUser, activeTab, loading, userProfile, isPublicView, userId, publicProfile]);
 
     const handleSave = async () => {
@@ -147,16 +168,20 @@ function Profile() {
         try {
             // 1. Update User Profile
             await userController.updateUserProfile(currentUser.uid, {
-                username: tempUsername
+                username: tempUsername,
+                bio: tempBio
             });
 
             // 2. Retroactive Update: Update all past posts and replies
-            await Promise.all([
-                postController.updatePostsAuthor(currentUser.uid, tempUsername),
-                replyController.updateRepliesAuthor(currentUser.uid, tempUsername)
-            ]);
+            if (tempUsername !== username) {
+                await Promise.all([
+                    postController.updatePostsAuthor(currentUser.uid, tempUsername),
+                    replyController.updateRepliesAuthor(currentUser.uid, tempUsername)
+                ]);
+            }
 
             setUsername(tempUsername);
+            setBio(tempBio);
             setIsEditing(false);
             setMessage({ type: 'success', text: 'Profile updated successfully!' });
         } catch (error) {
@@ -176,11 +201,13 @@ function Profile() {
 
     const handleEditClick = () => {
         setTempUsername(username);
+        setTempBio(bio || '');
         setIsEditing(true);
     };
 
     const handleCancelEdit = () => {
         setTempUsername('');
+        setTempBio('');
         setIsEditing(false);
     };
 
@@ -370,13 +397,22 @@ function Profile() {
 
                     <div className="profile-info">
                         {isEditing ? (
-                            <div className="edit-username-container">
+                            <div className="edit-profile-container">
                                 <input
                                     type="text"
                                     className="username-input"
                                     value={tempUsername}
                                     onChange={(e) => setTempUsername(e.target.value)}
                                     placeholder="Enter new username"
+                                    maxLength={20}
+                                />
+                                <textarea
+                                    className="bio-input"
+                                    value={tempBio}
+                                    onChange={(e) => setTempBio(e.target.value)}
+                                    placeholder="Write a short bio..."
+                                    rows={3}
+                                    maxLength={150}
                                 />
                                 <div className="edit-buttons-row">
                                     <button className="cancel-button-small" onClick={handleCancelEdit}>
@@ -388,12 +424,20 @@ function Profile() {
                                 </div>
                             </div>
                         ) : (
-                            <div className="username-display-container">
-                                <h2 className="profile-username">{username}</h2>
-                                {!isPublicView && (
-                                    <button className="edit-icon-btn" onClick={handleEditClick}>
-                                        <i className="fa-solid fa-pen"></i>
-                                    </button>
+                            <div className="profile-details-container">
+                                <div className="username-display-container">
+                                    <h2 className="profile-username">{username}</h2>
+                                    {!isPublicView && (
+                                        <button className="edit-icon-btn" onClick={handleEditClick}>
+                                            <i className="fa-solid fa-pen"></i>
+                                        </button>
+                                    )}
+                                </div>
+                                {bio && <p className="profile-bio">{bio}</p>}
+                                {!isPublicView && isAdmin && (
+                                    <span className="admin-badge">
+                                        <i className="fa-solid fa-shield-halved"></i> ADMIN
+                                    </span>
                                 )}
                             </div>
                         )}
