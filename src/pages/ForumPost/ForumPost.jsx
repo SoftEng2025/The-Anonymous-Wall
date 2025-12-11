@@ -12,6 +12,7 @@ import GuestRestrictionModal from '../../components/GuestRestrictionModal';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatTimeAgo } from '../../utils/timeUtils';
 import './ForumPost.css';
+import ForumReplyInput from '../../components/ForumPostModal/components/ForumReplyInput';
 
 const ForumPost = () => {
     const { postId } = useParams();
@@ -19,6 +20,8 @@ const ForumPost = () => {
     const { currentUser, toggleSave, userProfile } = useAuth();
     const [post, setPost] = useState(null);
     const [replyContent, setReplyContent] = useState('');
+    const [replyAttachment, setReplyAttachment] = useState('');
+    const replyInputRef = React.useRef(null);
     const [likes, setLikes] = useState(0);
     const [isLiked, setIsLiked] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
@@ -115,7 +118,10 @@ const ForumPost = () => {
     };
 
     const handleReplySubmit = async (e) => {
-        if (e.key === 'Enter' && replyContent.trim()) {
+        // e is optional now since we might call it from button click
+        if (e && e.key && e.key !== 'Enter') return;
+
+        if (replyContent.trim() || replyAttachment) {
             if (!currentUser) {
                 alert("Please login to reply.");
                 return;
@@ -132,11 +138,25 @@ const ForumPost = () => {
 
                 const authorName = profile.username;
 
+                let attachmentUrl = null;
+                if (replyAttachment) {
+                    if (typeof replyAttachment === 'object') {
+                        // It's a file, upload it
+                        attachmentUrl = await postController.uploadImage(replyAttachment);
+                    } else if (typeof replyAttachment === 'string') {
+                        // It's a URL string
+                        attachmentUrl = replyAttachment.trim();
+                    }
+                }
+
+                const attachments = attachmentUrl ? [{ url: attachmentUrl, type: 'image' }] : [];
+
                 const replyData = {
                     author: authorName,
                     uid: currentUser.uid,
                     content: replyContent,
-                    replyTo: replyingTo ? replyingTo.author : null
+                    replyTo: replyingTo ? replyingTo.author : null,
+                    attachments
                 };
 
                 const newReply = await replyController.addReply(postId, replyData);
@@ -150,6 +170,7 @@ const ForumPost = () => {
 
                 setReplies([...replies, displayReply]);
                 setReplyContent('');
+                setReplyAttachment('');
                 setReplyingTo(null);
             } catch (error) {
                 console.error("Error adding reply:", error);
@@ -160,7 +181,9 @@ const ForumPost = () => {
 
     const handleReplyClick = (reply) => {
         setReplyingTo(reply);
-        document.querySelector('.reply-main-input').focus();
+        if (replyInputRef.current) {
+            replyInputRef.current.focus();
+        }
     };
 
     const handleReportClick = () => {
@@ -242,22 +265,17 @@ const ForumPost = () => {
                         </div>
 
                         <div className="reply-input-section">
-                            {replyingTo && (
-                                <div className="replying-to-indicator">
-                                    <span>Replying to <span className="username">{replyingTo.author}</span></span>
-                                    <button className="cancel-reply-btn" onClick={() => setReplyingTo(null)}>
-                                        <i className="fa-solid fa-xmark"></i>
-                                    </button>
-                                </div>
-                            )}
-                            <input
-                                type="text"
-                                className="reply-main-input"
-                                placeholder={currentUser ? (replyingTo ? `Reply to ${replyingTo.author}...` : "Add a reply") : "Login to reply"}
-                                value={replyContent}
+                            <ForumReplyInput
+                                currentUser={currentUser}
+                                replyingTo={replyingTo}
+                                replyContent={replyContent}
+                                replyAttachment={replyAttachment}
+                                inputRef={replyInputRef}
+                                onCancelReplyTo={() => setReplyingTo(null)}
                                 onChange={(e) => setReplyContent(e.target.value)}
-                                onKeyDown={handleReplySubmit}
-                                disabled={!currentUser}
+                                onAttachmentChange={(value) => setReplyAttachment(value)}
+                                onEmojiAdd={(emoji) => setReplyContent(prev => `${prev}${emoji}`)}
+                                onSubmit={() => handleReplySubmit()}
                             />
                         </div>
                     </div>
@@ -284,6 +302,17 @@ const ForumPost = () => {
                                     </div>
                                 </div>
                                 <p className="reply-content">{reply.content}</p>
+                                {reply.attachments && reply.attachments.length > 0 && reply.attachments[0].url && (
+                                    <div className="reply-attachments" style={{ marginTop: '0.5rem' }}>
+                                        <a href={reply.attachments[0].url} target="_blank" rel="noreferrer">
+                                            <img
+                                                src={reply.attachments[0].url}
+                                                alt="Attachment"
+                                                style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}
+                                            />
+                                        </a>
+                                    </div>
+                                )}
                                 <div className="reply-actions">
                                     <button className="reply-action-btn">
                                         <i className="fa-regular fa-heart"></i> {reply.likes || 0}

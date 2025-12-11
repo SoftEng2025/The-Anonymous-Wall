@@ -32,7 +32,7 @@ const ForumPostMain = ({
                     onClick={(e) => onUserClick(e, post.uid)}
                 />
                 <div className="modal-post-info">
-                    <span 
+                    <span
                         className="modal-username clickable-username"
                         onClick={(e) => onUserClick(e, post.uid)}
                     >
@@ -66,6 +66,22 @@ const ForumPostMain = ({
                     <h1 className="modal-post-title">{post.title}</h1>
                     <p className="modal-post-content">{post.content}</p>
 
+                    {post.image && (
+                        <div className="modal-post-image-container" style={{ marginTop: '1rem', maxWidth: '100%' }}>
+                            <img
+                                src={post.image}
+                                alt="Post attachment"
+                                className="modal-post-image"
+                                style={{
+                                    maxWidth: '100%',
+                                    maxHeight: '500px',
+                                    borderRadius: '8px',
+                                    border: '1px solid rgba(255,255,255,0.1)'
+                                }}
+                            />
+                        </div>
+                    )}
+
                     <div className="modal-post-stats">
                         <button
                             className={`modal-stat-btn ${isLiked ? 'liked' : ''}`}
@@ -98,8 +114,8 @@ const ForumPostMain = ({
                             </button>
                         )}
                         {currentUser && !currentUser.isAnonymous && post.uid === currentUser.uid && (
-                            <button 
-                                className={`modal-stat-btn ${isPinned ? 'feature' : ''}`} 
+                            <button
+                                className={`modal-stat-btn ${isPinned ? 'feature' : ''}`}
                                 onClick={onTogglePin}
                                 title={isPinned ? "Unfeature Post" : "Feature Post"}
                             >

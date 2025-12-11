@@ -1,6 +1,7 @@
 import { db } from '../config/firebase';
 import { collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy, increment, where, writeBatch, arrayUnion, arrayRemove, startAfter, limit, documentId } from 'firebase/firestore';
 import { createPostModel } from '../models/PostModel';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 import { COLLECTIONS } from '../../utils/firebaseCollections';
 
@@ -8,7 +9,34 @@ const POSTS_COLLECTION = COLLECTIONS.POSTS;
 const FIRESTORE_IN_QUERY_LIMIT = 30;
 const FIRESTORE_BATCH_LIMIT = 500;
 
+const storage = getStorage();
+
 export const postController = {
+    /**
+     * Creates a new post in Firestore.
+     * @param {Object} postData 
+     * @returns {Promise<string>} The ID of the created post.
+     */
+    /**
+     * Uploads an image to Firebase Storage and returns the URL.
+     * @param {File} file 
+     * @returns {Promise<string>}
+     */
+    uploadImage: async (file) => {
+        try {
+            if (!file) return null;
+            // Changed back to 'posts/' as 'uploads/' might be blocked by security rules
+            const storageRef = ref(storage, `posts/${Date.now()}_${file.name}`);
+            console.log("Starting image upload to:", storageRef.fullPath);
+            const snapshot = await uploadBytes(storageRef, file);
+            console.log("Image uploaded successfully");
+            return await getDownloadURL(snapshot.ref);
+        } catch (error) {
+            console.error("Error uploading image detailed:", error);
+            throw error;
+        }
+    },
+
     /**
      * Creates a new post in Firestore.
      * @param {Object} postData 
@@ -19,7 +47,21 @@ export const postController = {
             if (!postData) throw new Error("Post data is required");
             if (!postData.uid) throw new Error("User ID is required");
 
-            const model = createPostModel(postData);
+            let imageUrl = null;
+
+            // Handle image upload if an image is provided
+            // Check if 'image' is a File object (upload needed) or string (already URL)
+            if (postData.image) {
+                if (typeof postData.image === 'object') {
+                    // Upload file
+                    imageUrl = await postController.uploadImage(postData.image);
+                } else {
+                    // Use URL directly
+                    imageUrl = postData.image;
+                }
+            }
+
+            const model = createPostModel({ ...postData, imageUrl });
             const docRef = await addDoc(collection(db, POSTS_COLLECTION), model);
             return docRef.id;
         } catch (error) {

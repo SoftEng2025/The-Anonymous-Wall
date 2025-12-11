@@ -51,6 +51,9 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [replyToDelete, setReplyToDelete] = useState(null);
 
+    // Add state for image upload
+    const [postImage, setPostImage] = useState(null);
+
     useEffect(() => {
         if (userProfile) {
             setIsAdmin(userProfile.role === 'admin');
@@ -184,7 +187,7 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
     };
 
     const handleReplySubmit = async () => {
-        if (!replyContent.trim()) return;
+        if (!replyContent.trim() && !replyAttachment) return; // Allow submission if only image is present
 
         if (!currentUser) {
             alert("Please login to reply.");
@@ -198,7 +201,18 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
             }
 
             const authorName = profile.username;
-            const attachmentUrl = replyAttachment.trim();
+
+            let attachmentUrl = null;
+            if (replyAttachment) {
+                if (typeof replyAttachment === 'object') {
+                    // It's a file, upload it
+                    attachmentUrl = await postController.uploadImage(replyAttachment);
+                } else if (typeof replyAttachment === 'string') {
+                    // It's a URL string
+                    attachmentUrl = replyAttachment.trim();
+                }
+            }
+
             const attachments = attachmentUrl ? [{ url: attachmentUrl, type: 'image' }] : [];
 
             const replyData = {
@@ -381,6 +395,41 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
         navigate(`/profile/${uid}`);
     };
 
+    // Function to handle image selection
+    const handleImageChange = (event) => {
+        if (event.target.files && event.target.files[0]) {
+            setPostImage(event.target.files[0]);
+        }
+    };
+
+    const handlePostSubmit = async (e) => {
+        e.preventDefault();
+        if (!editPostContent.trim()) return;
+        try {
+            const editedTimestamp = Date.now();
+            let imageUrl = null;
+            if (postImage) {
+                // Upload image and get the URL
+                imageUrl = await postController.uploadImage(postImage);
+            }
+            await postController.updatePost(postId, {
+                content: editPostContent,
+                image: imageUrl,
+                editedAt: editedTimestamp
+            });
+            setPost(prev => ({ ...prev, content: editPostContent, image: imageUrl, editedAt: editedTimestamp }));
+            setIsEditingPost(false);
+            setEditError(null);
+            setPostImage(null); // Reset image state
+            if (onPostUpdate) {
+                onPostUpdate({ id: postId, title: post.title, content: editPostContent, image: imageUrl, editedAt: editedTimestamp });
+            }
+        } catch (error) {
+            console.error("Failed to update post:", error);
+            setEditError("Failed to save your changes. Please try again.");
+        }
+    };
+
     if (loading) {
         return (
             <div className="forum-post-modal-overlay" onClick={handleOverlayClick}>
@@ -465,6 +514,8 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
                     onEmojiAdd={(emoji) => setReplyContent(prev => `${prev}${emoji}`)}
                     onSubmit={handleReplySubmit}
                 />
+
+                {/* Image upload field removed */}
             </div>
 
             <GuestRestrictionModal
