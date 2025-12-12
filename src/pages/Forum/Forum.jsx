@@ -296,10 +296,10 @@ const Forum = () => {
             return;
         }
 
-        // if (!captchaToken) {
-        //     setError("Please complete the captcha verification.");
-        //     return;
-        // }
+        if (!captchaToken) {
+            setError("Please complete the captcha verification.");
+            return;
+        }
 
         if (!currentUser) {
             setError("You must be logged in to create a post.");
