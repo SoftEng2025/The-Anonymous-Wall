@@ -61,7 +61,8 @@ export const postController = {
                 }
             }
 
-            const model = createPostModel({ ...postData, imageUrl });
+            const { image, ...restOfPostData } = postData;
+            const model = createPostModel({ ...restOfPostData, imageUrl });
             const docRef = await addDoc(collection(db, POSTS_COLLECTION), model);
             return docRef.id;
         } catch (error) {
