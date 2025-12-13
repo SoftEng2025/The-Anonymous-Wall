@@ -58,6 +58,8 @@ const Forum = () => {
     const [newPostTitle, setNewPostTitle] = useState('');
     const [newPostContent, setNewPostContent] = useState('');
     const [newPostBoard, setNewPostBoard] = useState('');
+    const [newPostImage, setNewPostImage] = useState(null);
+    const fileInputRef = useRef(null);
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [captchaToken, setCaptchaToken] = useState(null);
@@ -313,9 +315,13 @@ const Forum = () => {
                 uid: currentUser.uid,
                 title: newPostTitle,
                 content: newPostContent,
-                board: newPostBoard
+                board: newPostBoard,
+                image: newPostImage
             };
 
+
+
+            // Debug alerts removed
             const newPostId = await postController.createPost(newPostData);
 
             // Add new post to top of list if it matches current board filter
@@ -337,12 +343,15 @@ const Forum = () => {
             setNewPostTitle('');
             setNewPostContent('');
             setNewPostBoard('');
+            setNewPostImage(null);
             setCaptchaToken(null);
             setError('');
             setIsCreatePostOpen(false);
         } catch (error) {
             console.error("Failed to create post:", error);
-            setError(`Failed to create post: ${error.message || "Unknown error"}`);
+            const errorMsg = `Failed to create post: ${error.message || "Unknown error"}`;
+            setError(errorMsg);
+            alert(errorMsg);
         } finally {
             setIsSubmitting(false);
         }
@@ -447,8 +456,8 @@ const Forum = () => {
                                                         />
                                                         <div className="header-content">
                                                             <div className="post-info">
-                                                                <span 
-                                                                    className="username clickable-username" 
+                                                                <span
+                                                                    className="username clickable-username"
                                                                     onClick={(e) => handleUserClick(e, post.uid)}
                                                                 >
                                                                     {post.author}
@@ -584,6 +593,58 @@ const Forum = () => {
                                     value={newPostContent}
                                     onChange={e => setNewPostContent(e.target.value)}
                                 ></textarea>
+
+                                {/* Image URL Section */}
+                                <div className="image-upload-section">
+                                    <div className="url-input-container" style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
+                                        <button
+                                            className={`btn-toggle-url ${newPostImage ? 'active' : ''}`}
+                                            onClick={() => {
+                                                if (newPostImage) {
+                                                    setNewPostImage(null);
+                                                } else {
+                                                    // Focus input if needed, but for now just toggle logic
+                                                }
+                                            }}
+                                            style={{
+                                                padding: '10px',
+                                                borderRadius: '8px',
+                                                border: 'none',
+                                                backgroundColor: newPostImage ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.1)',
+                                                color: newPostImage ? '#818cf8' : 'rgba(255, 255, 255, 0.7)',
+                                                cursor: 'pointer',
+                                                fontSize: '1.1rem'
+                                            }}
+                                            title={newPostImage ? "Remove Link" : "Add Image URL"}
+                                        >
+                                            <i className="fa-solid fa-link"></i>
+                                        </button>
+
+                                        <input
+                                            type="text"
+                                            placeholder="Attachment image URL"
+                                            className="modal-input"
+                                            style={{ margin: 0, flex: 1 }}
+                                            value={typeof newPostImage === 'string' ? newPostImage : ''}
+                                            onChange={(e) => setNewPostImage(e.target.value)}
+                                        />
+                                    </div>
+
+                                    {newPostImage && typeof newPostImage === 'string' && (
+                                        <div className="image-preview-container">
+                                            <div className="image-preview-wrapper">
+                                                <img
+                                                    src={newPostImage}
+                                                    alt="Preview"
+                                                    className="image-preview"
+                                                    onError={(e) => {
+                                                        e.target.style.display = 'none';
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
 
                                 <div className="captcha-container" style={{ marginTop: '1rem', display: 'flex', justifyContent: 'center' }}>
                                     <ReCAPTCHA

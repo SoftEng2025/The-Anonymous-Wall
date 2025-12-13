@@ -18,6 +18,8 @@ const ForumReplyInput = ({
     // Basic emoji palette
     const emojis = ['❤️', '😍', '😔', '😢', '😠'];
 
+    // const fileInputRef = React.useRef(null);
+
     return (
         <div className="modal-reply-input-section">
             <img
@@ -48,6 +50,17 @@ const ForumReplyInput = ({
                     }}
                     disabled={!currentUser}
                 />
+
+                {/* Image Preview for URL */}
+                {replyAttachment && typeof replyAttachment === 'string' && (
+                    <div className="modal-reply-image-preview">
+                        <img src={replyAttachment} alt="Preview" onError={(e) => e.target.style.display = 'none'} />
+                        <button onClick={() => onAttachmentChange('')}>
+                            <i className="fa-solid fa-circle-xmark"></i>
+                        </button>
+                    </div>
+                )}
+
                 <div className="modal-input-toolbar">
                     <button
                         type="button"
@@ -58,6 +71,8 @@ const ForumReplyInput = ({
                     >
                         <i className="fa-regular fa-face-smile"></i>
                     </button>
+
+                    {/* File upload removed */}
 
                     <button
                         type="button"
@@ -74,7 +89,7 @@ const ForumReplyInput = ({
                             type="text"
                             className="modal-reply-attachment-inline"
                             placeholder="Attachment image URL"
-                            value={replyAttachment}
+                            value={typeof replyAttachment === 'string' ? replyAttachment : ''}
                             onChange={(e) => onAttachmentChange(e.target.value)}
                         />
                     )}
@@ -82,7 +97,7 @@ const ForumReplyInput = ({
                     <button
                         className="modal-send-btn"
                         onClick={onSubmit}
-                        disabled={!currentUser || !replyContent.trim()}
+                        disabled={!currentUser || (!replyContent.trim() && !replyAttachment)}
                         title="Send reply"
                     >
                         <i className="fa-solid fa-paper-plane"></i>

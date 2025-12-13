@@ -22,6 +22,7 @@ export const createPostModel = (data) => {
         comments: 0,
         createdAt: new Date().toISOString(),
         // We'll store a timestamp for sorting
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        image: data.imageUrl || null // Store the image URL
     };
 };
