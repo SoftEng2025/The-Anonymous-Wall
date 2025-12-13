@@ -7,7 +7,7 @@ import { postController } from '../../backend/controllers/postController';
 import { userController } from '../../backend/controllers/userController';
 import { reportController } from '../../backend/controllers/reportController';
 import { BOARDS, getBoardById, getBoardColor, getBoardName } from '../../data/boardConfig';
-import { formatTimeAgo } from '../../utils/timeUtils';
+import { formatTimeAgo, formatTimeLeft } from '../../utils/timeUtils';
 
 // Components
 import LoginModal from '../../components/LoginModal';
@@ -59,6 +59,7 @@ const Forum = () => {
     const [newPostContent, setNewPostContent] = useState('');
     const [newPostBoard, setNewPostBoard] = useState('');
     const [newPostImage, setNewPostImage] = useState(null);
+    const [expirationDuration, setExpirationDuration] = useState(null); // null means forever
     const fileInputRef = useRef(null);
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -122,14 +123,17 @@ const Forum = () => {
                 selectedBoard
             );
 
-            const processedPosts = newPosts.map(post => ({
-                ...post,
-                timeAgo: formatTimeAgo(post.timestamp),
-                isLikedByCurrentUser: currentUser ? (post.likedBy || []).includes(currentUser.uid) : false,
-                isSavedByCurrentUser: userProfile && userProfile.savedPosts
-                    ? userProfile.savedPosts.map(String).includes(String(post.id))
-                    : false
-            }));
+            const processedPosts = newPosts
+                .filter(post => !post.expiresAt || post.expiresAt > Date.now()) // Filter out expired posts
+                .map(post => ({
+                    ...post,
+                    timeAgo: formatTimeAgo(post.timestamp),
+                    timeLeft: formatTimeLeft(post.expiresAt),
+                    isLikedByCurrentUser: currentUser ? (post.likedBy || []).includes(currentUser.uid) : false,
+                    isSavedByCurrentUser: userProfile && userProfile.savedPosts
+                        ? userProfile.savedPosts.map(String).includes(String(post.id))
+                        : false
+                }));
 
             if (isLoadMore) {
                 setPosts(prev => [...prev, ...processedPosts]);
@@ -316,7 +320,8 @@ const Forum = () => {
                 title: newPostTitle,
                 content: newPostContent,
                 board: newPostBoard,
-                image: newPostImage
+                image: newPostImage,
+                expiresAt: expirationDuration ? Date.now() + expirationDuration : null
             };
 
 
@@ -334,6 +339,8 @@ const Forum = () => {
                     timeAgo: formatTimeAgo(Date.now()),
                     avatarSeed: currentUser.uid,
                     timestamp: Date.now(),
+                    expiresAt: newPostData.expiresAt,
+                    timeLeft: formatTimeLeft(newPostData.expiresAt),
                     isLikedByCurrentUser: false
                 };
                 setPosts([createdPost, ...posts]);
@@ -347,6 +354,7 @@ const Forum = () => {
             setCaptchaToken(null);
             setError('');
             setIsCreatePostOpen(false);
+            setExpirationDuration(null); // Reset expiration
         } catch (error) {
             console.error("Failed to create post:", error);
             const errorMsg = `Failed to create post: ${error.message || "Unknown error"}`;
@@ -470,6 +478,12 @@ const Forum = () => {
                                                                     <BoardBadge board={getBoardById(post.board)} />
                                                                 </div>
                                                             )}
+                                                            {post.timeLeft && (
+                                                                <div className="expiration-badge" style={{ marginLeft: '8px', fontSize: '0.8rem', color: '#ff6b6b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                                    <i className="fa-regular fa-clock"></i>
+                                                                    <span>{post.timeLeft}</span>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <h3 className="post-title">{post.title}</h3>
@@ -586,6 +600,36 @@ const Forum = () => {
                                         </div>
                                     </div>
                                 )}
+
+                                <div className="expiration-selector" style={{ marginBottom: '1rem' }}>
+                                    <label className="board-label" style={{ display: 'block', marginBottom: '0.5rem', color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.9rem' }}>Post Duration</label>
+                                    <div className="expiration-options" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                        {[
+                                            { label: 'Forever', value: null },
+                                            { label: '24 Hours', value: 24 * 60 * 60 * 1000 },
+                                            { label: '3 Days', value: 3 * 24 * 60 * 60 * 1000 },
+                                            { label: '1 Week', value: 7 * 24 * 60 * 60 * 1000 }
+                                        ].map((option, idx) => (
+                                            <button
+                                                key={idx}
+                                                type="button"
+                                                onClick={() => setExpirationDuration(option.value)}
+                                                style={{
+                                                    padding: '8px 16px',
+                                                    borderRadius: '20px',
+                                                    border: '1px solid ' + (expirationDuration === option.value ? '#6366f1' : 'rgba(255, 255, 255, 0.2)'),
+                                                    background: expirationDuration === option.value ? 'rgba(99, 102, 241, 0.2)' : 'transparent',
+                                                    color: expirationDuration === option.value ? '#818cf8' : 'white',
+                                                    cursor: 'pointer',
+                                                    fontSize: '0.9rem',
+                                                    transition: 'all 0.2s ease'
+                                                }}
+                                            >
+                                                {option.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
 
                                 <textarea
                                     placeholder="Share your message here"

@@ -21,6 +21,7 @@ const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('reports'); // reports, logs
     const [reports, setReports] = useState([]);
     const [logs, setLogs] = useState([]);
+    const [isCleaning, setIsCleaning] = useState(false); // State for cleanup button
 
     // Delete Modal State
     const [deleteModal, setDeleteModal] = useState({
@@ -157,6 +158,29 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleCleanup = async () => {
+        if (!window.confirm("Are you sure you want to delete all expired posts? This cannot be undone.")) {
+            return;
+        }
+
+        try {
+            setIsCleaning(true);
+            const count = await postController.deleteExpiredPosts();
+            if (count > 0) {
+                alert(`Successfully cleaned up ${count} expired posts.`);
+                await moderationController.logAction(currentUser.uid, 'CLEANUP_EXPIRED', 'BATCH', `Deleted ${count} expired posts`);
+                fetchLogs(); // Refresh logs
+            } else {
+                alert("No expired posts found to clean up.");
+            }
+        } catch (error) {
+            console.error("Error cleaning up expired posts:", error);
+            alert("Failed to cleanup expired posts.");
+        } finally {
+            setIsCleaning(false);
+        }
+    };
+
     if (loading) return <div className="loading">Loading...</div>;
     if (!isAdmin) return null;
 
@@ -176,6 +200,19 @@ const AdminDashboard = () => {
                         onClick={() => setActiveTab('logs')}
                     >
                         Moderation Logs
+                    </button>
+                    {/* Cleanup Button */}
+                    <button
+                        className="admin-tab cleanup-btn"
+                        onClick={handleCleanup}
+                        disabled={isCleaning}
+                        style={{ marginLeft: 'auto', backgroundColor: 'rgba(239, 68, 68, 0.2)', color: '#fca5a5', border: '1px solid rgba(239, 68, 68, 0.3)' }}
+                    >
+                        {isCleaning ? (
+                            <><i className="fa-solid fa-spinner fa-spin"></i> Cleaning...</>
+                        ) : (
+                            <><i className="fa-solid fa-trash-can"></i> Cleanup Expired</>
+                        )}
                     </button>
                 </div>
             </div>

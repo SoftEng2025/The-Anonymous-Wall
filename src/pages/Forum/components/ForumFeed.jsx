@@ -40,7 +40,7 @@ const ForumFeed = ({
                                 />
                                 <div className="header-content">
                                     <div className="post-info">
-                                        <span 
+                                        <span
                                             className="username clickable-username"
                                             onClick={(e) => onUserClick(e, post.uid)}
                                         >
@@ -52,6 +52,12 @@ const ForumFeed = ({
                                     {post.board && (
                                         <div className="post-board">
                                             <BoardBadge board={getBoardById(post.board)} />
+                                        </div>
+                                    )}
+                                    {post.timeLeft && (
+                                        <div className="expiration-badge" style={{ marginLeft: '8px', fontSize: '0.8rem', color: '#ff6b6b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <i className="fa-regular fa-clock"></i>
+                                            <span>{post.timeLeft}</span>
                                         </div>
                                     )}
                                 </div>

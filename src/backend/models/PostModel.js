@@ -23,6 +23,7 @@ export const createPostModel = (data) => {
         createdAt: new Date().toISOString(),
         // We'll store a timestamp for sorting
         timestamp: Date.now(),
-        image: data.imageUrl || null // Store the image URL
+        image: data.imageUrl || null, // Store the image URL
+        expiresAt: data.expiresAt || null // Timestamp when the post should expire
     };
 };
