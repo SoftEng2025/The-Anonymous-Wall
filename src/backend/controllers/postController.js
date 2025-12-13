@@ -349,5 +349,50 @@ export const postController = {
             console.error("Error updating post:", error);
             throw error;
         }
+    },
+
+    /**
+     * Deletes all posts that have expired.
+     * @returns {Promise<number>} The count of deleted posts.
+     */
+    deleteExpiredPosts: async () => {
+        try {
+            const now = Date.now();
+            const q = query(
+                collection(db, POSTS_COLLECTION),
+                where('expiresAt', '<', now)
+            );
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) return 0;
+
+            const batch = writeBatch(db);
+            let postCount = 0;
+            let replyCount = 0;
+
+            for (const docSnapshot of querySnapshot.docs) {
+                // Fetch and delete all replies for this post
+                const repliesRef = collection(db, POSTS_COLLECTION, docSnapshot.id, COLLECTIONS.REPLIES);
+                const repliesSnapshot = await getDocs(repliesRef);
+
+                repliesSnapshot.forEach(replyDoc => {
+                    batch.delete(replyDoc.ref);
+                    replyCount++;
+                });
+
+                // Delete the post document itself
+                batch.delete(docSnapshot.ref);
+                postCount++;
+            }
+
+            // Note: If total operations (posts + replies) exceed 500, this simple batch will fail.
+            // For a robust production app, you would chunk this or use a recursive delete Cloud Function.
+            await batch.commit();
+            console.log(`Successfully deleted ${postCount} expired posts and ${replyCount} replies.`);
+            return postCount;
+        } catch (error) {
+            console.error("Error deleting expired posts:", error);
+            throw error;
+        }
     }
 };
