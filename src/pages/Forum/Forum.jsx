@@ -300,8 +300,7 @@ const Forum = () => {
             return;
         }
 
-        // Captcha check bypassed in development for testing
-        if (!captchaToken && !import.meta.env.DEV) {
+        if (!captchaToken) {
             setError("Please complete the captcha verification.");
             return;
         }
@@ -607,7 +606,6 @@ const Forum = () => {
                                     <div className="expiration-options" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                                         {[
                                             { label: 'Forever', value: null },
-                                            { label: '10 Seconds', value: 10000 }, // Test
                                             { label: '24 Hours', value: 24 * 60 * 60 * 1000 },
                                             { label: '3 Days', value: 3 * 24 * 60 * 60 * 1000 },
                                             { label: '1 Week', value: 7 * 24 * 60 * 60 * 1000 }
