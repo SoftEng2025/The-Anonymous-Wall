@@ -349,5 +349,69 @@ export const postController = {
             console.error("Error updating post:", error);
             throw error;
         }
+    },
+
+    /**
+     * Deletes all posts that have expired.
+     * @returns {Promise<number>} The count of deleted posts.
+     */
+    deleteExpiredPosts: async () => {
+        try {
+            const now = Date.now();
+            const q = query(
+                collection(db, POSTS_COLLECTION),
+                where('expiresAt', '<', now)
+            );
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) return 0;
+
+            let postCount = 0;
+            let replyCount = 0;
+            let batch = writeBatch(db);
+            let operationCount = 0;
+            const MAX_OPERATIONS = 400; // Leaving a safe buffer below 500
+
+            for (const docSnapshot of querySnapshot.docs) {
+                // 1. Fetch all replies for this post
+                const repliesRef = collection(db, POSTS_COLLECTION, docSnapshot.id, COLLECTIONS.REPLIES);
+                const repliesSnapshot = await getDocs(repliesRef);
+
+                // 2. Add replies deletion to batch
+                for (const replyDoc of repliesSnapshot.docs) {
+                    batch.delete(replyDoc.ref);
+                    operationCount++;
+                    replyCount++;
+
+                    if (operationCount >= MAX_OPERATIONS) {
+                        await batch.commit();
+                        batch = writeBatch(db);
+                        operationCount = 0;
+                    }
+                }
+
+                // 3. Add post deletion to batch
+                batch.delete(docSnapshot.ref);
+                operationCount++;
+                postCount++;
+
+                if (operationCount >= MAX_OPERATIONS) {
+                    await batch.commit();
+                    batch = writeBatch(db);
+                    operationCount = 0;
+                }
+            }
+
+            // Commit any remaining operations
+            if (operationCount > 0) {
+                await batch.commit();
+            }
+
+            console.log(`Successfully deleted ${postCount} expired posts and ${replyCount} replies.`);
+            return postCount;
+        } catch (error) {
+            console.error("Error deleting expired posts:", error);
+            throw error;
+        }
     }
 };
