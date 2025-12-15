@@ -3,7 +3,7 @@ import { useStats } from '../../hooks/useStats';
 import './Stats.css';
 
 export default function Stats() {
-    const { postCount, messageCount, replyCount, totalCount, loading } = useStats();
+    const { postCount, messageCount, totalCount, loading } = useStats();
 
     if (loading) {
         return <div className="stats-container" aria-busy="true">Loading stats...</div>;
@@ -18,10 +18,6 @@ export default function Stats() {
             <div className="stat-item peach">
                 <span className="stat-number">{messageCount}</span>
                 <span className="stat-label">Messages</span>
-            </div>
-            <div className="stat-item coral">
-                <span className="stat-number">{replyCount}</span>
-                <span className="stat-label">Replies</span>
             </div>
             <div className="stat-item blue">
                 <span className="stat-number">{totalCount}</span>
