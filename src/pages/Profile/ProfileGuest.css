@@ -1,0 +1,96 @@
+/* Guest Restriction Styles */
+.guest-restriction-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem 1rem;
+    width: 100%;
+}
+
+.guest-restriction-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 2.5rem;
+    text-align: center;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.guest-restriction-icon {
+    width: 64px;
+    height: 64px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+}
+
+.guest-restriction-icon i {
+    font-size: 2rem;
+    color: var(--text-muted);
+    /* Ensure this variable exists or fallback */
+}
+
+/* Fallback if --text-muted is not defined globally */
+.guest-restriction-icon i {
+    color: rgba(148, 163, 184, 0.8);
+}
+
+.guest-restriction-card h3 {
+    margin: 0;
+    color: var(--text-light);
+    /* Ensure variable exists */
+    font-size: 1.25rem;
+}
+
+/* Fallback */
+.guest-restriction-card h3 {
+    color: #f1f5f9;
+}
+
+
+.guest-restriction-card p {
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+/* Fallback */
+.guest-restriction-card p {
+    color: #94a3b8;
+}
+
+.btn-login-profile {
+    margin-top: 1rem;
+    padding: 0.75rem 2rem;
+    background: var(--accent-blue);
+    /* Ensure variable exists */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+/* Fallback for accent-blue if needed, though likely defined in index.css */
+.btn-login-profile {
+    background-color: #3b82f6;
+}
+
+
+.btn-login-profile:hover {
+    background: var(--accent-blue-dark);
+    transform: translateY(-2px);
+}
+
+/* Fallback */
+.btn-login-profile:hover {
+    background-color: #2563eb;
+}
