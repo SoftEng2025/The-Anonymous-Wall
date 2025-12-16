@@ -113,3 +113,51 @@
     border-radius: var(--card-radius);
     border: var(--glass-border);
 }
+
+.delete-post-btn {
+    position: absolute;
+    bottom: 1.25rem;
+    /* Moved to bottom */
+    right: 1.25rem;
+    top: auto;
+    /* Ensure top is unset */
+    background: rgba(239, 68, 68, 0.1);
+    /* Red background with opacity */
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    /* Tailwind red-500 */
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 10;
+    opacity: 0;
+    /* Hidden by default until hover */
+    transform: translateY(5px);
+    /* Start slightly lower */
+}
+
+.history-post-card:hover .delete-post-btn {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+.delete-post-btn:hover {
+    background: #ef4444;
+    color: white;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+    transform: scale(1.1) !important;
+}
+
+@media (hover: none) or (max-width: 768px) {
+    .delete-post-btn {
+        opacity: 1 !important;
+        transform: translateY(0) !important;
+        background: rgba(239, 68, 68, 0.1);
+    }
+}
