@@ -53,11 +53,11 @@ function Profile() {
                     setBio(profile.bio || '');
                     setIsAdmin(profile.role === 'admin');
                     // Check privacy
-                    if (profile.isPublic !== true) { 
+                    if (profile.isPublic !== true) {
                         // It's private!
                         if (!currentUser || currentUser.uid !== userId) {
-                             // Viewer is not owner: Access Denied
-                             setPublicProfile({...profile, isRestricted: true}); 
+                            // Viewer is not owner: Access Denied
+                            setPublicProfile({ ...profile, isRestricted: true });
                         }
                     }
                 }
@@ -294,7 +294,7 @@ function Profile() {
             setMessage({ type: 'error', text: 'Failed to update pin status.' });
         }
     };
-    
+
     /*Private/Public Switch*/
     const handlePrivacySwitchClick = () => {
         if (!isPublic) {
@@ -309,9 +309,9 @@ function Profile() {
         try {
             await userController.updateUserProfile(currentUser.uid, { isPublic: newIsPublic });
             setIsPublic(newIsPublic);
-            setMessage({ 
-                type: 'success', 
-                text: newIsPublic ? 'Profile is now Public' : 'Profile is now Private' 
+            setMessage({
+                type: 'success',
+                text: newIsPublic ? 'Profile is now Public' : 'Profile is now Private'
             });
             await refreshProfile();
         } catch (error) {
@@ -324,6 +324,20 @@ function Profile() {
         return <div className="profile-container">Loading...</div>;
     }
 
+    const handleDeletePost = async (e, postId) => {
+        e.stopPropagation();
+        if (window.confirm("Are you sure you want to delete this post? This action cannot be undone.")) {
+            try {
+                await postController.deletePost(postId);
+                setHistoryPosts(prev => prev.filter(p => p.id !== postId));
+                setMessage({ type: 'success', text: 'Post deleted successfully.' });
+            } catch (error) {
+                console.error("Error deleting post:", error);
+                setMessage({ type: 'error', text: 'Failed to delete post.' });
+            }
+        }
+    };
+
     // Helper to render post list
     const renderPostList = (posts) => {
         if (loadingPosts) {
@@ -334,13 +348,22 @@ function Profile() {
         }
         return posts.map(post => {
             const isPinned = !isPublicView && userProfile?.pinnedPosts?.includes(post.id);
-            
+
             return (
                 <div
                     key={post.id}
                     className="history-post-card"
                     onClick={() => setSelectedPostId(post.id)}
                 >
+                    {activeTab === 'my-posts' && (
+                        <button
+                            className="delete-post-btn"
+                            onClick={(e) => handleDeletePost(e, post.id)}
+                            title="Delete Post"
+                        >
+                            <i className="fa-solid fa-trash"></i>
+                        </button>
+                    )}
                     <div className="history-post-header">
                         <div className="history-post-info">
                             <span className="history-time">{formatTimeAgo(post.timestamp)}</span>
@@ -442,11 +465,11 @@ function Profile() {
                             </div>
                         )}
 
-                        
+
                         {/* Privacy Switch (Owner & Not Public View) */}
                         {!isPublicView && (
                             <div className="privacy-switch-container">
-                                <button 
+                                <button
                                     className={`privacy-switch-btn ${isPublic ? 'public' : 'private'}`}
                                     onClick={handlePrivacySwitchClick}
                                     title={isPublic ? "Switch to Private" : "Switch to Public"}
@@ -467,7 +490,7 @@ function Profile() {
 
                         {/* Public View: Show Restriction Badge if blocked (though we likely hide the page content) */}
                         {isPublicView && publicProfile?.isRestricted && (
-                             <div style={{ marginTop: '0.5rem', textAlign: 'center' }}>
+                            <div style={{ marginTop: '0.5rem', textAlign: 'center' }}>
                                 <span className="private-badge">
                                     <i className="fa-solid fa-lock"></i> Private
                                 </span>
@@ -513,71 +536,71 @@ function Profile() {
                 {(!isPublicView || (isPublicView && !publicProfile?.isRestricted)) ? (
                     <>
                         <div className="profile-tabs">
-                    <button
-                        className={`tab-btn ${activeTab === 'my-posts' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('my-posts')}
-                    >
-                        {isPublicView ? "User's Posts" : "My Posts"}
-                    </button>
-                    <button
-                        className={`tab-btn ${activeTab === 'saved-posts' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('saved-posts')}
-                    >
-                        {isPublicView ? "Featured" : "Saved Posts"}
-                    </button>
-                    {!isPublicView && (
-                        <button
-                            className={`tab-btn ${activeTab === 'featured-posts' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('featured-posts')}
-                        >
-                            Featured
-                        </button>
-                    )}
-                </div>
-
-                <div className="profile-content-area">
-                    {!isPublicView && currentUser?.isAnonymous ? (
-                        <div className="guest-restriction-container">
-                            <div className="guest-restriction-card">
-                                <div className="guest-restriction-icon">
-                                    <i className={`fa-solid ${activeTab === 'my-posts' ? 'fa-pen-to-square' : 'fa-bookmark'}`}></i>
-                                </div>
-                                <h3>{activeTab === 'my-posts' ? 'Posting Restricted' : 'Saving Restricted'}</h3>
-                                <p>
-                                    {activeTab === 'my-posts'
-                                        ? "Guest accounts cannot create posts. Create a permanent account to start sharing your thoughts!"
-                                        : "Guest accounts cannot save posts. Create a permanent account to build your personal collection!"}
-                                </p>
-                                <button className="btn-login-profile" onClick={() => setIsLoginModalOpen(true)}>
-                                    Login or Sign Up
+                            <button
+                                className={`tab-btn ${activeTab === 'my-posts' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('my-posts')}
+                            >
+                                {isPublicView ? "User's Posts" : "My Posts"}
+                            </button>
+                            <button
+                                className={`tab-btn ${activeTab === 'saved-posts' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('saved-posts')}
+                            >
+                                {isPublicView ? "Featured" : "Saved Posts"}
+                            </button>
+                            {!isPublicView && (
+                                <button
+                                    className={`tab-btn ${activeTab === 'featured-posts' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('featured-posts')}
+                                >
+                                    Featured
                                 </button>
-                            </div>
+                            )}
                         </div>
-                    ) : (
-                        activeTab === 'my-posts' ? (
-                            <div className="posts-grid">
-                                {renderPostList(historyPosts)}
-                            </div>
-                        ) : activeTab === 'saved-posts' ? (
-                            <div className="posts-grid">
-                                {renderPostList(isPublicView ? pinnedPosts : savedPosts)}
-                            </div>
-                        ) : (
-                            <div className="posts-grid">
-                                {renderPostList(pinnedPosts)}
-                            </div>
-                        )
-                    )}
 
-                    {/* Private Profile Placeholder */}
-                    {isPublicView && publicProfile?.isRestricted && (
-                        <div className="private-profile-placeholder">
-                            <div className="private-icon-circle">
-                                <i className="fa-solid fa-lock"></i>
-                            </div>
+                        <div className="profile-content-area">
+                            {!isPublicView && currentUser?.isAnonymous ? (
+                                <div className="guest-restriction-container">
+                                    <div className="guest-restriction-card">
+                                        <div className="guest-restriction-icon">
+                                            <i className={`fa-solid ${activeTab === 'my-posts' ? 'fa-pen-to-square' : 'fa-bookmark'}`}></i>
+                                        </div>
+                                        <h3>{activeTab === 'my-posts' ? 'Posting Restricted' : 'Saving Restricted'}</h3>
+                                        <p>
+                                            {activeTab === 'my-posts'
+                                                ? "Guest accounts cannot create posts. Create a permanent account to start sharing your thoughts!"
+                                                : "Guest accounts cannot save posts. Create a permanent account to build your personal collection!"}
+                                        </p>
+                                        <button className="btn-login-profile" onClick={() => setIsLoginModalOpen(true)}>
+                                            Login or Sign Up
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                activeTab === 'my-posts' ? (
+                                    <div className="posts-grid">
+                                        {renderPostList(historyPosts)}
+                                    </div>
+                                ) : activeTab === 'saved-posts' ? (
+                                    <div className="posts-grid">
+                                        {renderPostList(isPublicView ? pinnedPosts : savedPosts)}
+                                    </div>
+                                ) : (
+                                    <div className="posts-grid">
+                                        {renderPostList(pinnedPosts)}
+                                    </div>
+                                )
+                            )}
+
+                            {/* Private Profile Placeholder */}
+                            {isPublicView && publicProfile?.isRestricted && (
+                                <div className="private-profile-placeholder">
+                                    <div className="private-icon-circle">
+                                        <i className="fa-solid fa-lock"></i>
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                    )}
-                </div>
                     </>
                 ) : null}
             </div>
