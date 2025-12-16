@@ -457,34 +457,35 @@ function Profile() {
                                     )}
                                 </div>
                                 {bio && <p className="profile-bio">{bio}</p>}
-                                {!isPublicView && isAdmin && (
-                                    <span className="admin-badge">
-                                        <i className="fa-solid fa-shield-halved"></i> ADMIN
-                                    </span>
-                                )}
-                            </div>
-                        )}
 
+                                <div className="profile-badges-row">
+                                    {!isPublicView && isAdmin && (
+                                        <span className="admin-badge">
+                                            <i className="fa-solid fa-shield-halved"></i> ADMIN
+                                        </span>
+                                    )}
 
-                        {/* Privacy Switch (Owner & Not Public View) */}
-                        {!isPublicView && (
-                            <div className="privacy-switch-container">
-                                <button
-                                    className={`privacy-switch-btn ${isPublic ? 'public' : 'private'}`}
-                                    onClick={handlePrivacySwitchClick}
-                                    title={isPublic ? "Switch to Private" : "Switch to Public"}
-                                >
-                                    <div className="switch-indicator">
-                                        <div className="switch-knob"></div>
-                                    </div>
-                                    <span className="privacy-status-text">
-                                        {isPublic ? (
-                                            <><i className="fa-solid fa-globe"></i> Public</>
-                                        ) : (
-                                            <><i className="fa-solid fa-lock"></i> Private</>
-                                        )}
-                                    </span>
-                                </button>
+                                    {!isPublicView && (
+                                        <div className="privacy-switch-container">
+                                            <button
+                                                className={`privacy-switch-btn ${isPublic ? 'public' : 'private'}`}
+                                                onClick={handlePrivacySwitchClick}
+                                                title={isPublic ? "Switch to Private" : "Switch to Public"}
+                                            >
+                                                <div className="switch-indicator">
+                                                    <div className="switch-knob"></div>
+                                                </div>
+                                                <span className="privacy-status-text">
+                                                    {isPublic ? (
+                                                        <><i className="fa-solid fa-globe"></i> Public</>
+                                                    ) : (
+                                                        <><i className="fa-solid fa-lock"></i> Private</>
+                                                    )}
+                                                </span>
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         )}
 
