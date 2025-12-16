@@ -22,6 +22,8 @@ import ForumFeed from './components/ForumFeed';
 
 import './Forum.css';
 
+const RECAPTCHA_ENABLED = !import.meta.env.DEV && !!import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+
 const Forum = () => {
     const { currentUser, userProfile, toggleSave } = useAuth();
     const navigate = useNavigate();
@@ -300,7 +302,7 @@ const Forum = () => {
             return;
         }
 
-        if (!captchaToken) {
+        if (RECAPTCHA_ENABLED && !captchaToken) {
             setError("Please complete the captcha verification.");
             return;
         }
@@ -690,14 +692,16 @@ const Forum = () => {
                                     )}
                                 </div>
 
-                                <div className="captcha-container" style={{ marginTop: '1rem', display: 'flex', justifyContent: 'center' }}>
-                                    <ReCAPTCHA
-                                        ref={recaptchaRef}
-                                        sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
-                                        onChange={(token) => setCaptchaToken(token)}
-                                        theme="dark"
-                                    />
-                                </div>
+                                {RECAPTCHA_ENABLED && (
+                                    <div className="captcha-container" style={{ marginTop: '1rem', display: 'flex', justifyContent: 'center' }}>
+                                        <ReCAPTCHA
+                                            ref={recaptchaRef}
+                                            sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                                            onChange={(token) => setCaptchaToken(token)}
+                                            theme="dark"
+                                        />
+                                    </div>
+                                )}
                             </div>
                             <div className="modal-footer">
                                 <button className="btn-cancel" onClick={() => setIsCreatePostOpen(false)}>
