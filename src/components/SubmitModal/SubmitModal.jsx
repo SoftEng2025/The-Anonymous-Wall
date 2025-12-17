@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react'
 import ReCAPTCHA from "react-google-recaptcha";
 import { useMessages } from '../../contexts/MessageContext'
 import { messageController } from '../../backend/controllers/messageController'
+import { reportController } from '../../backend/controllers/reportController'
+import { useAuth } from '../../contexts/AuthContext'
 
 import { getSpotifyEmbedUrl } from '../../utils/spotify'
 import { filterProfanity } from '../../utils/profanityFilter'
@@ -40,6 +42,7 @@ export default function SubmitModal({ isOpen, onClose }) {
     const [submitError, setSubmitError] = useState('')
     const [captchaToken, setCaptchaToken] = useState(null)
     const recaptchaRef = useRef(null)
+    const { currentUser } = useAuth()
 
     const { addMessage } = useMessages()
 
@@ -90,16 +93,24 @@ export default function SubmitModal({ isOpen, onClose }) {
         try {
             const trimmedRecipient = recipient.trim()
 
+            const filteredRecipient = filterProfanity(trimmedRecipient);
+            const filteredMessage = filterProfanity(message);
+
             const messageData = {
-                recipient: filterProfanity(trimmedRecipient) || 'Anonymous',
-                message: filterProfanity(message),
+                recipient: filteredRecipient || 'Anonymous',
+                message: filteredMessage,
                 theme: selectedTheme.id,
                 mood: selectedMood,
                 spotifyEmbedUrl
             }
 
             // Save to Firebase
-            await messageController.createMessage(messageData)
+            const newMessageId = await messageController.createMessage(messageData)
+
+            // Auto-report if content was censored
+            if ((filteredRecipient && filteredRecipient !== trimmedRecipient) || filteredMessage !== message) {
+                await reportController.createReport(newMessageId, "Automatic - Profanity Detected", currentUser ? currentUser.uid : 'SYSTEM', 'message')
+            }
 
             // Also add to local context for immediate UI update
             addMessage(messageData)
