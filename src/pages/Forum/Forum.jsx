@@ -317,11 +317,14 @@ const Forum = () => {
 
         try {
             setIsSubmitting(true);
+            const filteredTitle = filterProfanity(newPostTitle);
+            const filteredContent = filterProfanity(newPostContent);
+
             const newPostData = {
                 author: username || 'Anonymous',
                 uid: currentUser.uid,
-                title: filterProfanity(newPostTitle),
-                content: filterProfanity(newPostContent),
+                title: filteredTitle,
+                content: filteredContent,
                 board: newPostBoard,
                 image: newPostImage,
                 expiresAt: expirationDuration ? Date.now() + expirationDuration : null
@@ -331,6 +334,11 @@ const Forum = () => {
 
             // Debug alerts removed
             const newPostId = await postController.createPost(newPostData);
+
+            // Auto-report if content was censored
+            if (filteredTitle !== newPostTitle || filteredContent !== newPostContent) {
+                await reportController.createReport(newPostId, "Automatic - Profanity Detected", currentUser.uid, 'post');
+            }
 
             // Add new post to top of list if it matches current board filter
             if (!selectedBoard || selectedBoard === newPostBoard) {
