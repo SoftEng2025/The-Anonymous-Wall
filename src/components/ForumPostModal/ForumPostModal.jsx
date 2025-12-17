@@ -4,6 +4,7 @@ import { postController } from '../../backend/controllers/postController';
 import { replyController } from '../../backend/controllers/replyController';
 import { userController } from '../../backend/controllers/userController';
 import { useAuth } from '../../contexts/AuthContext';
+import { reportController } from '../../backend/controllers/reportController';
 import { formatTimeAgo } from '../../utils/timeUtils';
 import GuestRestrictionModal from '../GuestRestrictionModal';
 import ReportModal from '../ReportModal/ReportModal';
@@ -216,15 +217,21 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
 
             const attachments = attachmentUrl ? [{ url: attachmentUrl, type: 'image' }] : [];
 
+            const filteredContent = filterProfanity(replyContent);
             const replyData = {
                 author: authorName,
                 uid: currentUser.uid,
-                content: filterProfanity(replyContent),
+                content: filteredContent,
                 replyTo: replyingTo ? replyingTo.author : null,
                 attachments
             };
 
             const newReply = await replyController.addReply(postId, replyData);
+
+            // Auto-report if content was censored
+            if (filteredContent !== replyContent) {
+                await replyController.reportReply(postId, newReply.id, "Automatic - Profanity Detected", currentUser.uid);
+            }
 
             const displayReply = {
                 ...newReply,
@@ -346,10 +353,16 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
         if (!editPostContent.trim()) return;
         try {
             const editedTimestamp = Date.now();
+            const filteredContent = filterProfanity(editPostContent);
             await postController.updatePost(postId, {
-                content: filterProfanity(editPostContent),
+                content: filteredContent,
                 editedAt: editedTimestamp
             });
+
+            // Auto-report if content was censored
+            if (filteredContent !== editPostContent) {
+                await reportController.createReport(postId, "Automatic - Profanity Detected", currentUser.uid, 'post');
+            }
             setPost(prev => ({ ...prev, content: filterProfanity(editPostContent), editedAt: editedTimestamp }));
             setIsEditingPost(false);
             setEditError(null);
@@ -374,12 +387,18 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
             const editedTimestamp = Date.now();
             const attachmentUrl = editReplyAttachment.trim();
             const attachments = attachmentUrl ? [{ url: attachmentUrl, type: 'image' }] : [];
+            const filteredContent = filterProfanity(editReplyContent);
 
             await replyController.updateReply(postId, replyId, {
-                content: filterProfanity(editReplyContent),
+                content: filteredContent,
                 attachments,
                 editedAt: editedTimestamp
             });
+
+            // Auto-report if content was censored
+            if (filteredContent !== editReplyContent) {
+                await replyController.reportReply(postId, replyId, "Automatic - Profanity Detected", currentUser.uid);
+            }
             setReplies(prev => prev.map(r => r.id === replyId ? { ...r, content: filterProfanity(editReplyContent), attachments, editedAt: editedTimestamp } : r));
             setEditingReplyId(null);
             setEditReplyAttachment('');
@@ -413,11 +432,17 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
                 // Upload image and get the URL
                 imageUrl = await postController.uploadImage(postImage);
             }
+            const filteredContent = filterProfanity(editPostContent);
             await postController.updatePost(postId, {
-                content: filterProfanity(editPostContent),
+                content: filteredContent,
                 image: imageUrl,
                 editedAt: editedTimestamp
             });
+
+            // Auto-report if content was censored
+            if (filteredContent !== editPostContent) {
+                await reportController.createReport(postId, "Automatic - Profanity Detected", currentUser.uid, 'post');
+            }
             setPost(prev => ({ ...prev, content: filterProfanity(editPostContent), image: imageUrl, editedAt: editedTimestamp }));
             setIsEditingPost(false);
             setEditError(null);
