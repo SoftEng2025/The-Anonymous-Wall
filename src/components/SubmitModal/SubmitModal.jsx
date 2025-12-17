@@ -2,7 +2,9 @@ import React, { useState, useRef } from 'react'
 import ReCAPTCHA from "react-google-recaptcha";
 import { useMessages } from '../../contexts/MessageContext'
 import { messageController } from '../../backend/controllers/messageController'
+
 import { getSpotifyEmbedUrl } from '../../utils/spotify'
+import { filterProfanity } from '../../utils/profanityFilter'
 import './styles/layout.css'
 import './styles/form.css'
 import './styles/selectors.css'
@@ -89,8 +91,8 @@ export default function SubmitModal({ isOpen, onClose }) {
             const trimmedRecipient = recipient.trim()
 
             const messageData = {
-                recipient: trimmedRecipient || 'Anonymous',
-                message,
+                recipient: filterProfanity(trimmedRecipient) || 'Anonymous',
+                message: filterProfanity(message),
                 theme: selectedTheme.id,
                 mood: selectedMood,
                 spotifyEmbedUrl

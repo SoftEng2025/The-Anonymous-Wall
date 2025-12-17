@@ -8,6 +8,7 @@ import { userController } from '../../backend/controllers/userController';
 import { reportController } from '../../backend/controllers/reportController';
 import { BOARDS, getBoardById, getBoardColor, getBoardName } from '../../data/boardConfig';
 import { formatTimeAgo, formatTimeLeft } from '../../utils/timeUtils';
+import { filterProfanity } from '../../utils/profanityFilter';
 
 // Components
 import LoginModal from '../../components/LoginModal';
@@ -319,8 +320,8 @@ const Forum = () => {
             const newPostData = {
                 author: username || 'Anonymous',
                 uid: currentUser.uid,
-                title: newPostTitle,
-                content: newPostContent,
+                title: filterProfanity(newPostTitle),
+                content: filterProfanity(newPostContent),
                 board: newPostBoard,
                 image: newPostImage,
                 expiresAt: expirationDuration ? Date.now() + expirationDuration : null

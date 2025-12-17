@@ -9,6 +9,7 @@ import GuestRestrictionModal from '../GuestRestrictionModal';
 import ReportModal from '../ReportModal/ReportModal';
 import DeleteConfirmationModal from '../DeleteConfirmationModal/DeleteConfirmationModal';
 import './ForumPostModal.css';
+import { filterProfanity } from '../../utils/profanityFilter';
 
 // Sub-components
 import ForumPostHeader from './components/ForumPostHeader';
@@ -218,7 +219,7 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
             const replyData = {
                 author: authorName,
                 uid: currentUser.uid,
-                content: replyContent,
+                content: filterProfanity(replyContent),
                 replyTo: replyingTo ? replyingTo.author : null,
                 attachments
             };
@@ -346,10 +347,10 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
         try {
             const editedTimestamp = Date.now();
             await postController.updatePost(postId, {
-                content: editPostContent,
+                content: filterProfanity(editPostContent),
                 editedAt: editedTimestamp
             });
-            setPost(prev => ({ ...prev, content: editPostContent, editedAt: editedTimestamp }));
+            setPost(prev => ({ ...prev, content: filterProfanity(editPostContent), editedAt: editedTimestamp }));
             setIsEditingPost(false);
             setEditError(null);
             if (onPostUpdate) {
@@ -375,11 +376,11 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
             const attachments = attachmentUrl ? [{ url: attachmentUrl, type: 'image' }] : [];
 
             await replyController.updateReply(postId, replyId, {
-                content: editReplyContent,
+                content: filterProfanity(editReplyContent),
                 attachments,
                 editedAt: editedTimestamp
             });
-            setReplies(prev => prev.map(r => r.id === replyId ? { ...r, content: editReplyContent, attachments, editedAt: editedTimestamp } : r));
+            setReplies(prev => prev.map(r => r.id === replyId ? { ...r, content: filterProfanity(editReplyContent), attachments, editedAt: editedTimestamp } : r));
             setEditingReplyId(null);
             setEditReplyAttachment('');
             setEditError(null);
@@ -413,11 +414,11 @@ const ForumPostModal = ({ postId, onClose, onPostUpdate, focusCommentInput }) =>
                 imageUrl = await postController.uploadImage(postImage);
             }
             await postController.updatePost(postId, {
-                content: editPostContent,
+                content: filterProfanity(editPostContent),
                 image: imageUrl,
                 editedAt: editedTimestamp
             });
-            setPost(prev => ({ ...prev, content: editPostContent, image: imageUrl, editedAt: editedTimestamp }));
+            setPost(prev => ({ ...prev, content: filterProfanity(editPostContent), image: imageUrl, editedAt: editedTimestamp }));
             setIsEditingPost(false);
             setEditError(null);
             setPostImage(null); // Reset image state
